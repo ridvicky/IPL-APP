@@ -1,0 +1,208 @@
+{
+  "year": 2025,
+  "auctionType": "mega",
+  "displayName": "IPL 2025 Mega Auction",
+
+  "teams": ["CSK", "MI", "RCB", "KKR", "DC", "RR", "SRH", "PBKS", "GT", "LSG"],
+
+  "startingPurse": {
+    "CSK":  120.0,
+    "MI":   110.0,
+    "RCB":  83.0,
+    "KKR":  51.0,
+    "DC":   73.0,
+    "RR":   41.0,
+    "SRH":  45.0,
+    "PBKS": 110.5,
+    "GT":   69.0,
+    "LSG":  69.0
+  },
+
+  "minimumSquadSize": 18,
+  "maximumSquadSize": 25,
+  "overseasLimit": 8,
+
+  "rtmAvailable": false,
+  "maxRTMPerTeam": 0,
+  "maxRetainedPlayers": 6,
+  "maxOverseasRetained": 2,
+  "retentionAllowed": true,
+  "acceleratedRoundEnabled": true,
+
+  "bidIncrements": [
+    { "fromPrice": 0.00, "toPrice": 1.00, "step": 0.05 },
+    { "fromPrice": 1.00, "toPrice": 2.00, "step": 0.10 },
+    { "fromPrice": 2.00, "toPrice": 5.00, "step": 0.25 },
+    { "fromPrice": 5.00, "toPrice": 10.0, "step": 0.50 },
+    { "fromPrice": 10.0, "toPrice": 20.0, "step": 1.00 },
+    { "fromPrice": 20.0, "toPrice": null, "step": 2.00 }
+  ],
+
+  "auctionSets": [
+    "Marquee Set A",
+    "Marquee Set B",
+    "Indian Batters",
+    "Indian All-Rounders",
+    "Indian Wicket-Keepers",
+    "Indian Fast Bowlers",
+    "Indian Spinners",
+    "Overseas Batters",
+    "Overseas All-Rounders",
+    "Overseas Wicket-Keepers",
+    "Overseas Fast Bowlers",
+    "Overseas Spinners",
+    "Accelerated Set"
+  ],
+
+  "historicalRetentions": [
+    {
+      "teamId": "CSK",
+      "retainedPlayers": [
+        { "playerId": "ms-dhoni", "retentionPrice": 4.0, "isRTMEligible": false },
+        { "playerId": "ruturaj-gaikwad", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "matheesha-pathirana", "retentionPrice": 13.0, "isRTMEligible": false },
+        { "playerId": "shivam-dube", "retentionPrice": 12.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 73.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "MI",
+      "retainedPlayers": [
+        { "playerId": "rohit-sharma", "retentionPrice": 16.3, "isRTMEligible": false },
+        { "playerId": "jasprit-bumrah", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "suryakumar-yadav", "retentionPrice": 16.35, "isRTMEligible": false },
+        { "playerId": "hardik-pandya", "retentionPrice": 16.35, "isRTMEligible": false },
+        { "playerId": "tilak-varma", "retentionPrice": 8.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 45.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "RCB",
+      "retainedPlayers": [
+        { "playerId": "virat-kohli", "retentionPrice": 21.0, "isRTMEligible": false },
+        { "playerId": "rajat-patidar", "retentionPrice": 11.0, "isRTMEligible": false },
+        { "playerId": "yash-dayal", "retentionPrice": 5.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 83.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "KKR",
+      "retainedPlayers": [
+        { "playerId": "rinku-singh", "retentionPrice": 13.0, "isRTMEligible": false },
+        { "playerId": "varun-chakravarthy", "retentionPrice": 12.0, "isRTMEligible": false },
+        { "playerId": "sunil-narine", "retentionPrice": 12.0, "isRTMEligible": false },
+        { "playerId": "andre-russell", "retentionPrice": 12.0, "isRTMEligible": false },
+        { "playerId": "harshit-rana", "retentionPrice": 4.0, "isRTMEligible": false },
+        { "playerId": "ramandeep-singh", "retentionPrice": 4.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 51.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "DC",
+      "retainedPlayers": [
+        { "playerId": "axar-patel", "retentionPrice": 16.5, "isRTMEligible": false },
+        { "playerId": "kuldeep-yadav", "retentionPrice": 13.25, "isRTMEligible": false },
+        { "playerId": "tristan-stubbs", "retentionPrice": 10.0, "isRTMEligible": false },
+        { "playerId": "abishek-porel", "retentionPrice": 4.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 73.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "RR",
+      "retainedPlayers": [
+        { "playerId": "sanju-samson", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "yashasvi-jaiswal", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "riyan-parag", "retentionPrice": 14.0, "isRTMEligible": false },
+        { "playerId": "dhruv-jurel", "retentionPrice": 14.0, "isRTMEligible": false },
+        { "playerId": "shimron-hetmyer", "retentionPrice": 11.0, "isRTMEligible": false },
+        { "playerId": "sandeep-sharma", "retentionPrice": 4.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 41.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "SRH",
+      "retainedPlayers": [
+        { "playerId": "pat-cummins", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "heinrich-klaasen", "retentionPrice": 23.0, "isRTMEligible": false },
+        { "playerId": "abhishek-sharma", "retentionPrice": 14.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 45.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "PBKS",
+      "retainedPlayers": [
+        { "playerId": "shashank-singh", "retentionPrice": 5.5, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 110.5,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "GT",
+      "retainedPlayers": [
+        { "playerId": "shubman-gill", "retentionPrice": 16.5, "isRTMEligible": false },
+        { "playerId": "rashid-khan", "retentionPrice": 18.0, "isRTMEligible": false },
+        { "playerId": "sai-sudharsan", "retentionPrice": 8.5, "isRTMEligible": false },
+        { "playerId": "shahrukh-khan-gt", "retentionPrice": 7.4, "isRTMEligible": false },
+        { "playerId": "rahul-tewatia", "retentionPrice": 4.0, "isRTMEligible": false },
+        { "playerId": "kagiso-rabada", "retentionPrice": 10.75, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 69.0,
+      "rtmSlotsAvailable": 0
+    },
+    {
+      "teamId": "LSG",
+      "retainedPlayers": [
+        { "playerId": "nicholas-pooran", "retentionPrice": 21.0, "isRTMEligible": false },
+        { "playerId": "ravi-bishnoi", "retentionPrice": 11.0, "isRTMEligible": false },
+        { "playerId": "mayank-yadav", "retentionPrice": 11.0, "isRTMEligible": false },
+        { "playerId": "aryan-juyal", "retentionPrice": 4.0, "isRTMEligible": false },
+        { "playerId": "ayush-badoni", "retentionPrice": 4.0, "isRTMEligible": false },
+        { "playerId": "mohsin-khan", "retentionPrice": 4.0, "isRTMEligible": false }
+      ],
+      "purseAfterRetention": 69.0,
+      "rtmSlotsAvailable": 0
+    }
+  ],
+
+  "players": [
+    {
+      "_comment": "INSTRUCTIONS FOR FILLING THIS DATASET",
+      "_format": {
+        "playerId": "unique-kebab-case string (e.g. 'rishabh-pant', 'ben-stokes')",
+        "name": "Full display name",
+        "role": "BAT | BWL | AR | WK",
+        "nationality": "indian | overseas",
+        "country": "Country name (e.g. 'India', 'Australia')",
+        "cappedStatus": "capped | uncapped",
+        "isOverseas": "true if overseas, false if Indian",
+        "basePrice": "in crores (e.g. 0.20, 0.50, 1.00, 2.00)",
+        "auctionSet": "Must match one of the auctionSets names above",
+        "auctionSetOrder": "1-based position within that set",
+        "previousTeam": "TeamId string or null if no prior IPL team",
+        "rtmEligibleFor": "null (RTM not available in IPL 2025)"
+      },
+      "_note": "Remove this _comment object and fill in real players below.",
+      "_example": {
+        "playerId": "rishabh-pant",
+        "name": "Rishabh Pant",
+        "role": "WK",
+        "nationality": "indian",
+        "country": "India",
+        "cappedStatus": "capped",
+        "isOverseas": false,
+        "basePrice": 2.00,
+        "auctionSet": "Marquee Set A",
+        "auctionSetOrder": 1,
+        "previousTeam": "DC",
+        "rtmEligibleFor": null
+      }
+    }
+  ]
+}
