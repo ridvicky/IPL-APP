@@ -13,28 +13,23 @@ export interface PlayerRecord {
   country: string
   cappedStatus: PlayerCappedStatus
   isOverseas: boolean
-  basePrice: number          // in crores (e.g. 0.20, 0.50, 1.00, 2.00)
-  auctionSet: string         // e.g. "Marquee Set A"
-  auctionSetOrder: number    // position within set (1-based)
-  previousTeam: string | null // TeamId of prior IPL team, null if new/no history
-  rtmEligibleFor: string | null // TeamId that can RTM this player, null if none
+  basePrice: number
+  auctionSet: string
+  auctionSetOrder: number
+  previousTeam: string | null
+  rtmEligibleFor: string | null
 }
 
-/** A player who was sold during auction */
-export interface SoldPlayerRecord {
-  player: PlayerRecord
+/** A player who was sold during auction — extends PlayerRecord with sale metadata */
+export interface SoldPlayerRecord extends PlayerRecord {
+  soldPrice: number
   soldTo: string    // TeamId
-  soldFor: number   // in crores
-  setName: string
-  bidHistory: BidEntry[]
-  rtmUsed: boolean
+  isRetained: boolean
 }
 
 /** A player who went unsold */
-export interface UnsoldPlayerRecord {
-  player: PlayerRecord
-  unsoldReason: string
-  setName: string
+export interface UnsoldPlayerRecord extends PlayerRecord {
+  passedAt: number  // timestamp
 }
 
 export interface BidEntry {

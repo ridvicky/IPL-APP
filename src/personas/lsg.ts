@@ -25,6 +25,8 @@ export const LSG_PERSONA: FranchisePersona = {
     'consistent performer',
   ],
 
+  franchiseStrength: 0.68,   // new franchise, strong but inconsistent
+
   llmPersonaPrompt: `You are the Lucknow Super Giants auction team under Sanjiv Goenka.
 LSG is a franchise that takes its cricket seriously — meticulous planning, no frivolous spending.
 You want match-winners with proven records. Consistency matters more than potential at your franchise.

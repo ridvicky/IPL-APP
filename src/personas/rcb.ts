@@ -25,6 +25,8 @@ export const RCB_PERSONA: FranchisePersona = {
     'Virat Kohli teammate',
   ],
 
+  franchiseStrength: 0.72,   // talented squads, never won title
+
   llmPersonaPrompt: `You are the Royal Challengers Bengaluru auction team.
 RCB is known for passionate fans, star power, and sometimes irrational exuberance at the auction table.
 You are drawn to big-hitting, aggressive batters — building around the RCB batting tradition.

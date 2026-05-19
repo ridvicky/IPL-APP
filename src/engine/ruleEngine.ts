@@ -6,12 +6,12 @@
  */
 
 import type { ValidationResult } from '@/types/validation'
-import type { GameState, BidState } from '@/types/game'
+import type { GameState } from '@/types/game'
 import type { AuctionDataset } from '@/types/dataset'
 import type { TeamId, TeamState } from '@/types/team'
 import type { RetentionConfig } from '@/types/retention'
 import type { TradeProposal } from '@/types/trade'
-import { getBidIncrement } from '@/dataset/datasetLoader'
+import { getBidIncrement, getPlayersInSet } from '@/dataset/datasetLoader'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Purse helpers
@@ -188,7 +188,23 @@ export function validateSaleConfirmation(
   winningTeam: TeamId,
   salePrice: number,
 ): ValidationResult {
-  return validateBid(state, dataset, winningTeam, salePrice)
+  const teamState = state.teamStates[winningTeam]
+  if (!teamState) return { valid: false, reason: `Team ${winningTeam} not found` }
+
+  if (teamState.currentPurse < salePrice) {
+    return { valid: false, reason: `${winningTeam} cannot afford ₹${salePrice.toFixed(2)} Cr` }
+  }
+
+  if (teamState.squad.length >= dataset.maximumSquadSize) {
+    return { valid: false, reason: `${winningTeam} squad is full` }
+  }
+
+  const currentPlayer = getCurrentPlayer(state, dataset)
+  if (currentPlayer?.isOverseas && teamState.overseasCount >= dataset.overseasLimit) {
+    return { valid: false, reason: `${winningTeam} has no overseas slots` }
+  }
+
+  return { valid: true }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -356,10 +372,8 @@ export function validateSessionState(state: GameState): ValidationResult {
 function getCurrentPlayer(state: GameState, dataset: AuctionDataset) {
   const setName = dataset.auctionSets[state.currentSetIndex]
   if (!setName) return null
-  const playersInSet = dataset.players
-    .filter(p => p.auctionSet === setName)
-    .sort((a, b) => a.auctionSetOrder - b.auctionSetOrder)
-  return playersInSet[state.currentPlayerIndex] ?? null
+  const players = getPlayersInSet(dataset, setName, state.releasedRetainedPlayers ?? [])
+  return players[state.currentPlayerIndex] ?? null
 }
 
 function getBasePrice(state: GameState, dataset: AuctionDataset): number {

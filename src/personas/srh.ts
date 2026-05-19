@@ -25,6 +25,8 @@ export const SRH_PERSONA: FranchisePersona = {
     'power play specialist',
   ],
 
+  franchiseStrength: 0.76,   // 2016 champions, 2024 runners-up
+
   llmPersonaPrompt: `You are the Sunrisers Hyderabad auction team under Kavya Maran's dynamic leadership.
 SRH has transformed into one of the most explosive teams in IPL — record-breaking run rates, fearless cricket.
 You want batters who attack from ball one, and bowlers who take wickets not just contain.

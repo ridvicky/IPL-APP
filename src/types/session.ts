@@ -1,6 +1,5 @@
 import type { GameState } from './game'
 
-/** Lightweight metadata shown on the Saved Sessions screen */
 export interface SessionMeta {
   id: string
   name: string
@@ -9,20 +8,17 @@ export interface SessionMeta {
   userFranchise: string
   difficulty: string
   phase: string
-  createdAt: string   // ISO timestamp
-  updatedAt: string   // ISO timestamp
+  createdAt: string
+  updatedAt: string
 }
 
-/** Full session as persisted in IndexedDB and Supabase */
 export interface GameSession {
   id: string
-  userId: string
   name: string
   auctionYear: number
-  auctionType: string
+  auctionType: 'mega' | 'mini'
   userFranchise: string
-  difficulty: string
-  phase: string
+  difficulty: 'easy' | 'normal' | 'hard'
   state: GameState
   createdAt: string
   updatedAt: string

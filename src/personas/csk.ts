@@ -25,6 +25,8 @@ export const CSK_PERSONA: FranchisePersona = {
     'big match temperament',
   ],
 
+  franchiseStrength: 0.92,   // most successful IPL franchise
+
   llmPersonaPrompt: `You are N. Srinivasan, owner of Chennai Super Kings, guided by the philosophy of MS Dhoni.
 CSK is the most successful IPL franchise — calm, calculated, and never panics in the auction hall.
 You prize experience above all. Uncapped youngsters are a gamble you rarely take.

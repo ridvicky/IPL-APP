@@ -1,441 +1,612 @@
 /**
- * Static comment bank — shown when LLM is unavailable or rate-limited.
- * Each franchise has comments per scenario: bidding, passing, winning, losing.
- * Randomly sampled so the same line doesn't repeat every time.
+ * Static fallback comment bank — used when LLM is unavailable or rate-limited.
+ * One pool per franchise per scenario. Picked randomly so it never feels robotic.
  */
 
-export type CommentScenario = 'bid' | 'pass' | 'win' | 'lose' | 'rtm' | 'overbid'
+type Scenario = 'bidding_interested' | 'bidding_aggressive' | 'bidding_cautious' | 'passing' | 'sold_win' | 'sold_lost' | 'rtm_yes' | 'rtm_no'
 
-const bank: Record<string, Record<CommentScenario, string[]>> = {
+const BANK: Record<string, Record<Scenario, string[]>> = {
   CSK: {
-    bid: [
-      'CSK always backs experience. This is a calculated call.',
-      'Dhoni\'s philosophy — back the right player at the right price.',
-      'Chennai knows value when they see it. Paddle up.',
-      'We\'ve done our homework. This player fits our system.',
-      'Whistle Podu! CSK wants this one.',
+    bidding_interested: [
+      "Dhoni's kind of player — calm head, big heart.",
+      "This one fits our system perfectly.",
+      "Chennai will embrace this player.",
+      "We've been tracking him all season.",
+      "Experience like this doesn't come cheap.",
     ],
-    pass: [
-      'Not at that price. CSK keeps its powder dry.',
-      'There will be better value later. We\'re patient.',
-      'We have faith in our retained core. No need to overpay.',
-      'CSK doesn\'t panic. We step back when the price doesn\'t make sense.',
-      'Thala\'s taught us — don\'t force it. Pass.',
+    bidding_aggressive: [
+      "Don't test us — we want this player.",
+      "CSK doesn't lose targets. Raise it.",
+      "This is non-negotiable for us.",
+      "We'll go to the wall for him.",
+      "Chennai needs this. Simple.",
     ],
-    win: [
-      'Excellent. Another experienced head in the CSK dressing room.',
-      'That is exactly the kind of player our system rewards.',
-      'Whistle Podu! Welcome to yellow.',
-      'CSK is built on trust and experience. This signing continues that tradition.',
-      'A calm, calculated acquisition. Dhoni would approve.',
+    bidding_cautious: [
+      "Let's see where this goes…",
+      "We're watching closely.",
+      "Interesting. We'll hold for now.",
+      "Not our highest priority today.",
+      "Patience is a CSK virtue.",
     ],
-    lose: [
-      'They wanted it more tonight. CSK has other plans.',
-      'Good luck to them. We back our retained core.',
-      'No regrets. The price went beyond our value assessment.',
-      'There are other players on our list. CSK moves on calmly.',
-      'Sometimes you step aside. That\'s smart cricket.',
+    passing: [
+      "Not the profile we need right now.",
+      "Let someone else take the risk.",
+      "We'll pass. There's better value ahead.",
+      "Doesn't fit the Chennai way.",
+      "We have that role covered.",
     ],
-    rtm: [
-      'This is our player. We know exactly what he brings. RTM.',
-      'CSK never forgets its own. We\'re bringing him back.',
-      'Right To Match. Simple as that.',
-      'He wore yellow. He\'ll wear it again.',
+    sold_win: [
+      "Whistle Podu! Welcome to Chennai!",
+      "Another piece of the puzzle in yellow.",
+      "Dhoni will get the best out of him.",
+      "Thala approved. Done deal.",
+      "CSK continues to build smart.",
     ],
-    overbid: [
-      'We stretched a little but this player is worth every rupee.',
-      'The price went higher than planned, but so be it.',
-      'Sometimes you have to go the extra mile for the right player.',
+    sold_lost: [
+      "They paid too much. We'll recover.",
+      "Not at that price. No regrets.",
+      "Good luck to them. We move on.",
+      "Our time will come.",
+      "The auction is long. Stay patient.",
+    ],
+    rtm_yes: [
+      "He's a CSK man. Always was.",
+      "We never let family go easily.",
+      "Welcome back to Chennai, son.",
+      "RTM. No hesitation whatsoever.",
+      "That's our player. Matched.",
+    ],
+    rtm_no: [
+      "The price is too steep for us today.",
+      "We'll let him go. With respect.",
+      "Not at that valuation. Move on.",
+      "Our purse has bigger plans.",
+      "Best of luck to him.",
     ],
   },
 
   MI: {
-    bid: [
-      'Mumbai wants this one. Paltan needs quality.',
-      'MI targets are researched deeply. This bid is backed by data.',
-      'Five titles. We know what winning looks like. Paddle up.',
-      'This is a future MI star. We move early.',
-      'The Paltan spirit demands the best. Bidding.',
+    bidding_interested: [
+      "Mumbai identifies talent before anyone else.",
+      "He fits the MI mould exactly.",
+      "We've done our homework on this one.",
+      "This is a five-year investment for us.",
+      "Mumbai needs match-winners. He qualifies.",
     ],
-    pass: [
-      'Not for MI at this valuation. We have depth.',
-      'Our analysis says step back. We trust the process.',
-      'MI has enough options here. No need to overspend.',
-      'Patience wins auctions. We\'ll find our target.',
-      'Not the right fit for our current squad structure.',
+    bidding_aggressive: [
+      "Mumbai doesn't flinch. Keep going.",
+      "Five titles. We know how to buy.",
+      "This is a must-have. Period.",
+      "Paltan needs this player. No ceiling.",
+      "MI plays to win. Always.",
     ],
-    win: [
-      'Welcome to the Paltan! Another MI warrior in the squad.',
-      'MI always gets its man when it matters.',
-      'Five titles built on these kinds of smart buys.',
-      'Excellent. This player will thrive in the MI system.',
-      'The blue jersey suits you. Paltan Zindabad!',
+    bidding_cautious: [
+      "We're evaluating. Don't rush us.",
+      "Interesting profile. Let it breathe.",
+      "Mumbai doesn't overpay. Watching.",
+      "We have options. No panic.",
+      "Let the price settle first.",
     ],
-    lose: [
-      'Their loss is not our gain here — we stay disciplined.',
-      'MI has a deep enough squad. We let this one go.',
-      'No regrets. Our squad depth is our strength.',
-      'We\'ll find what we need further in the auction.',
-      'Data said step back. We listen to the data.',
+    passing: [
+      "Not our gap to fill today.",
+      "Mumbai passes. Better opportunities ahead.",
+      "We'll leave this one for the room.",
+      "Numbers don't add up for us.",
+      "Our squad needs something else.",
     ],
-    rtm: [
-      'MI doesn\'t let its players go that easily. RTM.',
-      'Paltan family. We\'re matching that bid.',
-      'Once a Mumbai Indian, always a Mumbai Indian. RTM.',
-      'This is too important to let walk away.',
+    sold_win: [
+      "Mumbai Paltan grows stronger!",
+      "Another quality addition to the squad.",
+      "The MI system will develop him further.",
+      "Blue and gold gets brighter today.",
+      "Champions keep on building.",
     ],
-    overbid: [
-      'We pushed the boat out, but MI investments always pay off.',
-      'This player\'s ceiling justifies the price.',
-      'The Ambani backing means we can back our targets properly.',
+    sold_lost: [
+      "Too rich. They'll regret it.",
+      "We play the long game. No panic.",
+      "Mumbai recovers. Always.",
+      "That's their money. Not ours to waste.",
+      "Next player. Stay focused.",
+    ],
+    rtm_yes: [
+      "Once MI, always MI.",
+      "We protect our own. RTM exercised.",
+      "No debate. He comes home.",
+      "Mumbai doesn't let go of winners.",
+      "Welcome back to Wankhede.",
+    ],
+    rtm_no: [
+      "Not worth straining the purse.",
+      "We have a plan. This doesn't fit it.",
+      "Good player, wrong price.",
+      "Mumbai moves forward.",
+      "Let him go. We rebuild smarter.",
     ],
   },
 
   RCB: {
-    bid: [
-      'Ee sala cup namde! RCB bids for glory.',
-      'This is the year. We need players who believe it too.',
-      'RCB fans deserve the best. We\'re bidding.',
-      'The RCB brand attracts stars — this player fits the vision.',
-      'Bengaluru is watching. Paddle up.',
+    bidding_interested: [
+      "Bangalore needs stars. He is one.",
+      "Virat would back this call.",
+      "Ee sala cup namde — starting with him.",
+      "Royal Challengers don't do half measures.",
+      "The fans deserve this player.",
     ],
-    pass: [
-      'Not at this price. Even RCB has limits... sometimes.',
-      'We\'ll find our match elsewhere in the auction.',
-      'The analytics team says step back. Reluctantly, we agree.',
-      'RCB fans understand — we must be strategic.',
-      'Painful, but the squad balance requires restraint.',
+    bidding_aggressive: [
+      "We're not letting Bangalore down again!",
+      "Raise it! RCB plays for the Cup!",
+      "No ceiling when we want someone.",
+      "Bangalore is all-in. Every time.",
+      "This is our year. Back it up!",
     ],
-    win: [
-      'Ee sala cup namde! Welcome to the RCB family!',
-      'Bengaluru is going to love this signing!',
-      'This is how you build a championship squad!',
-      'Another warrior for the red and gold army!',
-      'The M. Chinnaswamy Stadium will roar for this player!',
+    bidding_cautious: [
+      "Let's not get carried away…",
+      "The head says wait. The heart says bid.",
+      "Hmm. We'll see where this settles.",
+      "RCB is interested. Not desperate.",
+      "We have purse to deploy smartly.",
     ],
-    lose: [
-      'We wanted that one. But RCB never gives up on the dream.',
-      'The fans will understand. There are more players to come.',
-      'We competed hard. Sometimes it just doesn\'t go your way.',
-      'RCB regroups. Always. Ee sala cup namde is still alive.',
-      'On to the next. The vision remains.',
+    passing: [
+      "Not the RCB profile. We'll wait.",
+      "Bangalore has bigger targets today.",
+      "We'll pass. Our eye is elsewhere.",
+      "This one isn't the answer.",
+      "Not the right fit for the red army.",
     ],
-    rtm: [
-      'RCB never abandons its own. RTM, without hesitation.',
-      'This player is part of the Bengaluru story. We match.',
-      'Red and gold runs in your blood now. RTM.',
-      'We brought them here. We\'re keeping them here.',
+    sold_win: [
+      "Ee sala cup namde! He's ours!",
+      "Red and gold, baby! Welcome!",
+      "Bangalore has its match-winner!",
+      "The RCB faithful will love this.",
+      "One step closer to glory!",
     ],
-    overbid: [
-      'Perhaps we got a little carried away — but that\'s RCB!',
-      'The heart said yes before the head could object.',
-      'Worth every rupee for the Bengaluru fans.',
+    sold_lost: [
+      "Story of our lives. We move.",
+      "Someone always outbids us. Fine.",
+      "RCB keeps the faith. Always.",
+      "The Cup hunt continues.",
+      "We'll find our answer elsewhere.",
+    ],
+    rtm_yes: [
+      "A Bangalore legend returns!",
+      "We don't abandon our heroes.",
+      "RTM. Bangalore never forgets.",
+      "He bleeds red and gold. Matched.",
+      "Welcome back to the RCB family.",
+    ],
+    rtm_no: [
+      "The bid went too high for us.",
+      "Even RCB has limits. Today.",
+      "We'll honour his legacy elsewhere.",
+      "Go well, champion. Go well.",
+      "Budget demands it. With heavy heart.",
     ],
   },
 
   KKR: {
-    bid: [
-      'KKR sees potential here that others have missed.',
-      'Korbo Lorbo Jeetbo Re! KKR enters the bid.',
-      'Two titles built on smart buys like this one.',
-      'Shah Rukh Khan\'s instinct says yes. We bid.',
-      'This player fits the KKR system perfectly.',
+    bidding_interested: [
+      "Knight Riders identify value others miss.",
+      "Shreyas would love this addition.",
+      "Purple and gold has a plan for him.",
+      "KKR builds squads, not collections.",
+      "Eden Gardens is calling this player.",
     ],
-    pass: [
-      'The price exceeds our internal valuation. KKR passes.',
-      'We\'ve set our limit and we respect it.',
-      'There are other undervalued players ahead. Trust the process.',
-      'KKR discipline wins auctions as much as bids do.',
-      'Our analytics team has spoken. We step back.',
+    bidding_aggressive: [
+      "KKR doesn't leave empty-handed.",
+      "Two-time champions don't lose targets.",
+      "Korbo Lorbo Jeetbo — we take him.",
+      "Eden Gardens deserves this player.",
+      "Knight Riders are serious. Very serious.",
     ],
-    win: [
-      'Korbo Lorbo Jeetbo Re! Excellent acquisition for KKR.',
-      'SRK knew it. We all knew it. Welcome to the Knight Riders.',
-      'This is exactly the kind of buy that wins titles.',
-      'The Eden Gardens faithful will love this one.',
-      'Another Knight Rider joins the purple army!',
+    bidding_cautious: [
+      "KKR is patient. The price isn't right yet.",
+      "Let it breathe. We'll move at the right moment.",
+      "Purple has options. We watch.",
+      "Not our moment. Yet.",
+      "Strategic patience is KKR's weapon.",
     ],
-    lose: [
-      'They overpaid. KKR respects its limits. No regrets.',
-      'We backed our analysis. Someone else blinked first.',
-      'Eden Gardens will find someone to cheer for. Plenty more to bid.',
-      'KKR moves on. The best value picks are still to come.',
-      'Smart teams know when to walk away.',
+    passing: [
+      "Not the KKR template. Pass.",
+      "We build differently. Not for us.",
+      "Eden Gardens has other priorities.",
+      "This profile doesn't excite us.",
+      "KKR exits the bidding. Strategically.",
     ],
-    rtm: [
-      'A Knight Rider stays a Knight Rider. RTM.',
-      'We developed this talent. We\'re keeping it.',
-      'Eden Gardens doesn\'t forget its own. RTM exercise.',
-      'KKR matches the bid. Simple.',
+    sold_win: [
+      "Korbo Lorbo Jeetbo! He's a Knight!",
+      "Eden roars for this signing!",
+      "KKR strengthens the fort!",
+      "Purple and gold gets stronger today.",
+      "Champions know how to shop.",
     ],
-    overbid: [
-      'We went a touch over plan, but the talent justifies it.',
-      'SRK got excited. Understandable. Worth it.',
-      'An investment in quality. KKR can make this work.',
+    sold_lost: [
+      "They wanted him more. Respect.",
+      "Our strategy remains intact.",
+      "KKR doesn't chase. We plan.",
+      "The auction continues. Stay calm.",
+      "There are better options ahead.",
+    ],
+    rtm_yes: [
+      "A Knight never leaves the fort.",
+      "RTM. Eden Garden's favourite son.",
+      "We reclaim our own. Simple.",
+      "Purple loyalty has no price ceiling.",
+      "Welcome back, champion.",
+    ],
+    rtm_no: [
+      "The economics don't support it today.",
+      "We wish him well. Really.",
+      "KKR builds the future. Not the past.",
+      "Move forward. Always forward.",
+      "Our plan works without him.",
     ],
   },
 
   DC: {
-    bid: [
-      'Delhi Capitals bids — thorough analysis supports this.',
-      'This player fits our system. We move.',
-      'DC is building something special. This name belongs.',
-      'Consistent performers are what DC values. Bidding.',
-      'The capital has spoken. Paddle up.',
+    bidding_interested: [
+      "Delhi Capitals plays bold, thinks smart.",
+      "This player fits our attacking blueprint.",
+      "The capital deserves quality. He delivers.",
+      "DC's data team flagged him weeks ago.",
+      "Young, hungry, Delhi-ready.",
     ],
-    pass: [
-      'Not the right value equation for DC right now.',
-      'Our squad has depth here already. We step back.',
-      'DC always plays the long game. Patience.',
-      'The price doesn\'t match our assessment. Pass.',
-      'Delhi Capitals is disciplined. We don\'t chase prices.',
+    bidding_aggressive: [
+      "Delhi is going all in on this one.",
+      "Capitals don't back down from value.",
+      "We want this player. Simple.",
+      "DC commits when they believe. We believe.",
+      "The capital city demands this signing.",
     ],
-    win: [
-      'Excellent. DC strengthens the squad methodically.',
-      'This is how Delhi builds — smart, consistent, patient.',
-      'Welcome to the Capitals family. This was a targeted buy.',
-      'Another quality addition to the DC squad.',
-      'Delhi Capital will roar for this one.',
+    bidding_cautious: [
+      "Interesting. Delhi watches carefully.",
+      "The numbers are close. Let's see.",
+      "DC has options. Not desperate.",
+      "We hold the purse with discipline.",
+      "Let it run a little longer.",
     ],
-    lose: [
-      'DC had its price. Someone went beyond it. No regrets.',
-      'Our squad is deep enough. We move forward calmly.',
-      'The next player on our list might be a better fit anyway.',
-      'Delhi Capitals stays calm under pressure. Always.',
-      'We\'ll find our answer elsewhere in this auction.',
+    passing: [
+      "Not the Delhi profile today.",
+      "DC moves on to bigger targets.",
+      "The fit isn't right. We pass.",
+      "Our squad gaps lie elsewhere.",
+      "Capitals concede this one.",
     ],
-    rtm: [
-      'DC developed this player. We\'re not giving them up.',
-      'Right To Match. Our player stays in Delhi.',
-      'This talent was nurtured here. RTM is the right call.',
-      'The blue and navy jersey is home for this player.',
+    sold_win: [
+      "Delhi Capitals gets stronger!",
+      "A brilliant addition to the squad.",
+      "The capital city celebrates!",
+      "DC builds another chapter!",
+      "Bold, smart, and now ours.",
     ],
-    overbid: [
-      'We went slightly above plan, but this player is worth it.',
-      'Delhi Capitals makes calculated exceptions for the right talent.',
-      'A premium paid for a genuine squad gap. Justified.',
+    sold_lost: [
+      "Outbid but never outthought.",
+      "Delhi has a plan. Still.",
+      "We'll find our answer. Always do.",
+      "The auction is long. We're fine.",
+      "Next. DC keeps moving.",
+    ],
+    rtm_yes: [
+      "Capitals protect their investments.",
+      "RTM. Delhi keeps its own.",
+      "He belongs in blue and red. Matched.",
+      "We don't let talent walk away easily.",
+      "Welcome back to the capital.",
+    ],
+    rtm_no: [
+      "The price crossed our comfort zone.",
+      "DC looks ahead, not back.",
+      "We let him go with good wishes.",
+      "Our purse builds a different future.",
+      "Smart decision. Difficult, but smart.",
     ],
   },
 
   RR: {
-    bid: [
-      'Rajasthan sees value others have overlooked. Classic RR.',
-      'Shane Warne would have loved this player. We bid.',
-      'RR auctions are built on exactly these kinds of smart picks.',
-      'The moneyball approach says yes. Paddle up.',
-      'Rajasthan Royals — original IPL champions — bids.',
+    bidding_interested: [
+      "Rajasthan Royals: value over vanity.",
+      "This player is undervalued. We see it.",
+      "Moneyball is alive in Jaipur.",
+      "The pink army identifies talent early.",
+      "Sanju would love this signing.",
     ],
-    pass: [
-      'The price has moved past good value. RR knows when to stop.',
-      'We trust our process. This isn\'t the right price.',
-      'There are diamonds ahead that others won\'t see. We wait.',
-      'RR discipline is our greatest strength. We pass.',
-      'Every rupee is precious. This one costs too many of them.',
+    bidding_aggressive: [
+      "When Royals see value, they act.",
+      "Rajasthan is going for it. Hard.",
+      "The pink army wants this player.",
+      "We've done the analysis. We commit.",
+      "Value found. We don't hesitate.",
     ],
-    win: [
-      'The Warne formula lives on — find what others missed.',
-      'Rajasthan Royals doing what they do best. Brilliant buy.',
-      'Smart cricket. Value cricket. RR cricket.',
-      'The pink jersey gains another warrior today.',
-      'Shane would have approved. Welcome to Rajasthan.',
+    bidding_cautious: [
+      "Let's see if it's truly worth it.",
+      "Royals don't overpay. Watching.",
+      "The data is mixed. We're careful.",
+      "RR holds. For now.",
+      "Patience is our greatest weapon.",
     ],
-    lose: [
-      'They paid over the odds. RR never does that. We move on.',
-      'Our system identifies the next opportunity automatically.',
-      'Rajasthan doesn\'t mourn what it doesn\'t win. Onward.',
-      'The best value in this auction is still ahead. Trust us.',
-      'We set our price and we honour it. No shame in losing this one.',
+    passing: [
+      "The value isn't there. We pass.",
+      "Rajasthan plays the long game.",
+      "Not the RR formula. Move on.",
+      "Our analysts say no. We listen.",
+      "Better value is coming. We trust that.",
     ],
-    rtm: [
-      'Rajasthan Royals don\'t let their finds go easily. RTM.',
-      'We spotted this talent. We\'re keeping it.',
-      'Right To Match — and the price is still good value for us.',
-      'This player thrived in our system. They\'ll thrive again.',
+    sold_win: [
+      "Value identified. Value captured!",
+      "The pink army grows smarter!",
+      "Rajasthan wins this battle of wits.",
+      "Sanju will get the best from him.",
+      "Classic Royals — smart over flashy.",
     ],
-    overbid: [
-      'We stepped slightly above plan for a genuinely special talent.',
-      'Even the best value teams occasionally find a player worth a premium.',
-      'Rare exception for a rare player. RR accepts this.',
+    sold_lost: [
+      "They overpaid. Our formula survives.",
+      "RR discipline preserved.",
+      "The numbers didn't justify it. Good call.",
+      "Jaipur moves on — calculated as always.",
+      "Our war chest remains healthy.",
+    ],
+    rtm_yes: [
+      "Royals value loyalty above all.",
+      "He's our player. We match.",
+      "The pink army takes care of its own.",
+      "RTM exercised. Welcome back.",
+      "Jaipur never abandons its heroes.",
+    ],
+    rtm_no: [
+      "Even loyalty has a price ceiling.",
+      "The RR model demands discipline here.",
+      "We honour him by being smart.",
+      "Our future is built differently.",
+      "A tough but correct decision.",
     ],
   },
 
   SRH: {
-    bid: [
-      'Sunrisers Hyderabad bids hard for this one.',
-      'Kavya Maran\'s SRH doesn\'t hesitate on quality. Paddle up.',
-      'Record-breaking cricket needs record-breaking players.',
-      'SRH plays fast. We also bid fast. Going in.',
-      'This player has the aggression the Sunrisers demand.',
+    bidding_interested: [
+      "Sunrisers chase pace and aggression.",
+      "Orange Army has a plan for this player.",
+      "Hyderabad wants match-winners. He is one.",
+      "SRH knows fast bowling. We know this man.",
+      "The sunrise shines on this signing.",
     ],
-    pass: [
-      'We\'ve found our limit. SRH steps back.',
-      'Our retained core already covers this gap.',
-      'The price moved too far. Hyderabad shows restraint.',
-      'SRH is aggressive but not reckless. We pass.',
-      'The squad is balanced enough without this one.',
+    bidding_aggressive: [
+      "Sunrisers attack. Always.",
+      "Orange Army wants blood — and this player.",
+      "We go hard or go home. Going hard.",
+      "Hyderabad commits. No retreat.",
+      "SRH takes what it wants. And we want him.",
     ],
-    win: [
-      'Hyderabad erupts! Another Sunriser joins the squad!',
-      'Kavya Maran approves. What a signing for SRH.',
-      'This is how you build a team to break records.',
-      'The orange army grows stronger today.',
-      'Rise — another Sunriser has arrived!',
+    bidding_cautious: [
+      "Sunrisers weighs the option carefully.",
+      "We want him. But at our price.",
+      "Orange Army watches. Calculating.",
+      "Not yet. Let it climb a little.",
+      "SRH is in. Not all-in. Yet.",
     ],
-    lose: [
-      'SRH bid hard. The other team wanted it more. Fair enough.',
-      'We live to fight another bid. Sunrisers stay aggressive.',
-      'Our retained players cover this ground. No panic.',
-      'Hyderabad has other targets. This doesn\'t define our auction.',
-      'We pushed hard. No regrets.',
+    passing: [
+      "Doesn't fit the SRH attack.",
+      "Not the Sunrisers template. Pass.",
+      "Orange Army has better targets ahead.",
+      "The role doesn't match our gaps.",
+      "Hyderabad steps back from this one.",
     ],
-    rtm: [
-      'SRH matches without hesitation. This player is orange through and through.',
-      'Rise and RTM. Sunrisers keep their own.',
-      'We invested in this player. We\'re reclaiming them.',
-      'Kavya says yes. RTM.',
+    sold_win: [
+      "Rise, Sunrisers! He's ours!",
+      "Orange Army roars in Hyderabad!",
+      "SRH adds another weapon!",
+      "The attack just got more dangerous!",
+      "Hyderabad builds a champion squad!",
     ],
-    overbid: [
-      'SRH went big but this player changes games. Worth it.',
-      'Aggressive cricket needs aggressive investment.',
-      'Kavya Maran green-lit this. We back our instincts.',
+    sold_lost: [
+      "They can have him at that price.",
+      "SRH keeps the purse, keeps the plan.",
+      "Orange Army adapts. Always.",
+      "We'll find the pace we need.",
+      "No drama. We move forward.",
+    ],
+    rtm_yes: [
+      "He flies the orange flag. Matched.",
+      "SRH keeps its own. Always.",
+      "RTM. The sunrise never abandons its stars.",
+      "Once a Sunriser, always a Sunriser.",
+      "Welcome back to Hyderabad.",
+    ],
+    rtm_no: [
+      "The price doesn't make sense today.",
+      "Hyderabad looks forward, not back.",
+      "We let him go — with respect.",
+      "Our squad plan doesn't need this.",
+      "Orange Army chooses wisdom over sentiment.",
     ],
   },
 
   PBKS: {
-    bid: [
-      'Preity Zinta loves this player. Punjab Kings bids!',
-      'Sher-E-Punjab roars — PBKS enters the auction for this one.',
-      'Punjab Kings is building a winner this year. We have the purse!',
-      'This player has the energy Punjab deserves. Bidding.',
-      'PBKS has the money this year. No holding back.',
+    bidding_interested: [
+      "Punjab Kings has the purse and the intent.",
+      "Shubman knows what we need — this player.",
+      "Lions of Punjab don't miss quality.",
+      "PBKS is building something special.",
+      "The red lions want him in their den.",
     ],
-    pass: [
-      'Even PBKS has moments of discipline. Reluctantly, we pass.',
-      'The squad balance says step back. Hard to do, but right.',
-      'We have targets further in the auction. Saving the purse.',
-      'Punjab Kings pauses. Just this once.',
-      'Our team needs balance, not just star power. Pass.',
+    bidding_aggressive: [
+      "Punjab is going to the wall on this.",
+      "Kings don't flinch. We keep raising.",
+      "PBKS has the purse. We'll use it.",
+      "Lions of Punjab roar! We want him!",
+      "No hesitation. Keep going.",
     ],
-    win: [
-      'Sher-E-Punjab! What a signing for Punjab Kings!',
-      'Preity Zinta is thrilled! Welcome to the PBKS family!',
-      'This is THE year. This signing proves it.',
-      'Punjab Kings finally gets their man. Long overdue!',
-      'The Punjab crowd will love this. Absolutely love it.',
+    bidding_cautious: [
+      "Interesting. PBKS considers carefully.",
+      "We have the purse. Question is the fit.",
+      "Let the price move. We watch.",
+      "Punjab Kings is interested but patient.",
+      "Not yet. We hold.",
     ],
-    lose: [
-      'It hurts when Punjab Kings loses a target. It really does.',
-      'We bid, we competed, they went higher. PBKS moves forward.',
-      'The Punjab dream is alive. One player doesn\'t define the auction.',
-      'We\'ll find our spine further in the auction. Still confident.',
-      'PBKS has more to spend. The right player is coming.',
+    passing: [
+      "Not the Punjab Kings priority today.",
+      "PBKS passes. Bigger fish to fry.",
+      "Our squad needs something different.",
+      "The profile doesn't match our gaps.",
+      "Lions of Punjab conserve for better targets.",
     ],
-    rtm: [
-      'Punjab doesn\'t let its stars go easily. RTM!',
-      'PBKS goes heart-first. RTM — obviously.',
-      'This player belongs in Punjab colours. We match.',
-      'Preity Zinta says bring them back. RTM.',
+    sold_win: [
+      "Sher Punjab! He's ours!",
+      "Kings claim another jewel!",
+      "Punjab Kings gets stronger today!",
+      "The red lions welcome a champion!",
+      "This is the PBKS era!",
     ],
-    overbid: [
-      'We may have gone a bit over! But that\'s Punjab spirit!',
-      'The heart overruled the spreadsheet again. Typical PBKS!',
-      'Worth every rupee. Punjab fans deserve nothing less.',
+    sold_lost: [
+      "They paid over the odds. We're fine.",
+      "Punjab Kings keeps the war chest intact.",
+      "No regrets. We know our plan.",
+      "Lions hunt when the time is right.",
+      "The auction is long. We're patient.",
+    ],
+    rtm_yes: [
+      "A King never leaves his kingdom.",
+      "RTM. Punjab reclaims its own.",
+      "Once a Punjab King, always royalty.",
+      "The red lions protect their pride.",
+      "Welcome back to Mohali.",
+    ],
+    rtm_no: [
+      "The price is beyond reason today.",
+      "PBKS builds its future differently.",
+      "We salute him — but the maths says no.",
+      "Lions pick their battles wisely.",
+      "We move on. Stronger for it.",
     ],
   },
 
   GT: {
-    bid: [
-      'Gujarat Titans has done its analysis. We bid with conviction.',
-      'Aava De! Gujarat enters the auction for this player.',
-      'GT builds on balance. This player adds exactly what we need.',
-      'Two finals in two years tells you GT knows what it\'s doing.',
-      'Gujarat Titans — precise, patient, purposeful. We bid.',
+    bidding_interested: [
+      "Gujarat Titans builds on merit alone.",
+      "Shubman and Hardik knew — this is quality.",
+      "Titans identify character over hype.",
+      "Ahmedabad wants winners. He qualifies.",
+      "GT's philosophy fits this player perfectly.",
     ],
-    pass: [
-      'GT\'s squad structure doesn\'t require this. We step back.',
-      'The price exceeds our ceiling. No emotional override here.',
-      'Balance is the GT way. This bid would disrupt it.',
-      'Gujarat Titans waits for a better opportunity. Always one ahead.',
-      'Our retained core covers this gap adequately. Pass.',
+    bidding_aggressive: [
+      "Titans don't lose players they target.",
+      "Gujarat commits when it believes. We believe.",
+      "Ahmedabad has spoken. We want him.",
+      "GT goes for the jugular when ready.",
+      "Champions know how to acquire champions.",
     ],
-    win: [
-      'Aava De! Another Gujarat Titan joins the squad.',
-      'This is exactly the profile GT was looking to add.',
-      'Two finals bred the habit of good selection. Another example.',
-      'Welcome to the Titans. The squad is stronger today.',
-      'GT does it again — smart, targeted, decisive.',
+    bidding_cautious: [
+      "Titans assess. Never rush.",
+      "Gujarat Titans is methodical. Always.",
+      "Let the room decide first. We'll move.",
+      "Our data team is still running numbers.",
+      "Patience built two titles. It works.",
     ],
-    lose: [
-      'GT set its number and honoured it. No overpay. No regret.',
-      'Our retained core means we don\'t need to panic. Moving on.',
-      'Aava De for the next opportunity. GT stays patient.',
-      'Someone paid more than we valued them. We\'re comfortable with that.',
-      'The GT process continues. Another opportunity is loading.',
+    passing: [
+      "Doesn't fit the Titans blueprint.",
+      "Gujarat has better allocation targets.",
+      "Not the GT formula. We pass.",
+      "Ahmedabad builds differently.",
+      "Titans concede this one — strategically.",
     ],
-    rtm: [
-      'Gujarat Titans built this player. GT brings them back. RTM.',
-      'The blue jersey is home. RTM exercise.',
-      'We don\'t let investments walk away. Match.',
-      'Aava De — this Titan stays a Titan.',
+    sold_win: [
+      "Jai Gujarat! Another Titan rises!",
+      "Ahmedabad gets what it came for!",
+      "The Titans machine grows stronger!",
+      "Quality added. Championship mentality.",
+      "Gujarat builds a dynasty, player by player.",
     ],
-    overbid: [
-      'A slight premium for a player who fits the system perfectly.',
-      'GT rarely does this, but the profile was too good to let go.',
-      'Calculated exception. The squad balance demanded it.',
+    sold_lost: [
+      "Let them have it. Our plan adapts.",
+      "GT has contingencies. Always.",
+      "Titans lose this battle, not the war.",
+      "Ahmedabad stays calm. As always.",
+      "The bigger picture is still intact.",
+    ],
+    rtm_yes: [
+      "Once a Titan, always a Titan.",
+      "GT protects its investments. RTM.",
+      "He built this franchise. We return the favour.",
+      "Ahmedabad never abandons its own.",
+      "RTM exercised. Welcome back.",
+    ],
+    rtm_no: [
+      "The economics don't support it.",
+      "Titans think long-term. This is long-term.",
+      "We honour his service — differently.",
+      "GT builds forward. Always forward.",
+      "A hard choice. The right choice.",
     ],
   },
 
   LSG: {
-    bid: [
-      'Lucknow Super Giants commits to this player. We bid.',
-      'LSG\'s research is thorough. This decision is backed by data.',
-      'The Super Giants need quality — and quality has a price.',
-      'Lucknow is serious this year. Paddle up.',
-      'LSG moves with intent. This is a targeted buy.',
+    bidding_interested: [
+      "Lucknow Super Giants targets the overlooked.",
+      "KL Rahul knows quality when he sees it.",
+      "Super Giants builds without ego.",
+      "Lucknow is young, hungry, ambitious — like him.",
+      "LSG's process identified this player early.",
     ],
-    pass: [
-      'Lucknow knows its limits. This one goes too high.',
-      'LSG squad depth says we don\'t need this at this price.',
-      'The Super Giants respect the process. We step back.',
-      'There are better targets ahead. LSG waits.',
-      'Not the right value for our current squad needs. Pass.',
+    bidding_aggressive: [
+      "Super Giants don't back down from targets.",
+      "Lucknow is all-in. Right now.",
+      "LSG found its player. We're not stopping.",
+      "The Super Giants have spoken. Raise it.",
+      "KL Rahul wants him. That's enough.",
     ],
-    win: [
-      'Super Giants! Excellent acquisition for Lucknow.',
-      'LSG strengthens with purpose. This was exactly our target.',
-      'Lucknow gets its man. The squad grows better.',
-      'UP cricket pride grows with this signing.',
-      'Welcome to Lucknow. The Super Giants are serious.',
+    bidding_cautious: [
+      "LSG monitors the room carefully.",
+      "Lucknow is interested. Cautiously.",
+      "Super Giants weighs every rupee.",
+      "We'll enter when the moment is right.",
+      "Not there yet. Almost.",
     ],
-    lose: [
-      'LSG competed fairly. They valued them more. We move forward.',
-      'Our squad has the depth to absorb this. No panic.',
-      'Lucknow always has a Plan B. On to the next one.',
-      'The Super Giants don\'t overpay. That\'s a principle, not a defeat.',
-      'We respect the other team\'s decision. LSG moves on calmly.',
+    passing: [
+      "Not the LSG profile today.",
+      "Lucknow Super Giants passes — strategically.",
+      "Our squad gap is different.",
+      "Super Giants has other plans for the purse.",
+      "We move on. Eyes forward.",
     ],
-    rtm: [
-      'LSG invested in this player. We exercise RTM.',
-      'Lucknow doesn\'t forget its Super Giants. RTM.',
-      'Right To Match — and we do. Confidently.',
-      'This player grew with LSG. They stay with LSG.',
+    sold_win: [
+      "Lucknow roars! Super Giants sign him!",
+      "LSG adds another quality piece!",
+      "The Super Giants rise higher!",
+      "KL Rahul will maximise this player.",
+      "Lucknow has its man!",
     ],
-    overbid: [
-      'LSG stretched its budget slightly — but the profile demanded it.',
-      'A calculated premium for a targeted squad need.',
-      'Sanjiv Goenka approved this one. Justified.',
+    sold_lost: [
+      "Too expensive. Our plan survives.",
+      "LSG keeps discipline. Always.",
+      "The Super Giants adapt and move on.",
+      "Lucknow is patient. The auction continues.",
+      "We'll find our answer elsewhere.",
+    ],
+    rtm_yes: [
+      "LSG stands by its players.",
+      "RTM. Super Giants protect their assets.",
+      "Once a Super Giant, always family.",
+      "Lucknow never lets go easily.",
+      "He's ours. Welcome back.",
+    ],
+    rtm_no: [
+      "The valuation doesn't work for us.",
+      "LSG looks forward. Always forward.",
+      "We respect him — but the maths wins.",
+      "Super Giants moves on with grace.",
+      "Our future is built on different foundations.",
     ],
   },
 }
 
-/**
- * Returns a random comment for a franchise in a given scenario.
- * Always returns a string — never throws, never returns undefined.
- */
-export function getFallbackComment(teamId: string, scenario: CommentScenario): string {
-  const teamBank = bank[teamId]
-  if (!teamBank) return `${teamId} makes their move.`
-  const lines = teamBank[scenario]
-  if (!lines || lines.length === 0) return `${teamId} makes their move.`
-  return lines[Math.floor(Math.random() * lines.length)]
+/** Pick a random comment from the bank for a given team and scenario */
+export function getFallbackComment(teamId: string, scenario: Scenario): string {
+  const pool = BANK[teamId]?.[scenario]
+  if (!pool || pool.length === 0) return `${teamId} is watching closely...`
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/** Map interest level + style to scenario key for bidding comments */
+export function biddingScenario(interestLevel: number, isAggressive: boolean): Scenario {
+  if (interestLevel >= 75) return isAggressive ? 'bidding_aggressive' : 'bidding_interested'
+  if (interestLevel >= 40) return 'bidding_cautious'
+  return 'passing'
 }

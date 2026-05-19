@@ -1,4 +1,5 @@
 import type { AuctionDataset } from '@/types/dataset'
+import type { PlayerRecord } from '@/types/player'
 import { validateDataset } from './datasetValidator'
 
 const cache = new Map<number, AuctionDataset>()
@@ -35,11 +36,54 @@ export async function loadDataset(year: number): Promise<AuctionDataset> {
   return dataset
 }
 
-/** Returns players for a given set name, sorted by auctionSetOrder */
-export function getPlayersInSet(dataset: AuctionDataset, setName: string) {
-  return dataset.players
+/**
+ * Returns players for a given set name, sorted by auctionSetOrder.
+ * Merges in any released retained players that belong to this set.
+ * Released retained players are appended after the regular pool (order 9999+).
+ */
+export function getPlayersInSet(
+  dataset: AuctionDataset,
+  setName: string,
+  releasedPlayers: PlayerRecord[] = [],
+): PlayerRecord[] {
+  const regular = dataset.players
     .filter(p => p.auctionSet === setName)
     .sort((a, b) => a.auctionSetOrder - b.auctionSetOrder)
+
+  const released = releasedPlayers
+    .filter(p => p.auctionSet === setName)
+    .sort((a, b) => (a.auctionSetOrder ?? 9999) - (b.auctionSetOrder ?? 9999))
+
+  return [...regular, ...released]
+}
+
+/**
+ * Computes which auction set a released retained player should join.
+ * High-value retained players (≥ 10 Cr) go to Marquee Set A (Indian) or
+ * Marquee Set B (Overseas) — same treatment as star signings in real IPL.
+ * Lower-value retentions join their role/nationality set.
+ */
+export function getReleasedPlayerSet(
+  role: 'BAT' | 'BWL' | 'AR' | 'WK',
+  isOverseas: boolean,
+  bowlingType?: 'pace' | 'spin',
+  retentionPrice?: number,
+): string {
+  if (retentionPrice !== undefined && retentionPrice >= 10) {
+    return isOverseas ? 'Marquee Set B' : 'Marquee Set A'
+  }
+  if (isOverseas) {
+    if (role === 'BAT') return 'Overseas Batters'
+    if (role === 'WK')  return 'Overseas Wicket-Keepers'
+    if (role === 'AR')  return 'Overseas All-Rounders'
+    if (role === 'BWL') return bowlingType === 'spin' ? 'Overseas Spinners' : 'Overseas Fast Bowlers'
+  } else {
+    if (role === 'BAT') return 'Indian Batters'
+    if (role === 'WK')  return 'Indian Wicket-Keepers'
+    if (role === 'AR')  return 'Indian All-Rounders'
+    if (role === 'BWL') return bowlingType === 'spin' ? 'Indian Spinners' : 'Indian Fast Bowlers'
+  }
+  return 'Accelerated Set'
 }
 
 /** Returns a player by ID. Throws if not found. */

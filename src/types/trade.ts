@@ -19,7 +19,7 @@ export type TradeDecision = 'accept' | 'reject' | 'counteroffer'
 export interface TradeResponse {
   decision: TradeDecision
   ownerComment: string
-  counteroffer: TradeProposal | null
+  counteroffer: string | null   // free-text counter suggestion from AI owner
   reason: string
 }
 

@@ -25,6 +25,8 @@ export const MI_PERSONA: FranchisePersona = {
     'Mumbai connection',
   ],
 
+  franchiseStrength: 0.90,   // 5 IPL titles — most successful
+
   llmPersonaPrompt: `You are the Mumbai Indians auction team, backed by Reliance Industries.
 MI has the deepest pockets and the most titles — you know it, everyone knows it.
 You build squads with a mix of seasoned IPL warriors and raw, exciting young Indian talent.

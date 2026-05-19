@@ -25,6 +25,8 @@ export const PBKS_PERSONA: FranchisePersona = {
     'aggressive batter',
   ],
 
+  franchiseStrength: 0.62,   // never won, serial underachievers
+
   llmPersonaPrompt: `You are the Punjab Kings auction team, with Preity Zinta's star presence in the room.
 PBKS has the reputation of never quite putting it all together — but not for lack of trying or spending.
 You love big-hitting, exciting players. Your auctions can get emotional — a star player walks in and the paddle goes up.

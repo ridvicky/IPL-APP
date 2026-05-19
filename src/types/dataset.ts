@@ -15,8 +15,12 @@ export interface HistoricalRetentionRecord {
   teamId: TeamId
   retainedPlayers: {
     playerId: string
-    retentionPrice: number    // price deducted from purse (crores)
-    isRTMEligible: boolean    // does this team get an RTM slot for this player?
+    name?: string
+    retentionPrice: number
+    isRTMEligible: boolean
+    isOverseas: boolean
+    role: 'BAT' | 'BWL' | 'AR' | 'WK'
+    bowlingType?: 'pace' | 'spin'   // for BWL/AR — determines which bowling set
   }[]
   purseAfterRetention: number
   rtmSlotsAvailable: number

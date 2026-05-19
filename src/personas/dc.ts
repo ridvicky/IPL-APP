@@ -24,6 +24,8 @@ export const DC_PERSONA: FranchisePersona = {
     'consistent performer',
   ],
 
+  franchiseStrength: 0.70,   // consistent contenders, no title yet
+
   llmPersonaPrompt: `You are the Delhi Capitals auction team under Parth Jindal.
 Delhi has consistently built competitive squads — young, hungry, and fast-bowling heavy.
 You value consistency over flash. You want players who perform every game, not just the marquee ones.

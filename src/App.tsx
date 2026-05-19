@@ -1,36 +1,55 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/authStore'
+import { LoginScreen } from '@screens/LoginScreen'
+import { HomeScreen } from '@screens/HomeScreen'
+import { NewSessionScreen } from '@screens/NewSessionScreen'
+import { AuctionRoomScreen } from '@screens/AuctionRoomScreen'
+import { MySquadScreen } from '@screens/MySquadScreen'
+import { AllSquadsScreen } from '@screens/AllSquadsScreen'
+import { RetentionSetupScreen } from '@screens/RetentionSetupScreen'
+import { UnsoldPlayersScreen } from '@screens/UnsoldPlayersScreen'
+import { AuctionHistoryScreen } from '@screens/AuctionHistoryScreen'
+import { FinalSquadReviewScreen } from '@screens/FinalSquadReviewScreen'
+import { TradeWindowScreen } from '@screens/TradeWindowScreen'
+import { SeasonSetupScreen } from '@screens/SeasonSetupScreen'
+import { SeasonResultsScreen } from '@screens/SeasonResultsScreen'
+import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 
-// Screens will be imported here as they are built.
-// Placeholder keeps the router valid during incremental build.
-function Placeholder({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-ipl-dark">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-yellow-400 mb-2">{name}</h1>
-        <p className="text-slate-400 text-sm">Building in progress…</p>
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuthStore()
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-ipl-darker flex items-center justify-center">
+        <LoadingSpinner label="Authenticating..." />
       </div>
-    </div>
-  )
+    )
+  }
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
 }
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Placeholder name="Login" />} />
-        <Route path="/home" element={<Placeholder name="Home" />} />
-        <Route path="/auction/select" element={<Placeholder name="Auction Selection" />} />
-        <Route path="/auction/franchise" element={<Placeholder name="Franchise Selection" />} />
-        <Route path="/auction/difficulty" element={<Placeholder name="Difficulty" />} />
-        <Route path="/auction/retention" element={<Placeholder name="Retention Setup" />} />
-        <Route path="/auction/room" element={<Placeholder name="Auction Room" />} />
-        <Route path="/auction/squad/mine" element={<Placeholder name="My Squad" />} />
-        <Route path="/auction/squad/all" element={<Placeholder name="All Squads" />} />
-        <Route path="/auction/history" element={<Placeholder name="Auction History" />} />
-        <Route path="/auction/unsold" element={<Placeholder name="Unsold Players" />} />
-        <Route path="/auction/review" element={<Placeholder name="Final Squad Review" />} />
-        <Route path="/sessions" element={<Placeholder name="Saved Sessions" />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/" element={<RequireAuth><HomeScreen /></RequireAuth>} />
+        <Route path="/new-session" element={<RequireAuth><NewSessionScreen /></RequireAuth>} />
+        <Route path="/session/:id" element={<RequireAuth><AuctionRoomScreen /></RequireAuth>} />
+        <Route path="/auction" element={<RequireAuth><AuctionRoomScreen /></RequireAuth>} />
+        <Route path="/retention-setup" element={<RequireAuth><RetentionSetupScreen /></RequireAuth>} />
+        <Route path="/my-squad" element={<RequireAuth><MySquadScreen /></RequireAuth>} />
+        <Route path="/all-squads" element={<RequireAuth><AllSquadsScreen /></RequireAuth>} />
+        <Route path="/unsold" element={<RequireAuth><UnsoldPlayersScreen /></RequireAuth>} />
+        <Route path="/history" element={<RequireAuth><AuctionHistoryScreen /></RequireAuth>} />
+        <Route path="/final-squad" element={<RequireAuth><FinalSquadReviewScreen /></RequireAuth>} />
+        <Route path="/trade-window" element={<RequireAuth><TradeWindowScreen /></RequireAuth>} />
+        <Route path="/season-setup" element={<RequireAuth><SeasonSetupScreen /></RequireAuth>} />
+        <Route path="/season-results" element={<RequireAuth><SeasonResultsScreen /></RequireAuth>} />
+        {/* Legacy paths kept for backward compat with menu links */}
+        <Route path="/unsold-players" element={<Navigate to="/unsold" replace />} />
+        <Route path="/auction-history" element={<Navigate to="/history" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

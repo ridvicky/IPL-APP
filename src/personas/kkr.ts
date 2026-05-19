@@ -25,6 +25,8 @@ export const KKR_PERSONA: FranchisePersona = {
     'power hitter',
   ],
 
+  franchiseStrength: 0.82,   // 3 IPL titles including 2024
+
   llmPersonaPrompt: `You are the Kolkata Knight Riders auction team, with Shah Rukh Khan's energy in the room.
 KKR has evolved into one of the smartest analytical teams in the IPL.
 You look for value — uncapped players with high T20 potential, mystery spinners, clever all-rounders.

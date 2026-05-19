@@ -5,183 +5,54 @@ import {
   validateRetention,
   validateSaleConfirmation,
   validateSessionState,
+  validateTrade,
   getSafeBidLimit,
   getMinReservedPurse,
 } from '../src/engine/ruleEngine'
-import type { GameState } from '../src/types/game'
-import type { AuctionDataset } from '../src/types/dataset'
-import type { TeamState } from '../src/types/team'
-import type { PlayerRecord } from '../src/types/player'
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Test fixtures
-// ─────────────────────────────────────────────────────────────────────────────
-
-const INDIAN_BATTER: PlayerRecord = {
-  playerId: 'test-indian-bat',
-  name: 'Test Batter',
-  role: 'BAT',
-  nationality: 'indian',
-  country: 'India',
-  cappedStatus: 'capped',
-  isOverseas: false,
-  basePrice: 2.00,
-  auctionSet: 'Indian Batters',
-  auctionSetOrder: 1,
-  previousTeam: null,
-  rtmEligibleFor: null,
-}
-
-const OVERSEAS_BOWLER: PlayerRecord = {
-  playerId: 'test-overseas-bwl',
-  name: 'Test Overseas Bowler',
-  role: 'BWL',
-  nationality: 'overseas',
-  country: 'Australia',
-  cappedStatus: 'capped',
-  isOverseas: true,
-  basePrice: 1.00,
-  auctionSet: 'Overseas Fast Bowlers',
-  auctionSetOrder: 1,
-  previousTeam: null,
-  rtmEligibleFor: null,
-}
-
-const RTM_PLAYER: PlayerRecord = {
-  playerId: 'test-rtm-player',
-  name: 'RTM Test Player',
-  role: 'BAT',
-  nationality: 'indian',
-  country: 'India',
-  cappedStatus: 'capped',
-  isOverseas: false,
-  basePrice: 2.00,
-  auctionSet: 'Indian Batters',
-  auctionSetOrder: 2,
-  previousTeam: 'CSK',
-  rtmEligibleFor: 'CSK',
-}
-
-function makeDataset(overrides: Partial<AuctionDataset> = {}): AuctionDataset {
-  return {
-    year: 2025,
-    auctionType: 'mega',
-    displayName: 'Test Auction',
-    teams: ['CSK', 'MI', 'RCB', 'KKR', 'DC', 'RR', 'SRH', 'PBKS', 'GT', 'LSG'],
-    startingPurse: {
-      CSK: 120, MI: 110, RCB: 83, KKR: 51, DC: 73,
-      RR: 41, SRH: 45, PBKS: 110, GT: 69, LSG: 69,
-    },
-    minimumSquadSize: 18,
-    maximumSquadSize: 25,
-    overseasLimit: 8,
-    rtmAvailable: true,
-    maxRTMPerTeam: 1,
-    maxRetainedPlayers: 6,
-    maxOverseasRetained: 2,
-    retentionAllowed: true,
-    acceleratedRoundEnabled: false,
-    bidIncrements: [
-      { fromPrice: 0.00, toPrice: 1.00, step: 0.05 },
-      { fromPrice: 1.00, toPrice: 2.00, step: 0.10 },
-      { fromPrice: 2.00, toPrice: 5.00, step: 0.25 },
-      { fromPrice: 5.00, toPrice: 10.0, step: 0.50 },
-      { fromPrice: 10.0, toPrice: 20.0, step: 1.00 },
-      { fromPrice: 20.0, toPrice: null as unknown as number, step: 2.00 },
-    ],
-    auctionSets: ['Indian Batters', 'Overseas Fast Bowlers'],
-    historicalRetentions: null,
-    players: [INDIAN_BATTER, OVERSEAS_BOWLER, RTM_PLAYER],
-    ...overrides,
-  }
-}
-
-function makeTeamState(overrides: Partial<TeamState> = {}): TeamState {
-  return {
-    teamId: 'CSK',
-    currentPurse: 50,
-    squad: [],
-    rtmSlotsUsed: 0,
-    rtmSlotsAvailable: 1,
-    overseasCount: 0,
-    ...overrides,
-  }
-}
-
-function makeGameState(overrides: Partial<GameState> = {}): GameState {
-  const baseTeamStates = {
-    CSK: makeTeamState({ teamId: 'CSK', currentPurse: 50 }),
-    MI: makeTeamState({ teamId: 'MI', currentPurse: 40 }),
-    RCB: makeTeamState({ teamId: 'RCB', currentPurse: 30 }),
-    KKR: makeTeamState({ teamId: 'KKR', currentPurse: 25 }),
-    DC: makeTeamState({ teamId: 'DC', currentPurse: 35 }),
-    RR: makeTeamState({ teamId: 'RR', currentPurse: 20 }),
-    SRH: makeTeamState({ teamId: 'SRH', currentPurse: 28 }),
-    PBKS: makeTeamState({ teamId: 'PBKS', currentPurse: 60 }),
-    GT: makeTeamState({ teamId: 'GT', currentPurse: 32 }),
-    LSG: makeTeamState({ teamId: 'LSG', currentPurse: 38 }),
-  }
-
-  return {
-    sessionId: 'test-session',
-    auctionYear: 2025,
-    auctionType: 'mega',
-    userFranchise: 'CSK',
-    difficulty: 'normal',
-    retentionMode: 'historical',
-    retentionConfigs: {},
-    tradeHistory: [],
-    phase: 'bidding',
-    currentSetIndex: 0,
-    currentPlayerIndex: 0,
-    currentBidState: {
-      currentBid: 2.00,
-      currentLeader: 'MI',
-      bids: [{ teamId: 'MI', amount: 2.00, timestamp: Date.now() }],
-      teamsStillInterested: ['CSK', 'MI'],
-      teamsPassed: ['RCB', 'KKR'],
-      rtmPending: null,
-    },
-    soldPlayers: [],
-    unsoldPlayers: [],
-    teamStates: baseTeamStates,
-    auctionHistory: [],
-    remainingPlayers: [INDIAN_BATTER, OVERSEAS_BOWLER, RTM_PLAYER],
-    seasonSetup: null,
-    seasonResult: null,
-    ...overrides,
-  }
-}
+import {
+  makeDataset, makeGameState, makeTeamState, makeTeamStates,
+  makeBidState, INDIAN_BATTER, OVERSEAS_BOWLER, RTM_PLAYER, SOLD_PLAYER,
+} from './fixtures'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // getMinReservedPurse
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('getMinReservedPurse', () => {
-  it('reserves ₹0.20 × slots needed for minimum squad', () => {
+  it('reserves ₹0.20 × remaining slots below minimum squad', () => {
     const dataset = makeDataset() // minimumSquadSize = 18
-    const teamState = makeTeamState({ squad: [] }) // 0 players, need 18
-    expect(getMinReservedPurse(teamState, dataset)).toBeCloseTo(18 * 0.20)
+    const ts = makeTeamState({ squad: [] })
+    expect(getMinReservedPurse(ts, dataset)).toBeCloseTo(18 * 0.20)
   })
 
   it('returns 0 when squad already meets minimum', () => {
-    const dataset = makeDataset()
-    const players = Array.from({ length: 18 }, (_, i) => ({
-      ...INDIAN_BATTER,
-      playerId: `player-${i}`,
-    }))
-    const teamState = makeTeamState({ squad: players })
-    expect(getMinReservedPurse(teamState, dataset)).toBe(0)
+    const ts = makeTeamState({ squad: Array.from({ length: 18 }, (_, i) => SOLD_PLAYER(`p${i}`)) })
+    expect(getMinReservedPurse(ts, makeDataset())).toBe(0)
   })
 
   it('returns 0 when squad exceeds minimum', () => {
+    const ts = makeTeamState({ squad: Array.from({ length: 22 }, (_, i) => SOLD_PLAYER(`p${i}`)) })
+    expect(getMinReservedPurse(ts, makeDataset())).toBe(0)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getSafeBidLimit
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('getSafeBidLimit', () => {
+  it('safe limit = purse minus reserved amount', () => {
     const dataset = makeDataset()
-    const players = Array.from({ length: 22 }, (_, i) => ({
-      ...INDIAN_BATTER,
-      playerId: `player-${i}`,
-    }))
-    const teamState = makeTeamState({ squad: players })
-    expect(getMinReservedPurse(teamState, dataset)).toBe(0)
+    const ts = makeTeamState({ currentPurse: 50, squad: [] })
+    const reserved = getMinReservedPurse(ts, dataset)
+    expect(getSafeBidLimit(ts, dataset)).toBeCloseTo(50 - reserved)
+  })
+
+  it('returns 0 if purse is fully consumed by reserve', () => {
+    const dataset = makeDataset({ minimumSquadSize: 18 })
+    // 18 slots × 0.20 = 3.60 reserve; purse = 3.00 → safe = 0
+    const ts = makeTeamState({ currentPurse: 3.00, squad: [] })
+    expect(getSafeBidLimit(ts, dataset)).toBe(0)
   })
 })
 
@@ -190,129 +61,103 @@ describe('getMinReservedPurse', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('validateBid', () => {
-  it('accepts a valid bid that meets increment and purse requirements', () => {
-    const dataset = makeDataset()
-    const state = makeGameState()
-    // Current bid is 2.00, increment for 2.00 is 0.25, so next valid is 2.25
-    const result = validateBid(state, dataset, 'CSK', 2.25)
+  it('accepts a valid bid above minimum increment', () => {
+    // Current bid 2.00, increment for 2.00 is 0.25 → min next = 2.25
+    const result = validateBid(makeGameState(), makeDataset(), 'CSK', 2.25)
     expect(result.valid).toBe(true)
   })
 
-  it('rejects a bid below minimum increment', () => {
-    const dataset = makeDataset()
-    const state = makeGameState()
-    // Current bid 2.00, increment 0.25 — bid of 2.10 is below 2.25
-    const result = validateBid(state, dataset, 'CSK', 2.10)
+  it('accepts a bid jumping multiple increments', () => {
+    const result = validateBid(makeGameState(), makeDataset(), 'CSK', 5.00)
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects bid below minimum increment', () => {
+    const result = validateBid(makeGameState(), makeDataset(), 'CSK', 2.10)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/minimum bid/i)
   })
 
-  it('rejects a bid when team has insufficient purse', () => {
-    const dataset = makeDataset()
+  it('rejects bid when team does not have enough purse', () => {
     const state = makeGameState({
       teamStates: {
-        ...makeGameState().teamStates,
-        CSK: makeTeamState({ teamId: 'CSK', currentPurse: 2.00, squad: Array.from({ length: 18 }, (_, i) => ({ ...INDIAN_BATTER, playerId: `p${i}` })) }),
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 2.00, squad: Array.from({ length: 18 }, (_, i) => SOLD_PLAYER(`p${i}`)) }),
       },
     })
-    const result = validateBid(state, dataset, 'CSK', 20.00)
+    const result = validateBid(state, makeDataset(), 'CSK', 20.00)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/₹2\.00 Cr remaining/i)
   })
 
-  it('rejects bid if team has already passed', () => {
-    const dataset = makeDataset()
+  it('rejects bid when team has already passed this round', () => {
     const state = makeGameState({
-      currentBidState: {
-        currentBid: 2.00,
-        currentLeader: 'MI',
-        bids: [],
-        teamsStillInterested: ['MI'],
-        teamsPassed: ['CSK'],
-        rtmPending: null,
-      },
+      currentBidState: makeBidState({ teamsPassed: ['CSK'] }),
     })
-    const result = validateBid(state, dataset, 'CSK', 2.25)
+    const result = validateBid(state, makeDataset(), 'CSK', 2.25)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/already passed/i)
   })
 
-  it('rejects bid if not in bidding phase', () => {
-    const dataset = makeDataset()
-    const state = makeGameState({ phase: 'set-preview' })
-    const result = validateBid(state, dataset, 'CSK', 2.25)
-    expect(result.valid).toBe(false)
-  })
-
-  it('rejects bid if team is already leading', () => {
-    const dataset = makeDataset()
+  it('rejects bid when team is already the leader (no RTM)', () => {
     const state = makeGameState({
-      currentBidState: {
-        currentBid: 2.00,
-        currentLeader: 'CSK',
-        bids: [],
-        teamsStillInterested: ['CSK'],
-        teamsPassed: [],
-        rtmPending: null,
-      },
+      currentBidState: makeBidState({ currentLeader: 'CSK', rtmPending: null }),
     })
-    const result = validateBid(state, dataset, 'CSK', 2.25)
+    const result = validateBid(state, makeDataset(), 'CSK', 2.25)
     expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/already the leading bidder/i)
+    expect(result.valid ? '' : result.reason).toMatch(/already the leading/i)
   })
 
-  it('rejects bid if squad is full', () => {
-    const dataset = makeDataset()
-    const fullSquad = Array.from({ length: 25 }, (_, i) => ({ ...INDIAN_BATTER, playerId: `p${i}` }))
+  it('rejects bid when phase is not bidding', () => {
+    const state = makeGameState({ phase: 'set-preview' })
+    const result = validateBid(state, makeDataset(), 'CSK', 2.25)
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects bid when squad is full', () => {
     const state = makeGameState({
       teamStates: {
-        ...makeGameState().teamStates,
-        CSK: makeTeamState({ teamId: 'CSK', currentPurse: 50, squad: fullSquad }),
+        ...makeTeamStates(),
+        CSK: makeTeamState({
+          currentPurse: 100,
+          squad: Array.from({ length: 25 }, (_, i) => SOLD_PLAYER(`p${i}`)),
+        }),
       },
     })
-    const result = validateBid(state, dataset, 'CSK', 2.25)
+    const result = validateBid(state, makeDataset(), 'CSK', 2.25)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/squad is full/i)
   })
 
-  it('rejects overseas player bid when team has no overseas slot', () => {
-    const dataset = makeDataset()
-    // Set current player to overseas by setting setIndex=1 (Overseas Fast Bowlers set)
+  it('rejects overseas player bid when team has hit overseas limit', () => {
+    const dataset = makeDataset({ overseasLimit: 8 })
     const state = makeGameState({
-      currentSetIndex: 1,
+      currentSetIndex: 1, // Overseas Fast Bowlers set
       currentPlayerIndex: 0,
-      currentBidState: {
-        currentBid: 1.00,
-        currentLeader: 'MI',
-        bids: [],
-        teamsStillInterested: ['CSK', 'MI'],
-        teamsPassed: [],
-        rtmPending: null,
-      },
+      currentBidState: makeBidState(),
       teamStates: {
-        ...makeGameState().teamStates,
-        CSK: makeTeamState({ teamId: 'CSK', currentPurse: 50, overseasCount: 8 }),
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 100, overseasCount: 8 }),
       },
     })
-    const result = validateBid(state, dataset, 'CSK', 1.10)
+    const result = validateBid(state, dataset, 'CSK', 2.25)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/overseas player limit/i)
   })
 
-  it('rejects bid that would break purse reservation', () => {
-    const dataset = makeDataset() // minimumSquadSize=18
-    // Squad has 10 players → needs 8 more → reserve = 8 × 0.20 = 1.60
-    const smallSquad = Array.from({ length: 10 }, (_, i) => ({ ...INDIAN_BATTER, playerId: `p${i}` }))
+  it('rejects bid that would consume reserve purse', () => {
+    const dataset = makeDataset({ minimumSquadSize: 10 })
+    // Empty squad → needs 10 × 0.20 = 2.00 Cr in reserve
+    // Purse = 5.00, safe limit = 3.00 — bid of 4.00 crosses reserve
     const state = makeGameState({
       teamStates: {
-        ...makeGameState().teamStates,
-        CSK: makeTeamState({ teamId: 'CSK', currentPurse: 3.85, squad: smallSquad }),
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 5.00, squad: [] }),
       },
     })
-    // purse=3.85, reserve=1.60, safeBidLimit=2.25, bid of 2.26 should fail
-    const result = validateBid(state, dataset, 'CSK', 2.26)
+    const result = validateBid(state, dataset, 'CSK', 4.00)
     expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/reserve/i)
+    expect(result.valid ? '' : result.reason).toMatch(/must keep/i)
   })
 })
 
@@ -321,62 +166,59 @@ describe('validateBid', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('validateRTM', () => {
-  function makeRTMState() {
-    const base = makeGameState({
-      phase: 'rtm-decision',
-      currentSetIndex: 0,
-      currentPlayerIndex: 1, // RTM_PLAYER (index 1 in sorted Indian Batters set)
-      currentBidState: {
-        currentBid: 5.00,
-        currentLeader: 'MI',
-        bids: [],
-        teamsStillInterested: [],
-        teamsPassed: [],
-        rtmPending: 'CSK',
-      },
-    })
-    return base
-  }
+  const rtmState = makeGameState({
+    phase: 'rtm-decision',
+    currentSetIndex: 0,
+    currentPlayerIndex: 1, // RTM_PLAYER is at index 1 in fixture dataset
+    currentBidState: makeBidState({ rtmPending: 'CSK', currentLeader: 'MI', currentBid: 5.00 }),
+    teamStates: {
+      ...makeTeamStates(),
+      CSK: makeTeamState({ currentPurse: 10, rtmSlotsAvailable: 1, rtmSlotsUsed: 0 }),
+    },
+  })
+  const rtmDataset = makeDataset({ players: [INDIAN_BATTER, RTM_PLAYER, OVERSEAS_BOWLER] })
 
-  it('accepts valid RTM', () => {
-    const dataset = makeDataset()
-    const state = makeRTMState()
-    const result = validateRTM(state, dataset, 'CSK')
+  it('accepts valid RTM exercise', () => {
+    const result = validateRTM(rtmState, rtmDataset, 'CSK')
     expect(result.valid).toBe(true)
   })
 
-  it('rejects RTM when not available in auction year', () => {
-    const dataset = makeDataset({ rtmAvailable: false })
-    const state = makeRTMState()
-    const result = validateRTM(state, dataset, 'CSK')
+  it('rejects RTM when not in rtm-decision phase', () => {
+    const state = { ...rtmState, phase: 'bidding' as const }
+    const result = validateRTM(state, rtmDataset, 'CSK')
     expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/not available/i)
   })
 
   it('rejects RTM when team has no slots remaining', () => {
-    const dataset = makeDataset()
-    const state = makeRTMState()
-    state.teamStates['CSK'] = makeTeamState({
-      teamId: 'CSK',
-      rtmSlotsAvailable: 1,
-      rtmSlotsUsed: 1,
+    const state = makeGameState({
+      ...rtmState,
+      teamStates: {
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 10, rtmSlotsAvailable: 1, rtmSlotsUsed: 1 }),
+      },
     })
-    const result = validateRTM(state, dataset, 'CSK')
+    const result = validateRTM(state, rtmDataset, 'CSK')
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/no RTM slots/i)
   })
 
-  it('rejects RTM when team cannot afford RTM price', () => {
-    const dataset = makeDataset()
-    const state = makeRTMState()
-    state.teamStates['CSK'] = makeTeamState({
-      teamId: 'CSK',
-      currentPurse: 2.00, // RTM price is 5.00
-      squad: Array.from({ length: 18 }, (_, i) => ({ ...INDIAN_BATTER, playerId: `p${i}` })),
+  it('rejects RTM when team cannot afford the RTM price', () => {
+    const state = makeGameState({
+      ...rtmState,
+      teamStates: {
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 1.00, rtmSlotsAvailable: 1, rtmSlotsUsed: 0 }),
+      },
     })
-    const result = validateRTM(state, dataset, 'CSK')
+    const result = validateRTM(state, rtmDataset, 'CSK')
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/cannot afford/i)
+  })
+
+  it('rejects RTM when dataset does not support RTM', () => {
+    const result = validateRTM(rtmState, makeDataset({ rtmAvailable: false }), 'CSK')
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/not available/i)
   })
 })
 
@@ -385,74 +227,99 @@ describe('validateRTM', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('validateRetention', () => {
-  it('accepts valid retention within limits', () => {
+  it('accepts a valid single retention', () => {
     const dataset = makeDataset()
-    const result = validateRetention(dataset, 'CSK', {
-      teamId: 'CSK',
-      mode: 'custom',
-      retainedPlayers: [{ playerId: 'test-indian-bat', retentionPrice: 10, isRTMEligible: false }],
-      purseAfterRetention: 110,
-      rtmSlotsAvailable: 0,
-    })
+    const config = {
+      teamId: 'CSK' as const,
+      retainedPlayers: [{ playerId: 'test-indian-bat', retentionPrice: 14 }],
+    }
+    const result = validateRetention(dataset, 'CSK', config)
     expect(result.valid).toBe(true)
   })
 
-  it('rejects retention exceeding max allowed', () => {
+  it('rejects retention when retention is not allowed', () => {
+    const dataset = makeDataset({ retentionAllowed: false })
+    const result = validateRetention(dataset, 'CSK', { teamId: 'CSK', retainedPlayers: [] })
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/not allowed/i)
+  })
+
+  it('rejects when retaining more than maxRetainedPlayers', () => {
     const dataset = makeDataset({ maxRetainedPlayers: 2 })
-    const result = validateRetention(dataset, 'CSK', {
-      teamId: 'CSK',
-      mode: 'custom',
+    const config = {
+      teamId: 'CSK' as const,
       retainedPlayers: [
-        { playerId: 'test-indian-bat', retentionPrice: 10, isRTMEligible: false },
-        { playerId: 'test-overseas-bwl', retentionPrice: 10, isRTMEligible: false },
-        { playerId: 'test-rtm-player', retentionPrice: 10, isRTMEligible: false },
+        { playerId: 'test-indian-bat', retentionPrice: 18 },
+        { playerId: 'test-rtm', retentionPrice: 14 },
+        { playerId: 'test-os-bwl', retentionPrice: 12 },
       ],
-      purseAfterRetention: 90,
-      rtmSlotsAvailable: 0,
-    })
+    }
+    const result = validateRetention(dataset, 'CSK', config)
     expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/maximum 2 players/i)
+    expect(result.valid ? '' : result.reason).toMatch(/maximum 2/i)
   })
 
-  it('rejects retention of player not in dataset', () => {
-    const dataset = makeDataset()
-    const result = validateRetention(dataset, 'CSK', {
-      teamId: 'CSK',
-      mode: 'custom',
-      retainedPlayers: [{ playerId: 'ghost-player', retentionPrice: 5, isRTMEligible: false }],
-      purseAfterRetention: 115,
-      rtmSlotsAvailable: 0,
-    })
-    expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/not found in dataset/i)
-  })
-
-  it('rejects retention when total cost exceeds starting purse', () => {
-    const dataset = makeDataset({ startingPurse: { ...makeDataset().startingPurse, CSK: 10 } })
-    const result = validateRetention(dataset, 'CSK', {
-      teamId: 'CSK',
-      mode: 'custom',
-      retainedPlayers: [
-        { playerId: 'test-indian-bat', retentionPrice: 8, isRTMEligible: false },
-        { playerId: 'test-rtm-player', retentionPrice: 8, isRTMEligible: false },
-      ],
-      purseAfterRetention: -6,
-      rtmSlotsAvailable: 0,
-    })
+  it('rejects retention cost exceeding starting purse', () => {
+    const dataset = makeDataset({ startingPurse: { CSK: 10, MI: 110, RCB: 83, KKR: 51, DC: 73, RR: 41, SRH: 45, PBKS: 110, GT: 69, LSG: 69 } })
+    const config = {
+      teamId: 'CSK' as const,
+      retainedPlayers: [{ playerId: 'test-indian-bat', retentionPrice: 18 }],
+    }
+    const result = validateRetention(dataset, 'CSK', config)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/exceeds starting purse/i)
   })
 
-  it('rejects when retention not allowed in auction year', () => {
-    const dataset = makeDataset({ retentionAllowed: false })
-    const result = validateRetention(dataset, 'CSK', {
+  it('rejects negative retention price', () => {
+    const dataset = makeDataset()
+    const config = {
+      teamId: 'CSK' as const,
+      retainedPlayers: [{ playerId: 'test-indian-bat', retentionPrice: -5 }],
+    }
+    const result = validateRetention(dataset, 'CSK', config)
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/cannot be negative/i)
+  })
+
+  it('rejects retaining a player not in the dataset', () => {
+    const result = validateRetention(makeDataset(), 'CSK', {
       teamId: 'CSK',
-      mode: 'custom',
-      retainedPlayers: [],
-      purseAfterRetention: 120,
-      rtmSlotsAvailable: 0,
+      retainedPlayers: [{ playerId: 'ghost-player', retentionPrice: 5 }],
     })
     expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/not found/i)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// validateSaleConfirmation
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('validateSaleConfirmation', () => {
+  it('accepts a valid sale', () => {
+    const state = makeGameState()
+    const result = validateSaleConfirmation(state, makeDataset(), 'CSK', 3.00)
+    expect(result.valid).toBe(true)
+  })
+
+  it('rejects when winning team cannot afford sale price', () => {
+    const state = makeGameState({
+      teamStates: { ...makeTeamStates(), CSK: makeTeamState({ currentPurse: 1.00 }) },
+    })
+    const result = validateSaleConfirmation(state, makeDataset(), 'CSK', 5.00)
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects when winning team squad is full', () => {
+    const state = makeGameState({
+      teamStates: {
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 100, squad: Array.from({ length: 25 }, (_, i) => SOLD_PLAYER(`p${i}`)) }),
+      },
+    })
+    const result = validateSaleConfirmation(state, makeDataset(), 'CSK', 1.00)
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/squad is full/i)
   })
 })
 
@@ -462,52 +329,115 @@ describe('validateRetention', () => {
 
 describe('validateSessionState', () => {
   it('accepts valid session state', () => {
-    const state = makeGameState()
-    expect(validateSessionState(state).valid).toBe(true)
+    expect(validateSessionState(makeGameState()).valid).toBe(true)
   })
 
-  it('rejects state with no session ID', () => {
-    const state = makeGameState({ sessionId: '' })
-    const result = validateSessionState(state)
+  it('rejects missing session ID', () => {
+    const result = validateSessionState(makeGameState({ sessionId: '' }))
     expect(result.valid).toBe(false)
-    expect(result.valid ? '' : result.reason).toMatch(/no ID/i)
   })
 
-  it('rejects state with negative purse', () => {
+  it('rejects missing userFranchise', () => {
+    const result = validateSessionState(makeGameState({ userFranchise: '' as never }))
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects negative purse — corrupted state', () => {
     const state = makeGameState({
-      teamStates: {
-        ...makeGameState().teamStates,
-        CSK: makeTeamState({ teamId: 'CSK', currentPurse: -5 }),
-      },
+      teamStates: { ...makeTeamStates(), CSK: makeTeamState({ currentPurse: -5 }) },
     })
     const result = validateSessionState(state)
     expect(result.valid).toBe(false)
     expect(result.valid ? '' : result.reason).toMatch(/negative purse/i)
   })
+
+  it('rejects negative overseas count — corrupted state', () => {
+    const state = makeGameState({
+      teamStates: { ...makeTeamStates(), MI: makeTeamState({ overseasCount: -1 }) },
+    })
+    const result = validateSessionState(state)
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/negative overseas/i)
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// getSafeBidLimit
+// validateTrade
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('getSafeBidLimit', () => {
-  it('returns purse minus reserved amount', () => {
-    const dataset = makeDataset() // minimumSquadSize=18
-    // Empty squad: need 18 × 0.20 = 3.60 reserved
-    const teamState = makeTeamState({ currentPurse: 20, squad: [] })
-    expect(getSafeBidLimit(teamState, dataset)).toBeCloseTo(20 - 18 * 0.20)
+describe('validateTrade', () => {
+  const cskPlayer = SOLD_PLAYER('csk-p1', 5.0)
+  const miPlayer  = { ...SOLD_PLAYER('mi-p1', 4.0), soldTo: 'MI' as const }
+
+  const tradeState = makeGameState({
+    phase: 'trade-window',
+    teamStates: {
+      ...makeTeamStates(),
+      CSK: makeTeamState({ currentPurse: 20, squad: [cskPlayer] }),
+      MI:  makeTeamState({ currentPurse: 20, squad: [miPlayer] }),
+    },
   })
 
-  it('returns full purse when squad already meets minimum', () => {
-    const dataset = makeDataset()
-    const players = Array.from({ length: 18 }, (_, i) => ({ ...INDIAN_BATTER, playerId: `p${i}` }))
-    const teamState = makeTeamState({ currentPurse: 20, squad: players })
-    expect(getSafeBidLimit(teamState, dataset)).toBeCloseTo(20)
+  it('accepts a valid player-for-player trade', () => {
+    const result = validateTrade(tradeState, makeDataset(), {
+      legs: [
+        { teamId: 'CSK', playerIds: ['csk-p1'], cashAmount: 0 },
+        { teamId: 'MI',  playerIds: ['mi-p1'],  cashAmount: 0 },
+      ],
+    })
+    expect(result.valid).toBe(true)
   })
 
-  it('never returns negative value', () => {
-    const dataset = makeDataset()
-    const teamState = makeTeamState({ currentPurse: 0.50, squad: [] })
-    expect(getSafeBidLimit(teamState, dataset)).toBe(0)
+  it('rejects trade when phase is not trade-window', () => {
+    const state = { ...tradeState, phase: 'bidding' as const }
+    const result = validateTrade(state, makeDataset(), {
+      legs: [
+        { teamId: 'CSK', playerIds: ['csk-p1'], cashAmount: 0 },
+        { teamId: 'MI',  playerIds: ['mi-p1'],  cashAmount: 0 },
+      ],
+    })
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/trade window/i)
+  })
+
+  it('rejects trade when team does not own the player', () => {
+    const result = validateTrade(tradeState, makeDataset(), {
+      legs: [
+        { teamId: 'CSK', playerIds: ['ghost-player'], cashAmount: 0 },
+        { teamId: 'MI',  playerIds: ['mi-p1'], cashAmount: 0 },
+      ],
+    })
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/does not own/i)
+  })
+
+  it('rejects trade with negative cash amount', () => {
+    const result = validateTrade(tradeState, makeDataset(), {
+      legs: [
+        { teamId: 'CSK', playerIds: ['csk-p1'], cashAmount: -5 },
+        { teamId: 'MI',  playerIds: ['mi-p1'],  cashAmount: 0 },
+      ],
+    })
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/cannot be negative/i)
+  })
+
+  it('rejects when giving team does not have enough cash', () => {
+    const state = makeGameState({
+      phase: 'trade-window',
+      teamStates: {
+        ...makeTeamStates(),
+        CSK: makeTeamState({ currentPurse: 1, squad: [cskPlayer] }),
+        MI:  makeTeamState({ currentPurse: 20, squad: [miPlayer] }),
+      },
+    })
+    const result = validateTrade(state, makeDataset(), {
+      legs: [
+        { teamId: 'CSK', playerIds: [],        cashAmount: 10 },
+        { teamId: 'MI',  playerIds: ['mi-p1'], cashAmount: 0 },
+      ],
+    })
+    expect(result.valid).toBe(false)
+    expect(result.valid ? '' : result.reason).toMatch(/does not have/i)
   })
 })

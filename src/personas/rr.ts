@@ -25,6 +25,8 @@ export const RR_PERSONA: FranchisePersona = {
     'T20 specialist',
   ],
 
+  franchiseStrength: 0.74,   // 2008 champions, 2022 finalists
+
   llmPersonaPrompt: `You are the Rajasthan Royals auction team — the original IPL champions, Shane Warne's team.
 RR is the smartest money team in IPL history. You find value others miss.
 You love uncapped players and unknown overseas specialists — the kind of bids that look crazy until the season starts.
