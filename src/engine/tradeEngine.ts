@@ -104,8 +104,8 @@ export function executeTrade(
   const byLeg = legs.find(l => l.teamId === proposedBy)!
   const toLeg = legs.find(l => l.teamId === proposedTo)!
 
-  const byState = { ...teamStates[proposedBy] }
-  const toState = { ...teamStates[proposedTo] }
+  const byState = { ...teamStates[proposedBy], squad: [...teamStates[proposedBy].squad] }
+  const toState = { ...teamStates[proposedTo], squad: [...teamStates[proposedTo].squad] }
 
   // Players from proposedBy go to proposedTo, and vice versa
   const byGives = byLeg.playerIds.map(pid => byState.squad.find(p => p.playerId === pid)!)
@@ -168,6 +168,7 @@ export async function getAITradeResponse(
       decision: 'reject',
       ownerComment: getFallbackComment(proposedTo, 'passing'),
       counteroffer: null,
+      counterOfferStructured: null,
       reason: 'No persona found',
     }
   }
@@ -187,25 +188,32 @@ export async function getAITradeResponse(
     // Normalize: model sometimes returns "true"/"false" as strings instead of booleans
     const rawAccepts = llm.accepts
     const accepts = rawAccepts === true || (rawAccepts as unknown) === 'true'
+    const structured = llm.counterOfferStructured &&
+      Array.isArray(llm.counterOfferStructured.playersToOffer) &&
+      Array.isArray(llm.counterOfferStructured.playersToRequest)
+        ? llm.counterOfferStructured
+        : null
     return {
       decision: accepts ? 'accept' : 'reject',
       ownerComment: llm.ownerComment ?? getFallbackComment(proposedTo, accepts ? 'bidding_interested' : 'passing'),
       counteroffer: typeof llm.counterOffer === 'string' ? llm.counterOffer : null,
+      counterOfferStructured: structured,
       reason: llm.reasoning ?? '',
     }
   }
 
-  // Fallback heuristic — conservative: reject unless clearly beneficial
+  // Fallback heuristic — accept fair swaps, reject clearly one-sided deals
   const totalOfferedValue  = offeredProfiles.reduce((s, p) => s + p.player.soldPrice, 0) + Math.max(0, cashDelta)
   const totalRequestedValue = requestedProfiles.reduce((s, p) => s + p.player.soldPrice, 0)
-  const hasHighValueLeaving = requestedProfiles.some(p => p.importanceScore >= 65)
+  const hasHighValueLeaving = requestedProfiles.some(p => p.importanceScore >= 80)
   const gainValue = totalOfferedValue - totalRequestedValue
 
-  const accepts = gainValue >= 3 && !hasHighValueLeaving
+  const accepts = gainValue >= -3 && !hasHighValueLeaving
   return {
     decision: accepts ? 'accept' : 'reject',
     ownerComment: getFallbackComment(proposedTo, accepts ? 'bidding_interested' : 'passing'),
     counteroffer: null,
+    counterOfferStructured: null,
     reason: accepts ? 'Fair value — accepted on numbers' : 'Not enough value for what we give up',
   }
 }

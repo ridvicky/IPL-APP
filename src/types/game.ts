@@ -42,6 +42,10 @@ export interface GameState {
   soldPlayers: SoldPlayerRecord[]
   unsoldPlayers: UnsoldPlayerRecord[]
   releasedRetainedPlayers: PlayerRecord[]   // retained players the user chose to release back to auction
+  setPlayerOrder: Record<string, string[]>  // setName → shuffled playerIds; generated once per set
+  isReauction: boolean                      // true during the re-auction phase (unsold at 50% base)
+  reauctionPool: PlayerRecord[]             // unsold players with halved base prices
+  reauctionIndex: number                    // current position in reauctionPool
   tradeHistory: TradeRecord[]
   auctionLog: string[]
   seasonSetup: SeasonSetup | null

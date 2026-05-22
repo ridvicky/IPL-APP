@@ -16,6 +16,7 @@ interface TeamBadgeProps {
   teamId: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   showRing?: boolean
+  showName?: boolean
   className?: string
 }
 
@@ -23,25 +24,61 @@ const SIZE_CLASSES = {
   sm: 'w-8 h-8 text-xs',
   md: 'w-12 h-12 text-sm',
   lg: 'w-16 h-16 text-base',
-  xl: 'w-20 h-20 text-xl',
+  xl: 'w-24 h-24 text-2xl',
 }
 
-export function TeamBadge({ teamId, size = 'md', showRing = false, className = '' }: TeamBadgeProps) {
+/** Cricket ball seam SVG overlay — subtle curved lines like a real ball */
+function SeamOverlay() {
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-20"
+      viewBox="0 0 40 40"
+      fill="none"
+    >
+      <path
+        d="M10 6 Q14 20 10 34"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M30 6 Q26 20 30 34"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function TeamBadge({ teamId, size = 'md', showRing = false, showName = false, className = '' }: TeamBadgeProps) {
   const colors = TEAM_BADGE_COLORS[teamId] ?? { from: 'from-gray-600', to: 'to-gray-800', text: 'text-white', ring: 'ring-gray-400' }
 
-  return (
+  const badge = (
     <div
       className={[
-        'rounded-full flex items-center justify-center font-black bg-gradient-to-br shrink-0',
+        'relative rounded-full flex items-center justify-center font-black bg-gradient-to-br shrink-0 shadow-inner overflow-hidden',
         SIZE_CLASSES[size],
         colors.from,
         colors.to,
         colors.text,
         showRing ? `ring-2 ${colors.ring}` : '',
-        className,
+        showName ? '' : className,
       ].join(' ')}
     >
-      {teamId}
+      <SeamOverlay />
+      <span className="relative z-10">{teamId}</span>
     </div>
   )
+
+  if (showName) {
+    return (
+      <div className={`flex flex-col items-center gap-1 ${className}`}>
+        {badge}
+        <span className="text-gray-400 text-xs font-bold tracking-wide">{teamId}</span>
+      </div>
+    )
+  }
+
+  return badge
 }

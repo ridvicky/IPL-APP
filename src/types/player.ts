@@ -18,6 +18,19 @@ export interface PlayerRecord {
   auctionSetOrder: number
   previousTeam: string | null
   rtmEligibleFor: string | null
+  /** Real-world auction final price (Cr) — set when the actual IPL auction result is known */
+  marketValue?: number | null
+}
+
+/**
+ * Recent form context fetched by LLM at auction time.
+ * Not stored in dataset — fetched once per player per session and cached in memory.
+ */
+export interface PlayerFormContext {
+  summary: string            // 2–3 sentence form summary (SMAT, int'l series, tournaments)
+  t20iRanking: number | null // ICC T20I ranking at auction time; null if uncapped/not ranked
+  estimatedAge: number | null // player's approximate age at auction time
+  source: 'llm' | 'none'    // 'none' if LLM unavailable or timed out
 }
 
 /** A player who was sold during auction — extends PlayerRecord with sale metadata */

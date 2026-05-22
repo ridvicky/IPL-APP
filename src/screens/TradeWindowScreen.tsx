@@ -11,7 +11,7 @@ import { loadDataset } from '@/dataset/datasetLoader'
 import { ALL_PERSONAS } from '@/personas'
 import type { TeamId, TeamState } from '@/types/team'
 import type { SoldPlayerRecord } from '@/types/player'
-import type { TradeProposal, TradeLeg } from '@/types/trade'
+import type { TradeProposal, TradeLeg, CounterOfferStructured } from '@/types/trade'
 import type { AuctionDataset } from '@/types/dataset'
 
 const ROLE_COLOR: Record<string, string> = {
@@ -186,6 +186,7 @@ export function TradeWindowScreen() {
   const [validationError, setValidationError] = useState<string | null>(null)
   const [negotiations, setNegotiations] = useState<NegotiationEntry[]>([])
   const [counterOffer, setCounterOffer] = useState<string | null>(null)
+  const [counterOfferStructured, setCounterOfferStructured] = useState<CounterOfferStructured | null>(null)
 
   if (!gameState) {
     return (
@@ -224,6 +225,33 @@ export function TradeWindowScreen() {
     setLoading(false); setSettled(false)
     setValidationError(null)
     setCounterOffer(null)
+    setCounterOfferStructured(null)
+  }
+
+  const useCounterAsStart = () => {
+    if (!counterOfferStructured || !targetTeam) return
+    // AI said: "offer these, request those" — from AI's perspective
+    // AI offers = what we receive → map to their squad player IDs
+    const theirIds = new Set(
+      targetSquad
+        .filter(p => counterOfferStructured.playersToOffer.some(n => p.name === n))
+        .map(p => p.playerId)
+    )
+    // AI requests = what they want from us → map to our squad player IDs
+    const ourIds = new Set(
+      userSquad
+        .filter(p => counterOfferStructured.playersToRequest.some(n => p.name === n))
+        .map(p => p.playerId)
+    )
+    const cash = counterOfferStructured.cashAdjustment
+    setTheirRequests(theirIds)
+    setMyOffers(ourIds)
+    setMyCash(cash < 0 ? Math.abs(cash) : 0)
+    setTheirCash(cash > 0 ? cash : 0)
+    setSettled(false)
+    setValidationError(null)
+    setCounterOffer(null)
+    setCounterOfferStructured(null)
   }
 
   const buildProposalMessage = () => {
@@ -272,6 +300,7 @@ export function TradeWindowScreen() {
       type: response.decision === 'accept' ? 'accept' : response.counteroffer ? 'counter' : 'reject',
     }])
     setCounterOffer(response.counteroffer ?? null)
+    setCounterOfferStructured(response.counterOfferStructured ?? null)
     setLoading(false)
     setSettled(true)
 
@@ -289,7 +318,7 @@ export function TradeWindowScreen() {
   const lastType = negotiations[negotiations.length - 1]?.type
 
   return (
-    <div className="min-h-screen bg-ipl-darker pb-24">
+    <div className="min-h-screen bg-ipl-darker pb-36">
 
       {/* ── Header ── */}
       <div className="relative bg-gradient-to-b from-ipl-purple/25 via-ipl-purple/10 to-transparent px-4 pt-10 pb-6">
@@ -298,7 +327,7 @@ export function TradeWindowScreen() {
           <div className="w-10 h-10 rounded-xl bg-ipl-accent/20 border border-ipl-accent/30 flex items-center justify-center text-xl">🤝</div>
           <div>
             <h1 className="text-white font-black text-xl tracking-tight">Trade Window</h1>
-            <p className="text-gray-500 text-xs">Pre-auction player swap negotiations</p>
+            <p className="text-gray-500 text-xs">Swap players before releasing & going to auction</p>
           </div>
         </div>
 
@@ -359,10 +388,52 @@ export function TradeWindowScreen() {
         </div>
 
         {!targetTeam && (
-          <div className="text-center py-16">
-            <p className="text-5xl mb-4">🏏</p>
-            <p className="text-gray-400 font-bold text-sm">Select a franchise above</p>
-            <p className="text-gray-600 text-xs mt-1">Each owner has their own personality and squad priorities</p>
+          <div className="space-y-4 pt-2 pb-4">
+            {/* How it works */}
+            <div className="bg-ipl-card border border-ipl-border rounded-2xl overflow-hidden">
+              <div className="bg-gradient-to-r from-ipl-accent/15 to-ipl-purple/10 px-4 py-3 border-b border-ipl-border">
+                <p className="text-white font-black text-sm">How Trade Window Works</p>
+                <p className="text-gray-500 text-xs mt-0.5">Lock in squad moves before the season starts</p>
+              </div>
+              <div className="divide-y divide-ipl-border">
+                {[
+                  { step: '01', icon: '🏟️', title: 'Pick a Franchise', body: 'Select any of the 9 rival teams above. Each owner has a distinct personality and priorities.' },
+                  { step: '02', icon: '🔄', title: 'Build Your Offer', body: 'Choose players from your squad to send, players from their squad to request, and optionally add cash.' },
+                  { step: '03', icon: '🤝', title: 'Negotiate Live', body: 'The AI owner responds in character — they may accept, reject, or counter with their own terms.' },
+                ].map(({ step, icon, title, body }) => (
+                  <div key={step} className="flex items-start gap-4 px-4 py-4">
+                    <div className="shrink-0 w-9 h-9 rounded-xl bg-ipl-card2 border border-ipl-border flex items-center justify-center text-lg">
+                      {icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-gray-700 text-[10px] font-black">STEP {step}</span>
+                        <p className="text-white font-bold text-sm">{title}</p>
+                      </div>
+                      <p className="text-gray-500 text-xs leading-relaxed">{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trade rules reminder */}
+            <div className="bg-amber-500/8 border border-amber-500/20 rounded-2xl px-4 py-3">
+              <p className="text-amber-400 text-xs font-black uppercase tracking-widest mb-2">Trade Rules</p>
+              <div className="space-y-1.5">
+                {[
+                  'No team may exceed 8 overseas players after the trade',
+                  'Both teams must remain above their minimum squad size',
+                  'Cash can sweeten a deal, but players must be the core',
+                  'The AI owner reflects their team\'s real squad priorities',
+                ].map((rule, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-amber-500/60 text-xs shrink-0 mt-0.5">▸</span>
+                    <p className="text-amber-200/70 text-xs leading-snug">{rule}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -406,7 +477,17 @@ export function TradeWindowScreen() {
                   <p className="text-orange-400 text-xs font-black uppercase tracking-widest">They Want Instead</p>
                 </div>
                 <p className="text-orange-200 text-sm leading-relaxed">"{counterOffer}"</p>
-                <p className="text-gray-600 text-xs mt-2">Adjust your offer and send a revised proposal</p>
+                {counterOfferStructured && (
+                  <button
+                    onClick={useCounterAsStart}
+                    className="mt-3 w-full py-2 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-300 text-xs font-bold hover:bg-orange-500/30 transition-colors"
+                  >
+                    ↩ Use Counter as Starting Point
+                  </button>
+                )}
+                {!counterOfferStructured && (
+                  <p className="text-gray-600 text-xs mt-2">Adjust your offer and send a revised proposal</p>
+                )}
               </div>
             )}
 
@@ -526,15 +607,22 @@ export function TradeWindowScreen() {
           </>
         )}
 
-        <button onClick={() => navigate('/auction')}
-          className="w-full py-3 rounded-xl border border-ipl-border text-gray-500 text-sm font-semibold
-                     hover:border-white/20 hover:text-gray-300 transition-colors"
+      </div>
+
+      {/* Sticky footer CTA */}
+      <div className="fixed bottom-16 left-0 right-0 z-20 px-4 pb-2 pointer-events-none">
+        <button
+          onClick={() => navigate('/retention-setup')}
+          className="pointer-events-auto w-full py-3.5 rounded-2xl bg-ipl-card/95 backdrop-blur-md
+                     border border-white/15 text-gray-300 text-sm font-bold
+                     hover:bg-ipl-card2 hover:text-white hover:border-white/25
+                     shadow-lg shadow-black/40 transition-all active:scale-[0.98]"
         >
-          Skip Trade Window → Go to Auction
+          Done Trading — Release &amp; Retain Players →
         </button>
       </div>
 
-      <BottomNav active="auction" />
+      <BottomNav active="trade" />
     </div>
   )
 }

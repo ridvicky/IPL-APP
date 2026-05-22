@@ -25,17 +25,21 @@ import {
   validateSaleConfirmation,
   validateSessionState,
 } from '@/engine/ruleEngine'
-import { runBiddingPipeline, getCurrentAuctionPlayer } from '@/engine/biddingEngine'
+import { runBiddingPipeline, getCurrentAuctionPlayer, type LLMPersonaResult } from '@/engine/biddingEngine'
 import { runRTMDecision, findRTMEligibleTeam } from '@/engine/rtmEngine'
 import { useGameStore } from '@/store/gameStore'
 import { getFallbackComment } from '@/llm/fallbackBank'
 import {
   getPersonaResultForTeam,
+  getFightOrFoldDecision,
   getRTMPersonaResult,
   preloadPersonaResults,
   clearPersonaCache,
+  fetchPlayerFormContext,
+  getFormContext,
 } from '@/llm/personaLayer'
 import { ALL_PERSONAS } from '@/personas'
+import { getBidIncrement, getComparableSales, getPlayersInSet } from '@/dataset/datasetLoader'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // User actions (called from UI)
@@ -68,6 +72,9 @@ export function userInterruptBid(dataset: AuctionDataset, amount: number): strin
   const bs = state.currentBidState
   if (bs?.teamsPassed.includes(userTeam)) {
     useGameStore.getState().clearTeamPassed(userTeam)
+  }
+  if ((bs?.permanentPass ?? []).includes(userTeam)) {
+    useGameStore.getState().clearTeamPermanentPass(userTeam)
   }
 
   return userBid(dataset, amount)
@@ -148,23 +155,26 @@ export async function runOneAIDecision(dataset: AuctionDataset): Promise<'bid' |
 
   const userTeam = state.userFranchise as TeamId
 
-  // Eligible: not the user, not passed this round, not permanently skipped, not the current leader
   const out = new Set([...bidState.teamsPassed, ...(bidState.permanentPass ?? [])])
   const eligible = (Object.keys(state.teamStates) as TeamId[]).filter(
     id => id !== userTeam && id !== bidState.currentLeader && !out.has(id),
   )
-
   if (eligible.length === 0) return 'none'
 
-  // Pick one team at random from eligible teams
   const teamId = eligible[Math.floor(Math.random() * eligible.length)]
+  const persona = ALL_PERSONAS[teamId]
 
-  // Always use fresh state for the decision
-  const freshState = useGameStore.getState().gameState!
+  // Compute context helpers for persona layer
+  const nextAvail    = getNextAvailablePlayers(state, dataset, currentPlayer.role)
+  const teamPurses   = getAllTeamPurses(state)
+  const startPurse   = getStartingPurse(state, dataset, teamId)
+  const comparables  = getComparableSales(dataset, currentPlayer)
+
+  const freshState    = useGameStore.getState().gameState!
   const freshBidState = freshState.currentBidState!
 
-  // Get persona result — instant if cached, fallback if LLM still in-flight
-  const persona = await Promise.resolve(getPersonaResultForTeam(
+  // Get persona result — instant if cached, fallback if LLM still in-flight (never blocks)
+  const personaResult = await Promise.resolve(getPersonaResultForTeam(
     teamId,
     currentPlayer,
     freshState.teamStates[teamId],
@@ -172,18 +182,77 @@ export async function runOneAIDecision(dataset: AuctionDataset): Promise<'bid' |
     freshState.auctionYear,
     dataset.auctionSets[freshState.currentSetIndex] ?? 'Set 1',
     freshState.soldPlayers?.length ?? 0,
+    nextAvail,
+    teamPurses,
+    startPurse,
+    comparables,
+    getFormContext(currentPlayer.playerId),
   ))
 
-  // Only pass LLM result to bidding engine when it's a real LLM response, not a static fallback.
-  // Fallback suggestedMaxBid is just a rough estimate — the engine's own formula is more accurate.
-  const decision = runBiddingPipeline(freshState, dataset, teamId, currentPlayer, persona.source === 'llm' ? persona : null)
+  // Only inject real LLM result into engine — fallback uses formula path
+  const llmForEngine: LLMPersonaResult | null = personaResult.source === 'llm' ? personaResult : null
+  const decision = runBiddingPipeline(freshState, dataset, teamId, currentPlayer, llmForEngine)
 
   if (decision.action === 'bid' && decision.bidAmount != null) {
     const recheck = validateBid(freshState, dataset, teamId, decision.bidAmount)
     if (recheck.valid) {
       useGameStore.getState().advanceBid(teamId, decision.bidAmount)
-      useGameStore.getState().appendLog(`[${teamId}] ${persona.ownerComment}`)
+      useGameStore.getState().appendLog(`[${teamId}] ${personaResult.ownerComment}`)
       return 'bid'
+    }
+  }
+
+  // Team would pass — check if they want to Fight or Fold (only if LLM gave us a ceiling)
+  if (
+    persona &&
+    personaResult.source === 'llm' &&
+    !personaResult.hasStretched &&
+    freshBidState.currentLeader !== null
+  ) {
+    const nextBidAmount = freshBidState.currentBid > 0
+      ? freshBidState.currentBid + getBidIncrement(dataset, freshBidState.currentBid)
+      : currentPlayer.basePrice
+
+    // Trigger fight-or-fold when next bid exceeds ceiling by less than a persona-scaled margin.
+    // Aggressive teams (high maxBidMultiplier) tolerate a wider gap; conservative teams fold sooner.
+    const fofMargin = (persona?.maxBidMultiplier ?? 1.8) * 2
+    const nearCeiling = nextBidAmount > personaResult.personalCeiling &&
+                        nextBidAmount - personaResult.personalCeiling <= fofMargin
+
+    if (nearCeiling) {
+      const activeBidders = (Object.keys(freshState.teamStates) as TeamId[])
+        .filter(id => !out.has(id) && id !== freshBidState.currentLeader && id !== teamId)
+        .map(id => ({ teamId: id, purse: freshState.teamStates[id]?.currentPurse ?? 0 }))
+
+      const leader = {
+        teamId: freshBidState.currentLeader,
+        purse: freshState.teamStates[freshBidState.currentLeader]?.currentPurse ?? 0,
+      }
+
+      const teamSt = freshState.teamStates[teamId]
+      const playersStillNeeded = Math.max(0, dataset.maximumSquadSize - (teamSt?.squad.length ?? 0))
+
+      const fof = await getFightOrFoldDecision(
+        persona, currentPlayer, personaResult,
+        nextBidAmount, teamSt,
+        activeBidders, leader,
+        playersStillNeeded,
+      )
+
+      if (fof.stretch) {
+        // Update ceiling in cache so it won't fight again
+        personaResult.personalCeiling = fof.newCeiling
+        personaResult.hasStretched    = true
+
+        const recheck2 = validateBid(freshState, dataset, teamId, nextBidAmount)
+        if (recheck2.valid) {
+          useGameStore.getState().advanceBid(teamId, nextBidAmount)
+          useGameStore.getState().appendLog(`[${teamId}] ${fof.ownerComment}`)
+          return 'bid'
+        }
+      } else {
+        useGameStore.getState().appendLog(`[${teamId}] ${fof.ownerComment}`)
+      }
     }
   }
 
@@ -335,11 +404,34 @@ function markPlayerUnsold(dataset: AuctionDataset): void {
 /**
  * Initialises bid state for the current player and transitions to bidding phase.
  */
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export function startPlayerAuction(dataset: AuctionDataset): void {
   const state = useGameStore.getState().gameState
   if (!state) return
 
-  const currentPlayer = getCurrentAuctionPlayer(state, dataset)
+  // Generate a random order for the current set the first time we enter it (skip for re-auction)
+  const setName = dataset.auctionSets[state.currentSetIndex]
+  if (!state.isReauction && setName && !state.setPlayerOrder?.[setName]) {
+    const playersInSet = getPlayersInSet(dataset, setName, state.releasedRetainedPlayers ?? [])
+    const shuffledIds  = shuffleArray(playersInSet.map(p => p.playerId))
+    useGameStore.setState(s => s.gameState ? {
+      gameState: {
+        ...s.gameState,
+        setPlayerOrder: { ...(s.gameState.setPlayerOrder ?? {}), [setName]: shuffledIds },
+      },
+    } : {})
+    console.log(`[AUCTION] Set "${setName}" shuffled: ${shuffledIds.length} players in random order`)
+  }
+
+  const currentPlayer = getCurrentAuctionPlayer(useGameStore.getState().gameState ?? state, dataset)
   if (!currentPlayer) {
     useGameStore.getState().setPhase('auction-complete')
     return
@@ -359,9 +451,20 @@ export function startPlayerAuction(dataset: AuctionDataset): void {
   useGameStore.getState().setPhase('bidding')
   useGameStore.getState().appendLog(`--- Auction: ${currentPlayer.name} (Base: ₹${currentPlayer.basePrice.toFixed(2)} Cr) ---`)
 
-  // Pre-load LLM for all non-user teams in the background
-  const userTeam = state.userFranchise as TeamId
+  // Pre-load LLM for all non-user teams in the background (with full context)
+  const userTeam        = state.userFranchise as TeamId
   const interestedTeams = (Object.keys(state.teamStates) as TeamId[]).filter(id => id !== userTeam)
+  const nextAvail       = getNextAvailablePlayers(state, dataset, currentPlayer.role)
+  const teamPurses      = getAllTeamPurses(state)
+  const startingPurses  = Object.fromEntries(
+    interestedTeams.map(id => [id, getStartingPurse(state, dataset, id)])
+  )
+  const comparables     = getComparableSales(dataset, currentPlayer)
+
+  // Fire form context fetch in background — resolves well before first bid (2s timeout).
+  // By the time runOneAIDecision runs, getFormContext() returns the cached result.
+  void fetchPlayerFormContext(currentPlayer, state.auctionYear)
+
   preloadPersonaResults(
     currentPlayer,
     interestedTeams,
@@ -370,7 +473,56 @@ export function startPlayerAuction(dataset: AuctionDataset): void {
     state.auctionYear,
     dataset.auctionSets[state.currentSetIndex] ?? 'Set 1',
     state.soldPlayers?.length ?? 0,
+    nextAvail,
+    teamPurses,
+    startingPurses,
+    comparables,
+    getFormContext(currentPlayer.playerId),
   )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Context helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Next 3 unsold players of the same role, ordered by auctionSetOrder. */
+function getNextAvailablePlayers(
+  state: NonNullable<ReturnType<typeof useGameStore.getState>['gameState']>,
+  dataset: AuctionDataset,
+  role: string,
+  count = 3,
+) {
+  const soldIds   = new Set((state.soldPlayers ?? []).map(p => p.playerId))
+  const unsoldIds = new Set((state.unsoldPlayers ?? []).map(p => p.playerId))
+  const currentPlayer = getCurrentAuctionPlayer(state, dataset)
+
+  return dataset.players
+    .filter(p =>
+      p.role === role &&
+      !soldIds.has(p.playerId) &&
+      !unsoldIds.has(p.playerId) &&
+      p.playerId !== currentPlayer?.playerId,
+    )
+    .sort((a, b) => (a.auctionSetOrder ?? 999) - (b.auctionSetOrder ?? 999))
+    .slice(0, count)
+}
+
+/** All teams' purses sorted descending. */
+function getAllTeamPurses(
+  state: NonNullable<ReturnType<typeof useGameStore.getState>['gameState']>,
+): { teamId: string; purse: number }[] {
+  return (Object.keys(state.teamStates) as TeamId[])
+    .map(id => ({ teamId: id, purse: state.teamStates[id].currentPurse }))
+    .sort((a, b) => b.purse - a.purse)
+}
+
+/** Starting purse for a team — from dataset.startingPurse if available. */
+function getStartingPurse(
+  state: NonNullable<ReturnType<typeof useGameStore.getState>['gameState']>,
+  dataset: AuctionDataset,
+  teamId: string,
+): number {
+  return dataset.startingPurse?.[teamId as TeamId] ?? state.teamStates[teamId as TeamId]?.currentPurse ?? 100
 }
 
 /**

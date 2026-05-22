@@ -159,9 +159,10 @@ function resolveMarketTier(
   let tier: MarketTier
   let label: string
 
-  if (soldPrice >= 18)      { tier = 'elite';  label = `Elite — ₹${soldPrice.toFixed(2)} Cr (top ${100 - percentile}% of league)` }
-  else if (soldPrice >= 10) { tier = 'star';   label = `Star — ₹${soldPrice.toFixed(2)} Cr (top ${100 - percentile}% of league)` }
-  else if (soldPrice >= 4)  { tier = 'solid';  label = `Solid — ₹${soldPrice.toFixed(2)} Cr (${percentile}th percentile)` }
+  // Lowered elite threshold to ₹14 Cr — retained superstars (Rohit, Bumrah, Virat, Hardik) are elite
+  if (soldPrice >= 14)      { tier = 'elite';  label = `Elite — ₹${soldPrice.toFixed(2)} Cr (top ${100 - percentile}% of league)` }
+  else if (soldPrice >= 8)  { tier = 'star';   label = `Star — ₹${soldPrice.toFixed(2)} Cr (top ${100 - percentile}% of league)` }
+  else if (soldPrice >= 3)  { tier = 'solid';  label = `Solid — ₹${soldPrice.toFixed(2)} Cr (${percentile}th percentile)` }
   else                      { tier = 'budget'; label = `Budget — ₹${soldPrice.toFixed(2)} Cr` }
 
   return { tier, label, percentile }
@@ -243,13 +244,14 @@ function computeImportanceScore(
   marketTier: MarketTier,
   starPower: StarPower,
 ): number {
-  // Captaincy is the highest single signal
   const captainScore = { captain: 30, 'vice-captain': 20, candidate: 10, none: 0 }[captaincyRole]
   const loyaltyScore = { icon: 25, loyal: 18, familiar: 10, new: 0 }[loyaltyTier]
   const roleScore    = { sole: 22, thin: 14, adequate: 7, deep: 2 }[roleCriticality]
   const marketScore  = { elite: 15, star: 10, solid: 5, budget: 1 }[marketTier]
   const starScore    = { superstar: 8, known: 4, prospect: 4, journeyman: 0 }[starPower]
-  return Math.min(100, captainScore + loyaltyScore + roleScore + marketScore + starScore)
+  // Franchise pillar bonus: retained elite players (Rohit, Bumrah, Virat etc.) are near-irreplaceable
+  const pillarBonus  = loyaltyTier === 'icon' && marketTier === 'elite' ? 12 : 0
+  return Math.min(100, captainScore + loyaltyScore + roleScore + marketScore + starScore + pillarBonus)
 }
 
 // ─── Narrative ────────────────────────────────────────────────────────────────

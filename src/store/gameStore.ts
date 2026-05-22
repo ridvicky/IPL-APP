@@ -32,6 +32,7 @@ interface GameStoreState {
   markTeamPassed: (teamId: TeamId) => void
   clearTeamPassed: (teamId: TeamId) => void
   markTeamPermanentPass: (teamId: TeamId) => void
+  clearTeamPermanentPass: (teamId: TeamId) => void
 
   // Player outcomes
   recordSoldPlayer: (record: SoldPlayerRecord) => void
@@ -42,6 +43,7 @@ interface GameStoreState {
 
   // Auction navigation
   advanceToNextPlayer: (dataset: { auctionSets: string[]; players: { auctionSet: string }[] }) => void
+  startReauction: () => void
 
   // Team state direct update (used by retention engine on init)
   setAllTeamStates: (teamStates: Record<TeamId, TeamState>) => void
@@ -154,6 +156,25 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     })
   },
 
+  clearTeamPermanentPass: (teamId) => {
+    set(s => {
+      if (!s.gameState?.currentBidState) return {}
+      const bs = s.gameState.currentBidState
+      const pp = bs.permanentPass ?? []
+      if (!pp.includes(teamId)) return {}
+      return {
+        gameState: {
+          ...s.gameState,
+          currentBidState: {
+            ...bs,
+            permanentPass: pp.filter(id => id !== teamId),
+            teamsPassed: (bs.teamsPassed ?? []).filter(id => id !== teamId),
+          },
+        },
+      }
+    })
+  },
+
   recordSoldPlayer: (record) => {
     set(s => s.gameState ? {
       gameState: {
@@ -195,22 +216,33 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
   advanceToNextPlayer: (dataset) => {
     set(s => {
       if (!s.gameState) return {}
+
+      // Re-auction path
+      if (s.gameState.isReauction) {
+        const nextIdx = s.gameState.reauctionIndex + 1
+        if (nextIdx >= (s.gameState.reauctionPool?.length ?? 0)) {
+          return { gameState: { ...s.gameState, phase: 'auction-complete', currentBidState: null, isReauction: false } }
+        }
+        return { gameState: { ...s.gameState, reauctionIndex: nextIdx, phase: 'set-preview', currentBidState: null } }
+      }
+
       const { currentSetIndex, currentPlayerIndex } = s.gameState
       const setName = dataset.auctionSets[currentSetIndex]
       if (!setName) return {}
 
-      const released = s.gameState.releasedRetainedPlayers ?? []
-      const playersInSet = [
-        ...dataset.players.filter(p => p.auctionSet === setName),
-        ...released.filter(p => p.auctionSet === setName),
-      ]
-      const isLastInSet = currentPlayerIndex >= playersInSet.length - 1
-      const isLastSet = currentSetIndex >= dataset.auctionSets.length - 1
+      const shuffledIds = s.gameState.setPlayerOrder?.[setName]
+      const setLength = shuffledIds
+        ? shuffledIds.length
+        : [
+            ...dataset.players.filter(p => p.auctionSet === setName),
+            ...(s.gameState.releasedRetainedPlayers ?? []).filter(p => p.auctionSet === setName),
+          ].length
+
+      const isLastInSet = currentPlayerIndex >= setLength - 1
+      const isLastSet   = currentSetIndex >= dataset.auctionSets.length - 1
 
       if (isLastInSet && isLastSet) {
-        return {
-          gameState: { ...s.gameState, phase: 'auction-complete', currentBidState: null },
-        }
+        return { gameState: { ...s.gameState, phase: 'auction-complete', currentBidState: null } }
       }
 
       if (isLastInSet) {
@@ -229,6 +261,29 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
         gameState: {
           ...s.gameState,
           currentPlayerIndex: currentPlayerIndex + 1,
+          phase: 'set-preview',
+          currentBidState: null,
+        },
+      }
+    })
+    void get().saveNow()
+  },
+
+  startReauction: () => {
+    set(s => {
+      if (!s.gameState) return {}
+      const pool = s.gameState.unsoldPlayers.map(p => ({
+        ...p,
+        // Round to nearest 0.25 Cr increment, minimum 0.2 Cr
+        basePrice: Math.max(0.2, Math.round(p.basePrice * 0.5 * 4) / 4),
+      }))
+      return {
+        gameState: {
+          ...s.gameState,
+          isReauction: true,
+          reauctionPool: pool,
+          reauctionIndex: 0,
+          unsoldPlayers: [],   // moved to pool; re-unsold ones will re-enter unsoldPlayers
           phase: 'set-preview',
           currentBidState: null,
         },

@@ -16,10 +16,17 @@ export interface TradeProposal {
 
 export type TradeDecision = 'accept' | 'reject' | 'counteroffer'
 
+export interface CounterOfferStructured {
+  playersToOffer: string[]    // exact player names the AI offers
+  playersToRequest: string[]  // exact player names the AI wants instead
+  cashAdjustment: number      // positive = AI adds cash, negative = wants cash
+}
+
 export interface TradeResponse {
   decision: TradeDecision
   ownerComment: string
-  counteroffer: string | null   // free-text counter suggestion from AI owner
+  counteroffer: string | null                       // free-text counter suggestion
+  counterOfferStructured: CounterOfferStructured | null
   reason: string
 }
 

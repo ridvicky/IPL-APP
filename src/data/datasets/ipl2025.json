@@ -945,7 +945,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 4
     },
     {
       "playerId": "manish-pandey",
@@ -1053,7 +1054,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 5.25
     },
     {
       "playerId": "faf-du-plessis",
@@ -1125,7 +1127,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2
     },
     {
       "playerId": "finn-allen",
@@ -1143,7 +1146,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2
     },
     {
       "playerId": "dewald-brevis",
@@ -1179,7 +1183,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "rilee-rossouw",
@@ -1197,7 +1202,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 4.5
     },
     {
       "playerId": "sherfane-rutherford",
@@ -1305,7 +1311,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "brandon-king",
@@ -1323,7 +1330,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "evin-lewis",
@@ -1341,7 +1349,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "pathum-nissanka",
@@ -1359,7 +1368,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "bhanuka-rajapaksa",
@@ -1467,7 +1477,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "will-young",
@@ -1485,7 +1496,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "najibullah-zadran",
@@ -1503,7 +1515,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "ibrahim-zadran",
@@ -1521,7 +1534,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "ravichandaran-ashwin",
@@ -1647,7 +1661,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 3.5
     },
     {
       "playerId": "shahbaz-ahamad",
@@ -1755,7 +1770,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 6
     },
     {
       "playerId": "mitchell-marsh",
@@ -1881,7 +1897,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 9
     },
     {
       "playerId": "moeen-ali",
@@ -1989,7 +2006,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "tom-curran",
@@ -2007,7 +2025,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "mohammad-nabi",
@@ -2025,7 +2044,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "gulbadin-naib",
@@ -2043,7 +2063,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.75
     },
     {
       "playerId": "sikandar-raza",
@@ -2061,7 +2082,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2
     },
     {
       "playerId": "mitchell-santner",
@@ -2169,7 +2191,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "kamindu-mendis",
@@ -2241,7 +2264,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "michael-bracewell",
@@ -2259,7 +2283,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "gudakesh-motie",
@@ -2385,7 +2410,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 3.5
     },
     {
       "playerId": "karim-janat",
@@ -2547,7 +2573,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "dwaine-pretorius",
@@ -2619,7 +2646,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "junior-dala",
@@ -2763,7 +2791,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "matthew-forde",
@@ -2835,7 +2864,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "odean-smith",
@@ -2853,7 +2883,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "ishan-kishan",
@@ -2907,7 +2938,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "jonny-bairstow",
@@ -2925,7 +2957,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 4
     },
     {
       "playerId": "quinton-de-kock",
@@ -2997,7 +3030,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "donovan-ferreira",
@@ -3033,7 +3067,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "josh-inglis",
@@ -3087,7 +3122,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.75
     },
     {
       "playerId": "sam-billings",
@@ -3105,7 +3141,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2
     },
     {
       "playerId": "jordan-cox",
@@ -3141,7 +3178,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "kusal-mendis",
@@ -3159,7 +3197,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "kusal-perera",
@@ -3285,7 +3324,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "ollie-pope",
@@ -3555,7 +3595,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2.5
     },
     {
       "playerId": "kuldeep-sen",
@@ -3591,7 +3632,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 3.5
     },
     {
       "playerId": "navdeep-saini",
@@ -3609,7 +3651,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "chetan-sakariya",
@@ -3789,7 +3832,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2.5
     },
     {
       "playerId": "nuwan-thushara",
@@ -3825,7 +3869,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2.5
     },
     {
       "playerId": "fazalhaq-farooqi",
@@ -3897,7 +3942,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 7
     },
     {
       "playerId": "kwena-maphaka",
@@ -3969,7 +4015,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.75
     },
     {
       "playerId": "jason-behrendorff",
@@ -4059,7 +4106,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "jhye-richardson",
@@ -4131,7 +4179,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 4
     },
     {
       "playerId": "adam-milne",
@@ -4203,7 +4252,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 2.5
     },
     {
       "playerId": "ben-dwarshuis",
@@ -4293,7 +4343,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "daniel-worrall",
@@ -4329,7 +4380,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.75
     },
     {
       "playerId": "blessing-muzarabani",
@@ -4365,7 +4417,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "tanzim-hasan-sakib",
@@ -4383,7 +4436,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1
     },
     {
       "playerId": "benjamin-sears",
@@ -4473,7 +4527,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 4
     },
     {
       "playerId": "chris-jordan",
@@ -4527,7 +4582,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "david-payne",
@@ -4545,7 +4601,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "nahid-rana",
@@ -4599,7 +4656,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "richard-ngarava",
@@ -4851,7 +4909,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 3
     },
     {
       "playerId": "adil-rashid",
@@ -5085,7 +5144,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "atharva-taide",
@@ -5301,7 +5361,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.3
     },
     {
       "playerId": "kumar-kushagra",
@@ -5571,7 +5632,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "shreyas-gopal",
@@ -6057,7 +6119,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "kunal-rathore",
@@ -6165,7 +6228,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "rajan-kumar",
@@ -6525,7 +6589,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "rajvardhan-hangargekar",
@@ -7047,7 +7112,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 1.5
     },
     {
       "playerId": "ashwin-hebbar",
@@ -7407,7 +7473,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "vishnu-solanki",
@@ -7803,7 +7870,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.5
     },
     {
       "playerId": "samarth-vyas",
@@ -10035,7 +10103,8 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "marketValue": 0.75
     },
     {
       "playerId": "mayank-gusain",

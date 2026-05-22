@@ -46,7 +46,7 @@ export function applyHistoricalRetentions(dataset: AuctionDataset): RetentionRes
         : {
             playerId: rp.playerId,
             name: rp.name ?? rp.playerId,
-            role: 'BAT',
+            role: rp.role,
             nationality: rp.isOverseas ? 'overseas' : 'indian',
             country: rp.isOverseas ? 'Unknown' : 'India',
             cappedStatus: 'capped',

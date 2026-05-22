@@ -21,17 +21,79 @@ import {
 } from '@/controllers/auctionController'
 import { getCurrentAuctionPlayer } from '@/engine/biddingEngine'
 import { getBidIncrement, getPlayersInSet, loadDataset } from '@/dataset/datasetLoader'
+import { fetchAuctioneerComment, getFormContext } from '@/llm/personaLayer'
 import type { AuctionDataset } from '@/types/dataset'
 import type { TeamId } from '@/types/team'
 
-const BID_TIMER_SECONDS = 10
-const AI_DECISION_DELAY_MS = 350
-const AUCTIONEER_CALL_MS = 3000
+const BID_TIMER_SECONDS    = 10
+const BASE_AI_DELAY_MS     = 350   // scaled by speed
+const BASE_CALL_MS         = 1500  // scaled by speed (was 3000)
 
 type CallingStage = 0 | 1 | 2 | 3   // 0=none, 1=going once, 2=twice, 3=thrice→SOLD
 
 const STAGE_TEXT = ['', 'Going once…', 'Going twice…', '🔨 SOLD!']
 const STAGE_SUB  = ['', 'Any advance?', 'Last chance to bid!', '']
+
+// ─── Mobile Owner Reactions Feed ─────────────────────────────────────────────
+
+const TEAM_CHIP_COLORS: Record<string, string> = {
+  CSK: 'text-yellow-300 bg-yellow-400/10 border-yellow-500/30',
+  MI:  'text-blue-300 bg-blue-400/10 border-blue-500/30',
+  RCB: 'text-red-300 bg-red-400/10 border-red-500/30',
+  KKR: 'text-purple-300 bg-purple-400/10 border-purple-500/30',
+  DC:  'text-sky-300 bg-sky-400/10 border-sky-500/30',
+  RR:  'text-pink-300 bg-pink-400/10 border-pink-500/30',
+  SRH: 'text-orange-300 bg-orange-400/10 border-orange-500/30',
+  PBKS:'text-rose-300 bg-rose-400/10 border-rose-500/30',
+  GT:  'text-cyan-300 bg-cyan-400/10 border-cyan-500/30',
+  LSG: 'text-teal-300 bg-teal-400/10 border-teal-500/30',
+}
+
+function MobileReactionsFeed({ log }: { log: string[] }) {
+  const [open, setOpen] = useState(true)
+
+  const entries = log
+    .filter(e => /^\[[A-Z]+\]/.test(e) && !e.includes('SOLD:') && !e.includes('UNSOLD:') && !e.includes('---'))
+    .slice(-5)
+    .reverse()
+
+  if (entries.length === 0) return null
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-white/8 bg-black/30">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-gray-400 text-xs font-semibold uppercase tracking-widest">Owner Reactions</span>
+        </div>
+        <span className="text-gray-600 text-xs">{open ? '▲' : '▼'} {entries.length} recent</span>
+      </button>
+      {open && (
+        <div className="divide-y divide-white/5">
+          {entries.map((entry, i) => {
+            const m = entry.match(/^\[([A-Z]+)\]\s*(.+)$/)
+            if (!m) return null
+            const [, teamId, comment] = m
+            const chip = TEAM_CHIP_COLORS[teamId] ?? 'text-gray-300 bg-gray-500/10 border-gray-500/30'
+            return (
+              <div key={i} className={`flex items-start gap-3 px-4 py-3 ${i === 0 ? 'bg-white/4' : ''}`}>
+                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border shrink-0 mt-0.5 ${chip}`}>
+                  {teamId}
+                </span>
+                <p className={`text-sm leading-snug flex-1 ${i === 0 ? 'text-gray-200' : 'text-gray-500'}`}>
+                  {comment}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function AuctionRoomScreen() {
   const navigate = useNavigate()
@@ -47,11 +109,26 @@ export function AuctionRoomScreen() {
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [quitConfirm, setQuitConfirm] = useState(false)
+  const [speed, setSpeed] = useState<1 | 2 | 3>(() => (Number(localStorage.getItem('auctionSpeed')) as 1|2|3) || 1)
+  const [auctioneeerLine, setAuctioneeerLine] = useState<string | null>(null)
 
   const aiLoopRef = useRef(false)
   const callingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const hasAutoPassedRef = useRef(false)
+  const speedRef = useRef<1|2|3>(speed)
+  const commentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    speedRef.current = speed
+    localStorage.setItem('auctionSpeed', String(speed))
+  }, [speed])
+
+  const showComment = useCallback((text: string) => {
+    if (commentTimerRef.current) clearTimeout(commentTimerRef.current)
+    setAuctioneeerLine(text)
+    commentTimerRef.current = setTimeout(() => setAuctioneeerLine(null), 6000)
+  }, [])
 
   // ── Session resume from URL param (/session/:id) ─────────────────────────
   useEffect(() => {
@@ -90,6 +167,30 @@ export function AuctionRoomScreen() {
     }
   }, [dataset, gameState?.phase, gameState?.currentSetIndex, gameState?.currentPlayerIndex])
 
+  // ── Auctioneer commentary ─────────────────────────────────────────────────
+  const lastPlayerIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!gameState || !dataset) return
+    const player = getCurrentAuctionPlayer(gameState, dataset)
+    if (!player || player.playerId === lastPlayerIdRef.current) return
+    if (gameState.phase !== 'bidding') return
+    lastPlayerIdRef.current = player.playerId
+    void fetchAuctioneerComment('intro', player).then(c => { if (c) showComment(c) })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState?.phase, gameState?.currentPlayerIndex, gameState?.isReauction, gameState?.reauctionIndex])
+
+  useEffect(() => {
+    if (!gameState) return
+    if (gameState.phase === 'sale-confirmed') {
+      const last = gameState.soldPlayers[gameState.soldPlayers.length - 1]
+      if (last) void fetchAuctioneerComment('sold', last, { team: last.soldTo, price: last.soldPrice }).then(c => { if (c) showComment(c) })
+    } else if (gameState.phase === 'unsold-confirmed') {
+      const last = gameState.unsoldPlayers[gameState.unsoldPlayers.length - 1]
+      if (last) void fetchAuctioneerComment('unsold', last).then(c => { if (c) showComment(c) })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState?.phase])
+
   // ── Auctioneer calling ────────────────────────────────────────────────────
   const clearCalling = () => {
     callingTimersRef.current.forEach(clearTimeout)
@@ -99,17 +200,17 @@ export function AuctionRoomScreen() {
   const startCalling = useCallback((ds: AuctionDataset) => {
     clearCalling()
     setCallingStage(1)
-    const t1 = setTimeout(() => setCallingStage(2), AUCTIONEER_CALL_MS)
-    const t2 = setTimeout(() => setCallingStage(3), AUCTIONEER_CALL_MS * 2)
+    const callMs = Math.round(BASE_CALL_MS / speedRef.current)
+    const t1 = setTimeout(() => setCallingStage(2), callMs)
+    const t2 = setTimeout(() => setCallingStage(3), callMs * 2)
     const t3 = setTimeout(() => {
       setCallingStage(0)
       try {
         resolvePlayerSale(ds)
       } catch {
-        // Safety net: if resolve throws, force-advance so auction never locks up
         advanceAuction(ds)
       }
-    }, AUCTIONEER_CALL_MS * 3)
+    }, callMs * 3)
     callingTimersRef.current = [t1, t2, t3]
   }, [])
 
@@ -131,7 +232,7 @@ export function AuctionRoomScreen() {
     && !userIsLeader && !userHasPassed && !userHasSkipped && !aiRunning && !isCalling
 
   // User can interrupt calling: calling is active, user is not permanently skipped, not leader
-  const userCanInterrupt = isCalling && !userHasSkipped && !userIsLeader
+  const userCanInterrupt = isCalling && !userIsLeader
 
   useEffect(() => {
     if (!userCanBidNormal || !dataset) {
@@ -177,7 +278,7 @@ export function AuctionRoomScreen() {
       if (!uOut && !uLead) break
 
       const result = await runOneAIDecision(ds)
-      await new Promise(r => setTimeout(r, AI_DECISION_DELAY_MS))
+      await new Promise(r => setTimeout(r, Math.round(BASE_AI_DELAY_MS / speedRef.current)))
 
       const fresh = useGameStore.getState().gameState
       if (!fresh || fresh.phase !== 'bidding') break
@@ -284,8 +385,8 @@ export function AuctionRoomScreen() {
 
   // ── Set complete ─────────────────────────────────────────────────────────
   if (gameState.phase === 'set-complete') {
-    const completedSet = dataset.auctionSets[gameState.currentSetIndex - 1] ?? 'Previous Set'
-    const nextSet = dataset.auctionSets[gameState.currentSetIndex] ?? ''
+    const completedSet = gameState.isReauction ? 'Re-auction' : (dataset.auctionSets[gameState.currentSetIndex - 1] ?? 'Previous Set')
+    const nextSet = gameState.isReauction ? '' : (dataset.auctionSets[gameState.currentSetIndex] ?? '')
     const nextPlayers = nextSet ? getPlayersInSet(dataset, nextSet, gameState.releasedRetainedPlayers ?? []) : []
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
@@ -316,18 +417,34 @@ export function AuctionRoomScreen() {
 
   // ── Auction complete ──────────────────────────────────────────────────────
   if (gameState.phase === 'auction-complete') {
+    const unsoldCount = gameState.unsoldPlayers.length
     return (
       <div className="min-h-screen bg-ipl-darker flex items-center justify-center p-4">
-        <div className="text-center max-w-md animate-fade-in">
+        <div className="text-center max-w-md animate-fade-in w-full">
           <div className="text-8xl mb-6 animate-bounce">🏆</div>
           <p className="text-ipl-gold text-4xl font-black mb-2">Auction Complete!</p>
           <p className="text-gray-400 mb-2">
-            {gameState.soldPlayers.length} players sold · {gameState.unsoldPlayers.length} unsold
+            {gameState.soldPlayers.length} players sold · {unsoldCount} unsold
           </p>
-          <p className="text-gray-500 text-sm mb-8">IPL {gameState.auctionYear}</p>
+          <p className="text-gray-500 text-sm mb-6">IPL {gameState.auctionYear}</p>
+
+          {unsoldCount > 0 && (
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-left">
+              <p className="text-amber-400 font-black text-sm mb-1">🔄 Re-auction Available</p>
+              <p className="text-amber-200/70 text-xs leading-relaxed">
+                {unsoldCount} players went unsold. In real IPL, these go back at 50% base price — teams often snag bargains here.
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
+            {unsoldCount > 0 && (
+              <Button variant="secondary" size="lg" onClick={() => useGameStore.getState().startReauction()}>
+                🔄 Re-auction {unsoldCount} unsold at 50% base
+              </Button>
+            )}
             <Button variant="primary" size="lg" onClick={() => navigate('/final-squad')}>
-              🏏 View All Squads
+              🏏 View Final Squads
             </Button>
             <Button variant="secondary" size="lg" onClick={() => navigate('/my-squad')}>
               My Squad
@@ -567,14 +684,29 @@ export function AuctionRoomScreen() {
         <div className="flex items-center gap-2 min-w-0">
           <TeamBadge teamId={userTeam} size="sm" />
           <div className="min-w-0">
-            <p className="text-white font-bold text-xs leading-tight truncate">{setName}</p>
+            <p className="text-white font-bold text-xs leading-tight truncate">
+              {gameState.isReauction ? '🔄 Re-auction' : setName}
+            </p>
             <p className="text-gray-600 text-[10px] leading-tight">
-              Set {gameState.currentSetIndex + 1}/{dataset.auctionSets.length} · {gameState.soldPlayers.length} sold
+              {gameState.isReauction
+                ? `${gameState.reauctionIndex + 1}/${gameState.reauctionPool.length} · 50% base`
+                : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · ${gameState.soldPlayers.length} sold`
+              }
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="hidden sm:flex items-center gap-1.5 bg-white/5 rounded-lg px-2.5 py-1.5">
+          {/* Speed control */}
+          <div className="flex rounded-lg overflow-hidden border border-white/10">
+            {([1, 2, 3] as const).map(s => (
+              <button key={s} onClick={() => setSpeed(s)}
+                className={`px-2 py-1 text-[10px] font-black transition-colors ${
+                  speed === s ? 'bg-ipl-accent text-white' : 'bg-white/5 text-gray-600 hover:text-gray-300'
+                }`}
+              >{s}×</button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5 bg-white/5 rounded-lg px-2.5 py-1.5">
             <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
             <span className="text-gray-700 text-xs">left</span>
           </div>
@@ -611,16 +743,27 @@ export function AuctionRoomScreen() {
               />
             </div>
 
-            {/* Live reaction bubble — mobile only, shows latest LLM comment */}
-            <div className="lg:hidden">
-              <LiveReactionBubble log={gameState.auctionLog ?? []} />
+            {/* Live reaction bubble — mobile only, floating transient notification */}
+            <div className="lg:hidden fixed top-16 left-3 right-3 z-30 pointer-events-none">
+              <div className="pointer-events-auto">
+                <LiveReactionBubble log={gameState.auctionLog ?? []} />
+              </div>
             </div>
+            {/* Auctioneer commentary banner */}
+            {auctioneeerLine && (
+              <div className="flex items-start gap-2.5 bg-ipl-gold/10 border border-ipl-gold/25 rounded-2xl px-4 py-3 animate-slide-up">
+                <span className="text-lg shrink-0">🎙️</span>
+                <p className="text-ipl-gold text-sm font-semibold leading-snug italic">"{auctioneeerLine}"</p>
+              </div>
+            )}
+
             {/* Player spotlight */}
             {currentPlayer ? (
               <PlayerCard
                 player={currentPlayer}
                 currentBid={bidState?.currentBid}
                 currentLeader={bidState?.currentLeader}
+                formContext={getFormContext(currentPlayer.playerId)}
               />
             ) : (
               <div className="bg-white/5 rounded-2xl flex items-center justify-center py-16">
@@ -630,64 +773,81 @@ export function AuctionRoomScreen() {
 
             {/* Timer strip — only when user's turn */}
             {userCanBidNormal && (
-              <div className={`flex items-center gap-4 rounded-xl px-4 py-3 border transition-colors ${
-                timerUrgent ? 'bg-red-950/60 border-red-700/60' :
-                timerWarning ? 'bg-yellow-950/40 border-yellow-800/40' :
-                'bg-white/5 border-white/10'
+              <div className={`relative overflow-hidden flex items-center gap-4 rounded-2xl px-5 py-4 border transition-all ${
+                timerUrgent
+                  ? 'bg-red-950/70 border-red-600/60 shadow-lg shadow-red-900/40'
+                  : timerWarning
+                  ? 'bg-yellow-950/50 border-yellow-700/50 shadow-md shadow-yellow-900/20'
+                  : 'bg-ipl-card border-ipl-accent/25'
               }`}>
-                <div className="relative w-10 h-10 flex-shrink-0">
-                  <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#1f2937" strokeWidth="3" />
-                    <circle cx="20" cy="20" r="16" fill="none"
+                {timerUrgent && (
+                  <div className="absolute inset-0 bg-red-600/5 animate-pulse pointer-events-none" />
+                )}
+                <div className="relative w-12 h-12 flex-shrink-0">
+                  <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="#1f2937" strokeWidth="3.5" />
+                    <circle cx="24" cy="24" r="20" fill="none"
                       stroke={timerUrgent ? '#ef4444' : timerWarning ? '#eab308' : '#e8c96d'}
-                      strokeWidth="3"
-                      strokeDasharray={`${2 * Math.PI * 16}`}
-                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - timeLeft / BID_TIMER_SECONDS)}`}
+                      strokeWidth="3.5"
+                      strokeDasharray={`${2 * Math.PI * 20}`}
+                      strokeDashoffset={`${2 * Math.PI * 20 * (1 - timeLeft / BID_TIMER_SECONDS)}`}
                       strokeLinecap="round"
                       style={{ transition: 'stroke-dashoffset 1s linear' }}
                     />
                   </svg>
-                  <span className={`absolute inset-0 flex items-center justify-center font-black text-xs ${
+                  <span className={`absolute inset-0 flex items-center justify-center font-black text-sm ${
                     timerUrgent ? 'text-red-400' : timerWarning ? 'text-yellow-400' : 'text-ipl-gold'
                   }`}>{timeLeft}</span>
                 </div>
-                <div>
-                  <p className={`font-bold text-sm ${timerUrgent ? 'text-red-300' : timerWarning ? 'text-yellow-300' : 'text-white'}`}>
-                    {timerUrgent ? 'Bid NOW or auto-pass!' : 'Your turn to bid'}
+                <div className="relative flex-1">
+                  <p className={`font-black text-base leading-tight ${
+                    timerUrgent ? 'text-red-300' : timerWarning ? 'text-yellow-300' : 'text-white'
+                  }`}>
+                    {timerUrgent ? '⚡ Bid NOW or you auto-pass!' : '🏏 Your turn — place a bid'}
                   </p>
-                  <p className="text-gray-600 text-xs">{timeLeft}s remaining</p>
+                  <p className={`text-xs mt-0.5 ${timerUrgent ? 'text-red-500' : 'text-gray-600'}`}>
+                    {timeLeft}s remaining
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* User status badges when watching */}
+            {/* Watching states */}
             {gameState.phase === 'bidding' && !userCanBidNormal && !userIsLeader && !isCalling && (
-              <div className={`text-center py-3 px-4 rounded-xl border text-sm ${
+              <div className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${
                 userHasSkipped
-                  ? 'bg-gray-900/50 border-gray-800 text-gray-600'
-                  : 'bg-white/5 border-white/10 text-gray-500'
+                  ? 'bg-gray-900/30 border-gray-800/60'
+                  : 'bg-white/4 border-white/8'
               }`}>
-                {userHasSkipped
-                  ? 'You skipped this player — watching the room'
-                  : 'You passed this round — watching teams battle it out'}
+                <span className="text-xl">{userHasSkipped ? '👁' : '🤫'}</span>
+                <p className={`text-sm ${userHasSkipped ? 'text-gray-700' : 'text-gray-500'}`}>
+                  {userHasSkipped
+                    ? 'You skipped — watching the room'
+                    : 'You passed this round — watching teams battle'}
+                </p>
               </div>
             )}
 
             {userIsLeader && gameState.phase === 'bidding' && (
-              <div className="text-center py-3 px-4 rounded-xl border bg-ipl-accent/10 border-ipl-accent/40 text-sm text-ipl-accent font-bold">
-                🏏 You hold the highest bid — waiting for challengers
+              <div className="relative overflow-hidden flex items-center gap-3 rounded-2xl border bg-ipl-accent/10 border-ipl-accent/35 px-5 py-3.5">
+                <div className="absolute inset-0 bg-gradient-to-r from-ipl-accent/5 to-transparent pointer-events-none" />
+                <span className="text-2xl relative">🏆</span>
+                <div className="relative">
+                  <p className="text-ipl-accent font-black text-sm">You hold the highest bid</p>
+                  <p className="text-ipl-accent/50 text-xs mt-0.5">Waiting for challengers…</p>
+                </div>
               </div>
             )}
 
             {/* AI thinking */}
             {aiRunning && (
-              <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
-                <div className="flex gap-1">
-                  {[0, 150, 300].map(d => (
-                    <span key={d} className="w-1.5 h-1.5 rounded-full bg-ipl-accent animate-bounce" style={{ animationDelay: `${d}ms` }} />
+              <div className="flex items-center gap-3 bg-black/30 border border-white/8 rounded-2xl px-4 py-3">
+                <div className="flex gap-1.5 items-center">
+                  {[0, 120, 240].map(d => (
+                    <span key={d} className="w-2 h-2 rounded-full bg-ipl-accent/70 animate-bounce" style={{ animationDelay: `${d}ms` }} />
                   ))}
                 </div>
-                <span className="text-gray-500 text-sm">Teams deliberating...</span>
+                <span className="text-gray-500 text-sm">Franchise owners deliberating…</span>
               </div>
             )}
 
@@ -719,6 +879,11 @@ export function AuctionRoomScreen() {
                 <BidTimeline bids={bidState.bids} />
               </div>
             )}
+
+            {/* Owner Reactions feed — mobile only persistent panel */}
+            <div className="lg:hidden">
+              <MobileReactionsFeed log={gameState.auctionLog ?? []} />
+            </div>
           </div>
         </div>
 

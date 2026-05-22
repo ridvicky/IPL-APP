@@ -77,7 +77,8 @@ export function runRTMDecision(
 
   // LLM boost (Phase 2)
   if (llmResult) {
-    desireScore = desireScore * 0.5 + llmResult.interestLevel * 0.5
+    const llmInterest = Math.max(0, Math.min(100, llmResult.interestLevel))
+    desireScore = desireScore * 0.5 + llmInterest * 0.5
   }
 
   // Price relative to safe limit — if RTM price is >80% of safe limit, temper desire

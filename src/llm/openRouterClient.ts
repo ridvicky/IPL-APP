@@ -1,92 +1,33 @@
 /**
- * OpenRouter API client — tiered model strategy with auto-discovery.
+ * OpenRouter API client — fixed 3-tier model strategy.
  *
- * On first call, fetches the live model list from OpenRouter and picks the
- * best available free models automatically. This survives model deprecations.
- *
- * FREE tier  (regular bidding):      auto-selected free model
- * SMART tier (high-stakes moments):  best available free model with higher context
- *   Used for: RTM decisions, bids >₹10Cr, trade evaluations
+ * STRATEGIC tier  — complex reasoning (Trade, Fight-or-Fold, RTM)
+ * STANDARD tier   — bulk bidding decisions (Call 1, 9 teams in parallel)
+ * FALLBACK tier   — always-available safety net
  */
 
-const API_URL    = 'https://openrouter.ai/api/v1/chat/completions'
-const MODELS_URL = 'https://openrouter.ai/api/v1/models'
-const TIMEOUT_MS    = 8000
-const MAX_RETRIES   = 1
-const THROTTLE_MS   = 1500  // 1.5s stagger between call starts
-const MAX_CONCURRENT = 3    // allow up to 3 parallel calls (pre-loader fires them all at once)
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Preferred model IDs in priority order — first one available wins
-const PREFERRED_FREE_MODELS = [
-  'google/gemini-2.0-flash-exp:free',
-  'deepseek/deepseek-v4-flash:free',
-  'google/gemma-4-31b-it:free',
-  'mistralai/mistral-7b-instruct:free',
-  'meta-llama/llama-3.1-8b-instruct:free',
-  'openchat/openchat-7b:free',
-  'nousresearch/nous-capybara-7b:free',
-]
+// ─── Model tiers ──────────────────────────────────────────────────────────────
 
-// ─── Model auto-discovery ─────────────────────────────────────────────────────
-
-let resolvedPrimary: string | null = null
-let resolvedSmart: string | null = null
-let modelDiscoveryPromise: Promise<void> | null = null
-
-async function discoverModels(): Promise<void> {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
-  if (!apiKey) return
-
-  try {
-    const res = await fetch(MODELS_URL, {
-      headers: { 'Authorization': `Bearer ${apiKey}` },
-    })
-    if (!res.ok) {
-      console.warn('[LLM] Could not fetch model list — using fallback IDs')
-      resolvedPrimary = PREFERRED_FREE_MODELS[2] ?? null
-      resolvedSmart   = PREFERRED_FREE_MODELS[0] ?? null
-      return
-    }
-
-    const data = await res.json() as { data: { id: string; pricing?: { prompt: string } }[] }
-    const available = new Set(data.data.map(m => m.id))
-
-    console.log('[LLM] Available free models on this account:',
-      PREFERRED_FREE_MODELS.filter(id => available.has(id)))
-
-    resolvedPrimary = PREFERRED_FREE_MODELS.find(id => available.has(id)) ?? null
-    // Smart = highest-priority model that's different from primary (or same if only one)
-    resolvedSmart = PREFERRED_FREE_MODELS.find(id => available.has(id) && id !== resolvedPrimary)
-      ?? resolvedPrimary
-
-    console.log(`[LLM] Selected primary: ${resolvedPrimary}`)
-    console.log(`[LLM] Selected smart:   ${resolvedSmart}`)
-  } catch {
-    console.warn('[LLM] Model discovery failed — using first preferred ID')
-    resolvedPrimary = PREFERRED_FREE_MODELS[2] ?? null
-    resolvedSmart   = PREFERRED_FREE_MODELS[0] ?? null
-  }
-}
-
-async function ensureModelsResolved(): Promise<void> {
-  if (resolvedPrimary) return
-  if (!modelDiscoveryPromise) {
-    modelDiscoveryPromise = discoverModels()
-  }
-  await modelDiscoveryPromise
-}
+const MODEL_STRATEGIC = 'meta-llama/llama-3.3-70b-instruct'
+const MODEL_STANDARD  = 'google/gemini-2.0-flash-exp:free'
+const MODEL_FALLBACK  = 'google/gemma-2-9b-it:free'
 
 // ─── Rate limiter ─────────────────────────────────────────────────────────────
+
+const TIMEOUT_MS     = 8000
+const MAX_RETRIES    = 1
+const THROTTLE_MS    = 1500  // 1.5s stagger between call starts
+const MAX_CONCURRENT = 3     // up to 3 parallel calls
 
 let lastCallTime = 0
 let inFlight = 0
 
 async function waitForThrottle(): Promise<void> {
-  // Wait if at concurrency limit
   while (inFlight >= MAX_CONCURRENT) {
     await new Promise(r => setTimeout(r, 200))
   }
-  // Stagger call starts to avoid bursting all at once
   const elapsed = Date.now() - lastCallTime
   if (elapsed < THROTTLE_MS) {
     await new Promise(r => setTimeout(r, THROTTLE_MS - elapsed))
@@ -94,7 +35,7 @@ async function waitForThrottle(): Promise<void> {
   lastCallTime = Date.now()
 }
 
-// ─── Core fetch ───────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -107,6 +48,8 @@ export interface LLMCallOptions {
   temperature?: number
 }
 
+// ─── Core fetch ───────────────────────────────────────────────────────────────
+
 export async function callLLM(
   messages: ChatMessage[],
   options: LLMCallOptions = {},
@@ -114,11 +57,10 @@ export async function callLLM(
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
   if (!apiKey) return null
 
-  await ensureModelsResolved()
   await waitForThrottle()
 
-  const model = options.model ?? resolvedPrimary ?? PREFERRED_FREE_MODELS[0]
-  console.log(`[LLM] calling OpenRouter (model: ${model})`)
+  const model = options.model ?? MODEL_STANDARD
+  console.log(`[LLM] calling ${model.split('/').pop()}`)
   inFlight++
 
   try {
@@ -147,7 +89,7 @@ export async function callLLM(
         clearTimeout(timeout)
 
         if (res.status === 429) {
-          console.warn('[LLM] Rate limited (429) — waiting 5s before retry')
+          console.warn('[LLM] Rate limited (429) — waiting 5s')
           if (attempt < MAX_RETRIES) {
             await new Promise(r => setTimeout(r, 5000))
             lastCallTime = Date.now()
@@ -157,17 +99,13 @@ export async function callLLM(
         }
 
         if (res.status === 404) {
-          // Model no longer available — force re-discovery on next call
-          console.warn(`[LLM] Model ${model} not found (404) — triggering re-discovery`)
-          resolvedPrimary = null
-          resolvedSmart = null
-          modelDiscoveryPromise = null
+          console.warn(`[LLM] Model not found (404): ${model}`)
           return null
         }
 
         if (!res.ok) {
           const body = await res.text()
-          console.warn(`[LLM] HTTP ${res.status} from OpenRouter:`, body.slice(0, 200))
+          console.warn(`[LLM] HTTP ${res.status}:`, body.slice(0, 200))
           return null
         }
 
@@ -177,22 +115,21 @@ export async function callLLM(
         }
 
         if (data.error) {
-          console.warn('[LLM] OpenRouter error:', data.error.message)
+          console.warn('[LLM] Error:', data.error.message)
           return null
         }
 
-        // Some models return content as null with finish_reason=stop — try text field too
         const content =
           data.choices?.[0]?.message?.content ??
           data.choices?.[0]?.text ??
           null
 
         if (!content) {
-          console.warn('[LLM] Empty content — full response:', JSON.stringify(data).slice(0, 300))
+          console.warn('[LLM] Empty content:', JSON.stringify(data).slice(0, 200))
           return null
         }
 
-        console.log('[LLM] response received:', content.slice(0, 80))
+        console.log('[LLM] ✓', content.slice(0, 60))
         return content
       } catch {
         if (attempt < MAX_RETRIES) continue
@@ -205,12 +142,9 @@ export async function callLLM(
   }
 }
 
-export async function callLLMJson<T>(
-  messages: ChatMessage[],
-  options: LLMCallOptions = {},
-): Promise<T | null> {
-  const raw = await callLLM(messages, options)
-  if (!raw) return null
+// ─── JSON helpers ─────────────────────────────────────────────────────────────
+
+function parseJSON<T>(raw: string): T | null {
   try {
     return JSON.parse(raw) as T
   } catch {
@@ -222,32 +156,54 @@ export async function callLLMJson<T>(
   }
 }
 
-/**
- * High-stakes call — uses the best available smart model.
- * Falls back to primary model if smart call fails.
- * Use for: RTM decisions, bids above ₹10 Cr, trade evaluations.
- */
-export async function callLLMJsonSmart<T>(
+/** Fast call — auctioneer commentary, non-critical text (uses free fallback model). */
+export async function callLLMFast(
+  messages: ChatMessage[],
+  options: Omit<LLMCallOptions, 'model'> = {},
+): Promise<string | null> {
+  return callLLM(messages, { ...options, model: MODEL_FALLBACK })
+}
+
+/** Standard call — bulk bidding decisions (Call 1, 9 teams in parallel). */
+export async function callLLMJson<T>(
   messages: ChatMessage[],
   options: Omit<LLMCallOptions, 'model'> = {},
 ): Promise<T | null> {
-  await ensureModelsResolved()
-  const smartModel = resolvedSmart ?? resolvedPrimary ?? PREFERRED_FREE_MODELS[0]
-  console.log(`[LLM] HIGH-STAKES call — using smart model (${smartModel})`)
-  const result = await callLLMJson<T>(messages, { ...options, model: smartModel })
-  if (result !== null) return result
-  console.warn('[LLM] Smart model failed — falling back to primary')
-  return callLLMJson<T>(messages, options)
+  const raw = await callLLM(messages, { ...options, model: MODEL_STANDARD })
+  return raw ? parseJSON<T>(raw) : null
 }
 
-/** Fetch the live model list and log which free models are available for debugging. */
-export async function debugAvailableModels(): Promise<void> {
-  await discoverModels()
+/**
+ * Strategic call — complex reasoning (Fight-or-Fold, Trade, RTM).
+ * Uses strongest model; falls back through STANDARD → FALLBACK.
+ */
+export async function callLLMJsonStrategic<T>(
+  messages: ChatMessage[],
+  options: Omit<LLMCallOptions, 'model'> = {},
+): Promise<T | null> {
+  console.log('[LLM] STRATEGIC call')
+  const raw = await callLLM(messages, { ...options, model: MODEL_STRATEGIC })
+  if (raw) {
+    const parsed = parseJSON<T>(raw)
+    if (parsed !== null) return parsed
+  }
+  // Fallback chain
+  console.warn('[LLM] Strategic failed — trying standard')
+  const raw2 = await callLLM(messages, { ...options, model: MODEL_STANDARD })
+  if (raw2) {
+    const parsed2 = parseJSON<T>(raw2)
+    if (parsed2 !== null) return parsed2
+  }
+  console.warn('[LLM] Standard failed — trying fallback model')
+  const raw3 = await callLLM(messages, { ...options, model: MODEL_FALLBACK })
+  return raw3 ? parseJSON<T>(raw3) : null
 }
 
-/** Test the API key with a minimal call. Returns true if working. */
+/** @deprecated Use callLLMJsonStrategic for high-stakes calls. */
+export const callLLMJsonSmart = callLLMJsonStrategic
+
+/** Test the API key with a minimal call. */
 export async function testAPIKey(): Promise<boolean> {
-  await ensureModelsResolved()
   const result = await callLLMJson<{ ok: boolean }>(
     [{ role: 'user', content: 'Reply with exactly: {"ok":true}' }],
     { maxTokens: 16, temperature: 0 },

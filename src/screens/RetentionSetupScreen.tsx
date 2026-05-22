@@ -42,19 +42,53 @@ type Tab = 'retentions' | 'pool'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function buildTeamRetentions(dataset: AuctionDataset): Map<TeamId, RetainedPlayerEntry[]> {
-  const map = new Map<TeamId, RetainedPlayerEntry[]>()
+function buildTeamRetentions(
+  dataset: AuctionDataset,
+  teamStates?: import('@/types/game').GameState['teamStates'] | null,
+): Map<TeamId, RetainedPlayerEntry[]> {
+  // Build a flat lookup: playerId → retention record (for prices/metadata)
+  const retentionMeta = new Map<string, import('@/types/dataset').HistoricalRetentionRecord['retainedPlayers'][number]>()
   for (const rec of dataset.historicalRetentions ?? []) {
-    map.set(rec.teamId, rec.retainedPlayers.map(p => ({
-      playerId: p.playerId,
-      name: p.name ?? p.playerId,
-      retentionPrice: p.retentionPrice,
-      isOverseas: p.isOverseas,
-      role: p.role ?? 'BAT' as const,
-      ...(p.bowlingType ? { bowlingType: p.bowlingType } : {}),
-      released: false,
-    })))
+    for (const p of rec.retainedPlayers) {
+      retentionMeta.set(p.playerId, p)
+    }
   }
+
+  const map = new Map<TeamId, RetainedPlayerEntry[]>()
+
+  if (teamStates) {
+    // Post-trade: use gameState squads as the source of truth for who is on each team.
+    // Look up retention metadata (price, bowlingType) from the dataset by playerId.
+    for (const [teamId, ts] of Object.entries(teamStates) as [TeamId, import('@/types/team').TeamState][]) {
+      const entries: RetainedPlayerEntry[] = ts.squad.map(p => {
+        const meta = retentionMeta.get(p.playerId)
+        return {
+          playerId: p.playerId,
+          name: p.name,
+          retentionPrice: meta?.retentionPrice ?? p.soldPrice,
+          isOverseas: p.isOverseas,
+          role: p.role,
+          ...(meta?.bowlingType ? { bowlingType: meta.bowlingType } : {}),
+          released: false,
+        }
+      })
+      map.set(teamId, entries)
+    }
+  } else {
+    // Initial load (no trades yet) — build from dataset retentions directly
+    for (const rec of dataset.historicalRetentions ?? []) {
+      map.set(rec.teamId, rec.retainedPlayers.map(p => ({
+        playerId: p.playerId,
+        name: p.name ?? p.playerId,
+        retentionPrice: p.retentionPrice,
+        isOverseas: p.isOverseas,
+        role: p.role ?? 'BAT' as const,
+        ...(p.bowlingType ? { bowlingType: p.bowlingType } : {}),
+        released: false,
+      })))
+    }
+  }
+
   return map
 }
 
@@ -135,7 +169,9 @@ export function RetentionSetupScreen() {
     loadDataset(gameState.auctionYear)
       .then(ds => {
         setDataset(ds)
-        setRetentions(buildTeamRetentions(ds))
+        // Use gameState.teamStates if squads exist (post-trade) — otherwise fall back to dataset
+        const hasTrades = Object.values(gameState.teamStates).some(ts => ts.squad.length > 0)
+        setRetentions(buildTeamRetentions(ds, hasTrades ? gameState.teamStates : null))
       })
       .catch(e => setError(String(e)))
   }, [gameState?.auctionYear])
@@ -152,10 +188,11 @@ export function RetentionSetupScreen() {
   }, [])
 
   const resetTeam = useCallback((teamId: TeamId) => {
-    if (!dataset) return
-    const original = buildTeamRetentions(dataset).get(teamId) ?? []
+    if (!dataset || !gameState) return
+    const hasTrades = Object.values(gameState.teamStates).some(ts => ts.squad.length > 0)
+    const original = buildTeamRetentions(dataset, hasTrades ? gameState.teamStates : null).get(teamId) ?? []
     setRetentions(prev => { const n = new Map(prev); n.set(teamId, original); return n })
-  }, [dataset])
+  }, [dataset, gameState])
 
   const handleBeginAuction = useCallback(() => {
     if (!dataset || !gameState) return
@@ -173,7 +210,7 @@ export function RetentionSetupScreen() {
     }
 
     applyRetentionEdits(newTeamStates, allReleased)
-    navigate('/trade-window')
+    navigate('/auction')
   }, [dataset, gameState, retentions, applyRetentionEdits, navigate])
 
   // ── Loading / error states ─────────────────────────────────────────────────

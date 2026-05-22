@@ -33,13 +33,31 @@ export function getMinReservedPurse(
 
 /**
  * Maximum a team can safely bid without risking being unable to complete their squad.
+ *
+ * Reserve rules (applied as a floor — whichever is highest wins):
+ *   1. Marquee sets:       hold ₹30 Cr in reserve
+ *   2. Squad under 12:     hold ₹20 Cr in reserve
+ *   3. Always:             hold slotsNeeded × ₹0.20 Cr (min squad completion reserve)
  */
 export function getSafeBidLimit(
   teamState: TeamState,
   dataset: AuctionDataset,
+  currentSetName?: string,
+  currentSetIndex?: number,
 ): number {
-  const reserved = getMinReservedPurse(teamState, dataset)
-  return Math.max(0, teamState.currentPurse - reserved)
+  const minSquadReserve = getMinReservedPurse(teamState, dataset)
+
+  const isMarquee = currentSetName?.toLowerCase().includes('marquee') ?? false
+  const marqueeReserve = isMarquee ? 30 : 0
+
+  const squadSize = teamState.squad.length
+  const earlySquadReserve = squadSize < 12 ? 20 : 0
+
+  // Suppress unused param warning — kept for API compatibility
+  void currentSetIndex
+
+  const totalReserved = Math.max(minSquadReserve, marqueeReserve, earlySquadReserve)
+  return Math.max(0, teamState.currentPurse - totalReserved)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -370,9 +388,22 @@ export function validateSessionState(state: GameState): ValidationResult {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function getCurrentPlayer(state: GameState, dataset: AuctionDataset) {
+  // Re-auction uses a separate pool
+  if (state.isReauction) {
+    return state.reauctionPool?.[state.reauctionIndex] ?? null
+  }
+
   const setName = dataset.auctionSets[state.currentSetIndex]
   if (!setName) return null
   const players = getPlayersInSet(dataset, setName, state.releasedRetainedPlayers ?? [])
+
+  // Sets are shuffled — resolve actual player via setPlayerOrder, same as biddingEngine
+  const shuffledIds = state.setPlayerOrder?.[setName]
+  if (shuffledIds) {
+    const playerId = shuffledIds[state.currentPlayerIndex]
+    return players.find(p => p.playerId === playerId) ?? null
+  }
+
   return players[state.currentPlayerIndex] ?? null
 }
 

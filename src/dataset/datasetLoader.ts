@@ -32,6 +32,15 @@ export async function loadDataset(year: number): Promise<AuctionDataset> {
   }
 
   const dataset = raw as AuctionDataset
+
+  // Map finalPrice → marketValue so bidding engine has real auction prices as anchors
+  for (const player of dataset.players) {
+    const raw_player = player as PlayerRecord & { finalPrice?: number }
+    if (raw_player.finalPrice != null && (player.marketValue == null)) {
+      player.marketValue = raw_player.finalPrice
+    }
+  }
+
   cache.set(year, dataset)
   return dataset
 }
@@ -84,6 +93,48 @@ export function getReleasedPlayerSet(
     if (role === 'BWL') return bowlingType === 'spin' ? 'Indian Spinners' : 'Indian Fast Bowlers'
   }
   return 'Accelerated Set'
+}
+
+/**
+ * Returns comparable real sales for a player — retained/RTM players from the same dataset
+ * with known finalPrice, filtered by role and similarity. Used to ground LLM valuations.
+ */
+export function getComparableSales(
+  dataset: AuctionDataset,
+  player: { role: string; isOverseas: boolean; cappedStatus: string; basePrice: number },
+  maxResults = 5,
+): { name: string; finalPrice: number; isOverseas: boolean; cappedStatus: string }[] {
+  type RawPlayer = {
+    role: string; isOverseas: boolean; cappedStatus: string; basePrice: number
+    finalPrice?: number | null; name: string; auctionStatus: string
+  }
+
+  const raw = dataset.players as unknown as RawPlayer[]
+  const withPrice = raw.filter(p => (p.finalPrice ?? 0) > 0 && p.auctionStatus === 'sold')
+
+  // Score each candidate by similarity — same role required, then bonus for nationality/tier/price range
+  const scored = withPrice
+    .filter(p => p.role === player.role)
+    .map(p => {
+      let score = 0
+      if (p.isOverseas === player.isOverseas) score += 3
+      if (p.cappedStatus === player.cappedStatus) score += 2
+      // Prefer players in a similar base-price band (within 2× of each other)
+      const ratio = Math.max(p.basePrice, player.basePrice) / Math.min(p.basePrice, player.basePrice)
+      if (ratio <= 1.5) score += 2
+      else if (ratio <= 3) score += 1
+      return { p, score }
+    })
+    .sort((a, b) => b.score !== a.score ? b.score - a.score : (b.p.finalPrice ?? 0) - (a.p.finalPrice ?? 0))
+    .slice(0, maxResults)
+    .map(({ p }) => ({
+      name: p.name,
+      finalPrice: p.finalPrice!,
+      isOverseas: p.isOverseas,
+      cappedStatus: p.cappedStatus,
+    }))
+
+  return scored
 }
 
 /** Returns a player by ID. Throws if not found. */

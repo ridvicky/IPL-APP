@@ -35,7 +35,8 @@ export interface BidDecision {
 // Injected LLM result (Phase 2). Phase 1 passes null and pipeline uses static fallback.
 export interface LLMPersonaResult {
   interestLevel: number       // 0–100
-  suggestedMaxBid: number     // advisory; still capped by Rule Engine
+  personalCeiling: number     // franchise's true max — LLM is authoritative when present
+  jumpBid: number | null      // optional jump bid above minimum increment
   emotionalTriggers: string[]
   ownerComment: string        // shown in auction room UI
 }
@@ -74,7 +75,8 @@ export function runBiddingPipeline(
   }
 
   // ── Step 3: Safe bid limit ────────────────────────────────────────────────
-  const safeBidLimit = getSafeBidLimit(teamState, dataset)
+  const currentSetName = dataset.auctionSets[state.currentSetIndex] ?? ''
+  const safeBidLimit = getSafeBidLimit(teamState, dataset, currentSetName, state.currentSetIndex)
   if (safeBidLimit <= 0 || nextBid > safeBidLimit) {
     return pass(teamId, staticInterest, 'Insufficient safe purse to bid')
   }
@@ -87,19 +89,35 @@ export function runBiddingPipeline(
 
   // ── Step 6: Max bid calculation ───────────────────────────────────────────
   const blendedScore = blendScores(staticInterest, needScore, emotionScore, llmResult)
-  const maxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult)
+
+  // Emotional star bonus: former franchise players and capped stars drive 30% higher ceilings
+  // This models the real IPL phenomenon where teams go crazy for their own players
+  const isEmotionalTarget = currentPlayer.previousTeam === persona.teamId ||
+                            currentPlayer.rtmEligibleFor === persona.teamId
+  const isCapStar = currentPlayer.cappedStatus === 'capped' &&
+                    (currentPlayer.marketValue ?? 0) >= 14
+  const emotionalMultiplier = isEmotionalTarget ? 1.30 : isCapStar ? 1.10 : 1.0
+
+  const maxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue) * emotionalMultiplier
 
   // ── Step 7: Bid or pass ───────────────────────────────────────────────────
   if (nextBid > maxBid) {
     return pass(teamId, blendedScore, `Next bid ₹${nextBid.toFixed(2)} exceeds max ₹${maxBid.toFixed(2)}`)
   }
 
+  // Jump bid: LLM signals dominance by bidding above minimum increment
+  let finalBid = nextBid
+  if (llmResult?.jumpBid != null && llmResult.jumpBid > nextBid && llmResult.jumpBid <= maxBid) {
+    finalBid = llmResult.jumpBid
+    console.log(`[LLM] JUMP BID: ${teamId} ₹${finalBid.toFixed(1)}Cr (min was ₹${nextBid.toFixed(1)}Cr)`)
+  }
+
   return {
     teamId,
     action: 'bid',
-    bidAmount: nextBid,
+    bidAmount: finalBid,
     interestScore: blendedScore,
-    reasoning: `Interest ${blendedScore.toFixed(0)}/100 — bidding ₹${nextBid.toFixed(2)} (max ₹${maxBid.toFixed(2)})`,
+    reasoning: `Interest ${blendedScore.toFixed(0)}/100 — bidding ₹${finalBid.toFixed(2)} (max ₹${maxBid.toFixed(2)})`,
   }
 }
 
@@ -238,7 +256,7 @@ function computeEmotionScore(
   persona: FranchisePersona,
   _teamState: TeamState,
   player: PlayerRecord,
-  llmResult: LLMPersonaResult | null,
+  _llmResult: LLMPersonaResult | null,
 ): number {
   let score = 40 // neutral baseline
 
@@ -246,10 +264,8 @@ function computeEmotionScore(
   if (player.previousTeam === persona.teamId) score += 25
   if (player.rtmEligibleFor === persona.teamId) score += 20
 
-  // LLM-provided emotional triggers (Phase 2)
-  if (llmResult && llmResult.emotionalTriggers.length > 0) {
-    score += Math.min(30, llmResult.emotionalTriggers.length * 8)
-  }
+  // LLM-provided emotional triggers (Phase 2) — not used in new architecture
+  // (personalCeiling already incorporates emotional factors)
 
   // Auction style modifiers
   if (persona.auctionStyle === 'aggressive') score *= 1.15
@@ -286,14 +302,8 @@ function blendScores(
 /**
  * Step 6 — Calculate the maximum this team will bid.
  *
- * IPL reality: ₹2Cr base players routinely sell for ₹20–30Cr (10–15× base).
- * ₹0.3Cr base players: 3–8× base. Elite marquee: up to 25× base.
- *
- * Formula:
- *   tierMultiplier — scales with log of base price (higher base = more headroom)
- *   desireFraction — 0–1, from blended interest score
- *   maxBidMultiplier — persona aggression (1.0–2.0)
- *   Result: base × tier × desire × persona, capped by safe purse
+ * When LLM result is present: personalCeiling IS the max — LLM is authoritative.
+ * When no LLM (fallback path): formula-based estimate using base price + blended score.
  */
 function computeMaxBid(
   blendedScore: number,
@@ -301,24 +311,39 @@ function computeMaxBid(
   safeBidLimit: number,
   persona: FranchisePersona,
   llmResult: LLMPersonaResult | null,
+  marketValue?: number | null,
 ): number {
-  // Tier multiplier: ₹0.3Cr → ~8×, ₹2Cr → ~18×, ₹2Cr+ → ~22× ceiling
-  // log10(0.3+1)=0.114 → 8.9; log10(2+1)=0.477 → 18.1; log10(3+1)=0.602 → 21.6
-  const tierMultiplier = 5 + Math.log10(Math.max(basePrice, 0.3) + 1) * 27
+  // Absolute hard ceiling — only Rishabh Pant (₹27 Cr) has ever come close
+  const ABSOLUTE_CAP = 28
 
-  const desireFraction = blendedScore / 100
-  let maxBid = basePrice * desireFraction * tierMultiplier * persona.maxBidMultiplier
-
-  // ±20% natural variance — avoids identical cutoff prices across teams
-  maxBid *= 0.80 + Math.random() * 0.40
-
-  // LLM advisory (Phase 2) — blend in LLM suggested ceiling
-  if (llmResult && llmResult.suggestedMaxBid > 0) {
-    maxBid = maxBid * 0.35 + llmResult.suggestedMaxBid * 0.65
+  if (llmResult && llmResult.personalCeiling > 0) {
+    const variance = 0.95 + Math.random() * 0.10
+    const ceiling = llmResult.personalCeiling * variance
+    return Math.min(ceiling, safeBidLimit, ABSOLUTE_CAP)
   }
 
-  // Hard ceiling: never exceed safe bid limit
-  return Math.min(maxBid, safeBidLimit)
+  // marketValue = actual 2025 auction result — primary anchor for formula path
+  // desireFraction scales how much of market value a team is willing to pay,
+  // persona multiplier adds the 'overpay' character (RCB/MI pay more than RR/DC)
+  if (marketValue && marketValue > 0) {
+    const desireFraction = blendedScore / 100
+    let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
+    maxBid *= 0.90 + Math.random() * 0.20
+    return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
+  }
+
+  // Pure formula fallback (no real price known) — tighter caps, multiplier capped at 1.5
+  // desireFraction × realisticCap × bounded multiplier produces realistic ranges
+  const realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
+                     : basePrice < 2  ? Math.min(basePrice * 6, 10)   // ₹2 Cr base → max ₹12 Cr formula ceiling
+                     : basePrice < 5  ? Math.min(basePrice * 5, 16)   // ₹2–5 Cr → max ₹16 Cr
+                     : basePrice < 10 ? Math.min(basePrice * 3, 22)   // ₹5–10 Cr → max ₹22 Cr
+                     :                  Math.min(basePrice * 2, 26)   // ₹10+ Cr → max ₹26 Cr
+  const desireFraction = blendedScore / 100
+  const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.5)  // cap formula multiplier
+  let maxBid = realisticCap * desireFraction * effectiveMultiplier
+  maxBid *= 0.85 + Math.random() * 0.25
+  return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -342,8 +367,23 @@ export function getCurrentAuctionPlayer(
   state: GameState,
   dataset: AuctionDataset,
 ): PlayerRecord | null {
+  // Re-auction phase: serve players from reauctionPool
+  if (state.isReauction) {
+    return state.reauctionPool?.[state.reauctionIndex] ?? null
+  }
+
   const setName = dataset.auctionSets[state.currentSetIndex]
   if (!setName) return null
+
+  const shuffledIds = state.setPlayerOrder?.[setName]
+  if (shuffledIds) {
+    const playerId = shuffledIds[state.currentPlayerIndex]
+    if (!playerId) return null
+    const allInSet = getPlayersInSet(dataset, setName, state.releasedRetainedPlayers ?? [])
+    return allInSet.find(p => p.playerId === playerId) ?? null
+  }
+
+  // Fallback: unshuffled (first set before shuffle is generated)
   const players = getPlayersInSet(dataset, setName, state.releasedRetainedPlayers ?? [])
   return players[state.currentPlayerIndex] ?? null
 }
