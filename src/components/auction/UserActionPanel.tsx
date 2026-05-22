@@ -4,7 +4,6 @@ import type { GameState } from '@/types/game'
 import type { PlayerRecord } from '@/types/player'
 import type { TeamId } from '@/types/team'
 import { getBidIncrement } from '@/dataset/datasetLoader'
-import { getSafeBidLimit } from '@/engine/ruleEngine'
 
 interface UserActionPanelProps {
   state: GameState
@@ -26,18 +25,17 @@ export function UserActionPanel({
   const [showCustom, setShowCustom] = useState(false)
   const [customError, setCustomError] = useState('')
 
-  const currentBid   = bidState?.currentBid ?? 0
-  const increment    = getBidIncrement(dataset, currentBid)
-  const nextBid      = currentBid === 0 ? currentPlayer.basePrice : currentBid + increment
-  const safeBidLimit = getSafeBidLimit(teamState, dataset)
-  const canBid       = nextBid <= safeBidLimit && teamState.currentPurse >= nextBid
-  const purseAfter   = teamState.currentPurse - nextBid
+  const currentBid = bidState?.currentBid ?? 0
+  const increment  = getBidIncrement(dataset, currentBid)
+  const nextBid    = currentBid === 0 ? currentPlayer.basePrice : currentBid + increment
+  const canBid     = teamState.currentPurse >= nextBid
+  const purseAfter = teamState.currentPurse - nextBid
 
   const handleCustomBid = () => {
     const amount = parseFloat(customBid)
     if (isNaN(amount)) { setCustomError('Enter a valid amount'); return }
     if (amount < nextBid) { setCustomError(`Minimum bid is ₹${nextBid.toFixed(2)} Cr`); return }
-    if (amount > safeBidLimit) { setCustomError(`Max safe bid is ₹${safeBidLimit.toFixed(2)} Cr`); return }
+    if (amount > teamState.currentPurse) { setCustomError(`You only have ₹${teamState.currentPurse.toFixed(2)} Cr`); return }
     setCustomError('')
     onBid(amount)
     setCustomBid('')
@@ -118,7 +116,7 @@ export function UserActionPanel({
                 type="number"
                 step={increment}
                 min={nextBid}
-                max={safeBidLimit}
+                max={teamState.currentPurse}
                 value={customBid}
                 onChange={e => { setCustomBid(e.target.value); setCustomError('') }}
                 placeholder={`Min ₹${nextBid.toFixed(2)}`}
@@ -154,11 +152,6 @@ export function UserActionPanel({
         )}
       </div>
 
-      {safeBidLimit < nextBid && (
-        <p className="text-ipl-accent text-xs text-center pb-3 px-4 -mt-1">
-          Must reserve ₹{(teamState.currentPurse - safeBidLimit).toFixed(1)} Cr for remaining slots
-        </p>
-      )}
     </div>
   )
 }
