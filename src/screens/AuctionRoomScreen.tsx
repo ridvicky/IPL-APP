@@ -695,7 +695,7 @@ export function AuctionRoomScreen() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Speed control */}
           <div className="flex rounded-lg overflow-hidden border border-white/10">
             {([1, 2, 3] as const).map(s => (
@@ -706,10 +706,26 @@ export function AuctionRoomScreen() {
               >{s}×</button>
             ))}
           </div>
-          <div className="flex items-center gap-1.5 bg-white/5 rounded-lg px-2.5 py-1.5">
+          <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1.5">
             <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
-            <span className="text-gray-700 text-xs">left</span>
           </div>
+          {/* Quick squad access */}
+          <button
+            onClick={() => navigate('/my-squad')}
+            className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-ipl-accent/15 border border-ipl-accent/30 hover:bg-ipl-accent/25 active:scale-95 transition-all flex-shrink-0"
+            title="My Squad"
+          >
+            <span className="text-sm leading-none">⭐</span>
+            <span className="text-[8px] text-ipl-accent font-bold leading-none mt-0.5">Mine</span>
+          </button>
+          <button
+            onClick={() => navigate('/all-squads')}
+            className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/12 hover:bg-white/15 active:scale-95 transition-all flex-shrink-0"
+            title="All Squads"
+          >
+            <span className="text-sm leading-none">🏟</span>
+            <span className="text-[8px] text-gray-400 font-bold leading-none mt-0.5">All</span>
+          </button>
           <button
             onClick={() => setMenuOpen(true)}
             className="flex flex-col gap-1 justify-center items-center w-9 h-9 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
@@ -743,11 +759,9 @@ export function AuctionRoomScreen() {
               />
             </div>
 
-            {/* Live reaction bubble — mobile only, floating transient notification */}
+            {/* Live reaction bubble — mobile only, purely visual, never blocks taps */}
             <div className="lg:hidden fixed top-16 left-3 right-3 z-30 pointer-events-none">
-              <div className="pointer-events-auto">
-                <LiveReactionBubble log={gameState.auctionLog ?? []} />
-              </div>
+              <LiveReactionBubble log={gameState.auctionLog ?? []} />
             </div>
             {/* Auctioneer commentary banner */}
             {auctioneeerLine && (

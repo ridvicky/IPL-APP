@@ -120,9 +120,11 @@ export function executeTrade(
     ...byGives.map(p => ({ ...p, soldTo: proposedTo as TeamId })),
   ]
 
-  // Cash exchange
-  byState.currentPurse = byState.currentPurse - byLeg.cashAmount + toLeg.cashAmount
-  toState.currentPurse = toState.currentPurse - toLeg.cashAmount + byLeg.cashAmount
+  // Purse adjustment: reclaim the retained cost of given players, pay the retained cost of received players, then exchange cash
+  const byGivesValue = byGives.reduce((s, p) => s + p.soldPrice, 0)
+  const toGivesValue = toGives.reduce((s, p) => s + p.soldPrice, 0)
+  byState.currentPurse = byState.currentPurse + byGivesValue - toGivesValue - byLeg.cashAmount + toLeg.cashAmount
+  toState.currentPurse = toState.currentPurse + toGivesValue - byGivesValue - toLeg.cashAmount + byLeg.cashAmount
 
   // Overseas count recalculate
   byState.overseasCount = byState.squad.filter(p => p.isOverseas).length
