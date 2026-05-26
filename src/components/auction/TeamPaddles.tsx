@@ -78,42 +78,42 @@ export function TeamPaddles({ teamStates, bidState, userTeam, maximumSquadSize, 
                 <span className="w-2 h-2 rounded-full bg-green-400 block" />
               )}
               {status === 'passed' && (
-                <span className="text-[9px] text-gray-700 font-black leading-none">—</span>
+                <span className="text-[9px] text-gray-500 font-black leading-none">—</span>
               )}
               {status === 'skipped' && (
-                <span className="text-[9px] text-gray-800 font-black leading-none">✕</span>
+                <span className="text-[9px] text-gray-500 font-black leading-none">✕</span>
               )}
             </div>
 
             {/* Team name */}
             <span className={`font-black text-sm leading-tight ${
-              isLeading ? c.text : isDead || isFull ? 'text-gray-700' : 'text-gray-200'
+              isLeading ? c.text : isDead || isFull ? 'text-gray-500' : 'text-gray-200'
             }`}>
               {teamId}
             </span>
 
             {/* Squad count */}
             <span className={`text-[10px] font-bold mt-0.5 ${
-              isFull ? 'text-amber-500' : isLeading ? c.text : 'text-gray-600'
+              isFull ? 'text-amber-400' : isLeading ? c.text : isDead ? 'text-gray-600' : 'text-gray-400'
             }`}>
               {squadCount}/{maximumSquadSize}
             </span>
 
             {/* Purse */}
             <span className={`text-[11px] font-mono font-bold mt-0.5 ${
-              isLeading ? c.text : isDead || isFull ? 'text-gray-800' : isLowPurse ? 'text-red-700' : 'text-gray-500'
+              isLeading ? c.text : isDead || isFull ? 'text-gray-600' : isLowPurse ? 'text-red-400' : 'text-gray-400'
             }`}>
               ₹{ts?.currentPurse.toFixed(0)}Cr
             </span>
 
             {/* Status label */}
             {isFull && (
-              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-amber-600">
+              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-amber-400">
                 FULL
               </span>
             )}
             {isLowPurse && !isFull && (
-              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-red-800">
+              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-red-400">
                 LOW
               </span>
             )}

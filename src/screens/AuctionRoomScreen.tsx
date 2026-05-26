@@ -662,7 +662,7 @@ export function AuctionRoomScreen() {
                 onClick={() => { setMenuOpen(false); navigate('/') }}
                 className="px-5 py-4 text-left text-gray-400 hover:text-white hover:bg-white/5 text-sm transition-colors"
               >
-                ← Home <span className="text-gray-700 text-xs ml-2">Session saved</span>
+                ← Home <span className="text-gray-500 text-xs ml-2">Session saved</span>
               </button>
               <button
                 onClick={() => { setMenuOpen(false); setQuitConfirm(true) }}
@@ -711,23 +711,23 @@ export function AuctionRoomScreen() {
             <p className="text-white font-bold text-xs leading-tight truncate">
               {gameState.isReauction ? '🔄 Re-auction' : setName}
             </p>
-            <p className="text-gray-600 text-[10px] leading-tight">
+            <p className="text-gray-400 text-[10px] leading-tight">
               {gameState.isReauction
                 ? `${gameState.reauctionIndex + 1}/${gameState.reauctionPool.length} · 50% base`
                 : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · Player ${gameState.currentPlayerIndex + 1}/${playersInSet.length}`
               }
             </p>
-            <p className="text-[9px] leading-tight mt-0.5 text-gray-700">
-              <span className="text-blue-500">{squadComp.BAT}B</span>
-              <span className="text-gray-800 mx-0.5">·</span>
-              <span className="text-green-600">{squadComp.BWL}P</span>
-              <span className="text-gray-800 mx-0.5">·</span>
-              <span className="text-purple-500">{squadComp.AR}A</span>
-              <span className="text-gray-800 mx-0.5">·</span>
-              <span className="text-yellow-600">{squadComp.WK}W</span>
-              <span className="text-gray-800 mx-1">|</span>
-              <span className="text-orange-500">🌍{userOverseas}/{dataset.overseasLimit}</span>
-              {rtmRemaining > 0 && <span className="text-gray-700 mx-1">| RTM {rtmRemaining}</span>}
+            <p className="text-[9px] leading-tight mt-0.5">
+              <span className="text-blue-400">{squadComp.BAT}B</span>
+              <span className="text-gray-600 mx-0.5">·</span>
+              <span className="text-green-400">{squadComp.BWL}P</span>
+              <span className="text-gray-600 mx-0.5">·</span>
+              <span className="text-purple-400">{squadComp.AR}A</span>
+              <span className="text-gray-600 mx-0.5">·</span>
+              <span className="text-yellow-400">{squadComp.WK}W</span>
+              <span className="text-gray-600 mx-1">|</span>
+              <span className="text-orange-400">🌍{userOverseas}/{dataset.overseasLimit}</span>
+              {rtmRemaining > 0 && <span className="text-cyan-400 mx-1">| RTM {rtmRemaining}</span>}
             </p>
           </div>
         </div>
@@ -819,7 +819,7 @@ export function AuctionRoomScreen() {
               />
             ) : (
               <div className="bg-white/5 rounded-2xl flex items-center justify-center py-16">
-                <p className="text-gray-700">Preparing player...</p>
+                <p className="text-gray-500">Preparing player...</p>
               </div>
             )}
 
@@ -872,7 +872,7 @@ export function AuctionRoomScreen() {
                   : 'bg-white/4 border-white/8'
               }`}>
                 <span className="text-xl">{userHasSkipped ? '👁' : '🤫'}</span>
-                <p className={`text-sm ${userHasSkipped ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-sm ${userHasSkipped ? 'text-gray-500' : 'text-gray-400'}`}>
                   {userHasSkipped
                     ? 'You skipped — watching the room'
                     : 'You passed this round — watching teams battle'}

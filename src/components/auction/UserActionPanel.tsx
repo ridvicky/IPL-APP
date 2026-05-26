@@ -70,7 +70,7 @@ export function UserActionPanel({
         className={`w-full py-6 font-black text-2xl tracking-widest transition-all duration-150
           ${canBid && !disabled
             ? 'bg-gradient-to-r from-ipl-accent via-ipl-accent to-red-600 text-white active:scale-[0.98] hover:opacity-95 shadow-lg shadow-ipl-accent/30'
-            : 'bg-ipl-dark text-gray-700 cursor-not-allowed'
+            : 'bg-ipl-dark text-gray-500 cursor-not-allowed'
           }`}
       >
         {canBid && !disabled ? (
@@ -93,7 +93,7 @@ export function UserActionPanel({
         >
           <span className="text-base leading-none">✋</span>
           <span className="font-black text-xs tracking-wide mt-1">PASS ROUND</span>
-          <span className="text-gray-700 text-[10px]">re-enter later</span>
+          <span className="text-gray-500 text-[10px]">re-enter later</span>
         </button>
         <button
           disabled={disabled}
@@ -103,7 +103,7 @@ export function UserActionPanel({
         >
           <span className="text-base leading-none">⏭</span>
           <span className="font-black text-xs tracking-wide mt-1">SKIP PLAYER</span>
-          <span className="text-gray-700 text-[10px]">not interested</span>
+          <span className="text-gray-500 text-[10px]">not interested</span>
         </button>
       </div>
 
@@ -123,7 +123,7 @@ export function UserActionPanel({
                 autoFocus
                 className="flex-1 bg-ipl-dark border border-ipl-border rounded-xl px-3 py-2.5
                            text-white text-sm focus:outline-none focus:border-ipl-accent/50
-                           placeholder:text-gray-700"
+                           placeholder:text-gray-500"
               />
               <button
                 onClick={handleCustomBid}
@@ -144,7 +144,7 @@ export function UserActionPanel({
         ) : (
           <button
             onClick={() => { setShowCustom(true); setCustomBid(nextBid.toFixed(2)); setCustomError('') }}
-            className="w-full py-2.5 text-gray-700 hover:text-gray-400 text-xs tracking-wide
+            className="w-full py-2.5 text-gray-500 hover:text-gray-300 text-xs tracking-wide
                        transition-colors font-semibold"
           >
             ↑  Enter jump bid amount

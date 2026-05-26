@@ -141,7 +141,7 @@ export function PlayerCard({ player, currentBid, currentLeader, formContext }: P
                 <span className="text-lg text-gray-500 font-semibold ml-1">Cr</span>
               </p>
             </div>
-            <p className="text-gray-700 text-sm font-semibold">No bids yet</p>
+            <p className="text-gray-500 text-sm font-semibold">No bids yet</p>
           </div>
         )}
       </div>
