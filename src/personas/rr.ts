@@ -15,6 +15,8 @@ export const RR_PERSONA: FranchisePersona = {
   rtmThreshold: 0.75,
   tradeOpenness: 0.65,
   maxBidMultiplier: 1.5,  // tight purse — disciplined
+  potentialWeight: 0.90,  // RR moneyball model — Buttler, Jaiswal found as raw unknowns
+  youthThreshold: 24,
 
   emotionalTriggers: [
     'uncapped talent',

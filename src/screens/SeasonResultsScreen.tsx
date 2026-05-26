@@ -170,7 +170,7 @@ export function SeasonResultsScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker pb-24">
       {/* Champion hero */}
-      <div className={`bg-gradient-to-b ${winColors?.from ?? 'from-ipl-dark'} ${winColors?.to ?? 'to-ipl-darker'} px-4 pt-10 pb-6`}>
+      <div className={`bg-gradient-to-b ${winColors?.from ?? 'from-ipl-dark'} ${winColors?.to ?? 'to-ipl-darker'} px-4 pb-6 safe-top`}>
         <div className="text-center mb-4">
           <p className="text-white/60 text-sm uppercase tracking-widest mb-1">IPL {result.year} Champions</p>
           <div className="flex items-center justify-center gap-3 mb-2">

@@ -15,6 +15,8 @@ export const SRH_PERSONA: FranchisePersona = {
   rtmThreshold: 0.70,
   tradeOpenness: 0.50,
   maxBidMultiplier: 2.0,
+  potentialWeight: 0.65,  // SRH analytical — values stats over age per se
+  youthThreshold: 24,
 
   emotionalTriggers: [
     'former SRH player',

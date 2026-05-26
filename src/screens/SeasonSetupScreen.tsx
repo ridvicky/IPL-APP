@@ -76,7 +76,7 @@ export function SeasonSetupScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker pb-10">
       {/* Header */}
-      <div className="bg-gradient-to-b from-ipl-purple/30 to-transparent px-4 pt-10 pb-6">
+      <div className="bg-gradient-to-b from-ipl-purple/30 to-transparent px-4 pb-6 safe-top">
         <button className="text-gray-500 hover:text-white text-sm mb-4 transition-colors" onClick={() => navigate(-1)}>
           ← Back
         </button>

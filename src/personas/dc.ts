@@ -15,6 +15,8 @@ export const DC_PERSONA: FranchisePersona = {
   rtmThreshold: 0.70,
   tradeOpenness: 0.55,
   maxBidMultiplier: 1.7,
+  potentialWeight: 0.70,  // DC known for blooding youngsters — Prithvi Shaw, Axar era
+  youthThreshold: 23,
 
   emotionalTriggers: [
     'former DC player',

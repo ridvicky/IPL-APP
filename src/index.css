@@ -9,6 +9,10 @@
 }
 
 /* BottomNav already uses .safe-bottom — wire it up here */
+.safe-top {
+  padding-top: var(--status-bar-height, env(safe-area-inset-top));
+}
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }

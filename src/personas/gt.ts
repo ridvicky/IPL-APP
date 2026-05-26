@@ -15,6 +15,8 @@ export const GT_PERSONA: FranchisePersona = {
   rtmThreshold: 0.72,
   tradeOpenness: 0.55,
   maxBidMultiplier: 1.65,
+  potentialWeight: 0.75,  // GT built a champion squad on smart youth scouting (Sai Sudharsan)
+  youthThreshold: 23,
 
   emotionalTriggers: [
     'former GT player',

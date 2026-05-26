@@ -16,6 +16,8 @@ export const CSK_PERSONA: FranchisePersona = {
   rtmThreshold: 0.80,       // will RTM core players
   tradeOpenness: 0.40,      // rarely trades — builds stable squads
   maxBidMultiplier: 1.8,    // willing to overbid for targets
+  potentialWeight: 0.30,    // CSK prefers proven experience over raw upside
+  youthThreshold: 21,
 
   emotionalTriggers: [
     'former CSK player',

@@ -113,7 +113,7 @@ export function HomeScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker flex flex-col">
       {/* ── HERO HEADER ── */}
-      <header className="relative overflow-hidden">
+      <header className="relative overflow-hidden safe-top">
         {/* Stadium night radial glow */}
         <div className="absolute inset-0 bg-gradient-to-b from-black via-ipl-darker to-ipl-darker" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-ipl-accent/10 rounded-full blur-3xl pointer-events-none" />

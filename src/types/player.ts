@@ -4,6 +4,8 @@ export type PlayerNationality = 'indian' | 'overseas'
 
 export type PlayerCappedStatus = 'capped' | 'uncapped'
 
+export type ProspectTier = 'elite' | 'promising' | 'domestic' | 'filler'
+
 /** A player record exactly as loaded from the auction dataset. Immutable after load. */
 export interface PlayerRecord {
   playerId: string
@@ -20,6 +22,12 @@ export interface PlayerRecord {
   rtmEligibleFor: string | null
   /** Real-world auction final price (Cr) — set when the actual IPL auction result is known */
   marketValue?: number | null
+  /** Uncapped players only — age at time of auction */
+  age?: number
+  /** Uncapped players only — talent/potential rating 1–10 */
+  potential?: number
+  /** Uncapped players only — derived from potential */
+  prospectTier?: ProspectTier
 }
 
 /**

@@ -15,6 +15,8 @@ export const PBKS_PERSONA: FranchisePersona = {
   rtmThreshold: 0.60,
   tradeOpenness: 0.50,
   maxBidMultiplier: 2.3,  // PBKS often overpays — a franchise known for impulse bids
+  potentialWeight: 0.55,  // PBKS chases immediate impact more than long-term potential
+  youthThreshold: 22,
 
   emotionalTriggers: [
     'big-hitting opener',

@@ -111,11 +111,10 @@ export function userExerciseRTM(dataset: AuctionDataset): string | null {
   const validation = validateRTM(state, dataset, userTeam)
   if (!validation.valid) return validation.reason
 
-  // Mark RTM as used, set user as new leader at current bid price
-  const { setBidState } = useGameStore.getState()
+  const { setBidState, incrementRTMUsed } = useGameStore.getState()
   const bidState = state.currentBidState!
   setBidState({ ...bidState, rtmPending: null, currentLeader: userTeam })
-  // RTM exercised — confirm sale immediately (RTM means winning at that price)
+  incrementRTMUsed(userTeam)
   confirmSale(dataset, userTeam, bidState.currentBid)
   return null
 }
@@ -334,6 +333,7 @@ export function resolvePlayerSale(dataset: AuctionDataset): void {
         .catch(() => {})
     }
     if (rtmDecision.exercisesRTM) {
+      useGameStore.getState().incrementRTMUsed(rtmTeam)
       confirmSale(dataset, rtmTeam, salePrice)
     } else {
       confirmSale(dataset, winningTeam, salePrice)
@@ -543,4 +543,60 @@ export function validateAndStart(_dataset: AuctionDataset): string | null {
   if (!check.valid) return check.reason
 
   return null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Accelerated auction pool selection
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ACCELERATED_TOTAL = 30
+export const USER_MAX_PICKS = 5
+
+/**
+ * Picks AI nominations for the accelerated auction.
+ * Each team scores unsold players based on squad need + base price.
+ * The top scorers across all teams fill the remaining slots.
+ */
+export function pickAIAcceleratedPlayers(
+  dataset: AuctionDataset,
+  userPickIds: string[],
+): string[] {
+  const state = useGameStore.getState().gameState
+  if (!state) return []
+
+  const userPickSet = new Set(userPickIds)
+  const available = state.unsoldPlayers.filter(p => !userPickSet.has(p.playerId))
+  const aiSlots = ACCELERATED_TOTAL - userPickIds.length
+
+  if (available.length <= aiSlots) {
+    return available.map(p => p.playerId)
+  }
+
+  // Score each candidate across all AI teams weighted by squad need
+  const scores = new Map<string, number>()
+  for (const player of available) {
+    let total = 0
+    for (const teamId of dataset.teams) {
+      if (teamId === state.userFranchise) continue
+      const ts = state.teamStates[teamId]
+      if (!ts) continue
+      if (ts.squad.length >= dataset.maximumSquadSize) continue
+      if (player.isOverseas && ts.overseasCount >= dataset.overseasLimit) continue
+
+      const roleCounts: Record<string, number> = { WK: 0, BAT: 0, AR: 0, BWL: 0 }
+      for (const sq of ts.squad) roleCounts[sq.role] = (roleCounts[sq.role] ?? 0) + 1
+
+      const roleGap = Math.max(0, 3 - (roleCounts[player.role] ?? 0))
+      const affordScore = ts.currentPurse > player.basePrice * 2 ? 1 : 0.3
+      const baseScore = Math.min(player.basePrice / 2, 1)
+
+      total += roleGap * 2 + baseScore + affordScore
+    }
+    scores.set(player.playerId, total)
+  }
+
+  return [...scores.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, aiSlots)
+    .map(([id]) => id)
 }

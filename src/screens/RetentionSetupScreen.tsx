@@ -113,7 +113,7 @@ function buildPlayerRecord(
     auctionSet: targetSet,
     auctionSetOrder: minOrder,
     previousTeam,
-    rtmEligibleFor: null,
+    rtmEligibleFor: previousTeam,  // released retained players keep RTM eligibility for their old team
   }
 }
 
@@ -247,7 +247,7 @@ export function RetentionSetupScreen() {
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-white/10 bg-black/60 px-5 py-4 flex items-center justify-between flex-shrink-0">
+      <header className="border-b border-white/10 bg-black/60 px-5 py-4 flex items-center justify-between flex-shrink-0 safe-top">
         <div>
           <p className="text-ipl-gold font-black text-lg">IPL {gameState.auctionYear} Mega Auction</p>
           <p className="text-gray-500 text-xs mt-0.5">Review and edit team retentions before the auction</p>
@@ -427,20 +427,6 @@ export function RetentionSetupScreen() {
               const regular = getPlayersInSet(dataset, setName)
               const total = regular.length + releasedForSet.length
 
-              // For Accelerated Set: show breakdown by role
-              const isAccelerated = setName === 'Accelerated Set'
-              const roleGroups = isAccelerated
-                ? {
-                    'Indian Batters': regular.filter(p => !p.isOverseas && p.role === 'BAT'),
-                    'Indian Bowlers': regular.filter(p => !p.isOverseas && p.role === 'BWL'),
-                    'Indian All-Rounders': regular.filter(p => !p.isOverseas && p.role === 'AR'),
-                    'Indian Wicket-Keepers': regular.filter(p => !p.isOverseas && p.role === 'WK'),
-                    'Overseas Batters': regular.filter(p => p.isOverseas && p.role === 'BAT'),
-                    'Overseas Bowlers': regular.filter(p => p.isOverseas && p.role === 'BWL'),
-                    'Overseas All-Rounders': regular.filter(p => p.isOverseas && p.role === 'AR'),
-                    'Overseas Wicket-Keepers': regular.filter(p => p.isOverseas && p.role === 'WK'),
-                  }
-                : null
 
               return (
                 <div key={setName} className="bg-white/3 border border-white/8 rounded-xl overflow-hidden">
@@ -454,19 +440,7 @@ export function RetentionSetupScreen() {
                     </span>
                   </div>
 
-                  {isAccelerated && roleGroups ? (
-                    // Breakdown by role for Accelerated Set
-                    <div className="px-4 py-3 grid grid-cols-2 gap-2">
-                      {Object.entries(roleGroups).filter(([, arr]) => arr.length > 0).map(([label, arr]) => (
-                        <div key={label} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
-                          <span className="text-gray-500 text-xs">{label}</span>
-                          <span className="text-gray-300 text-xs font-bold">{arr.length}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    // Regular set: show player chips
-                    <div className="px-4 py-2.5 flex flex-wrap gap-1.5">
+                  <div className="px-4 py-2.5 flex flex-wrap gap-1.5">
                       {releasedForSet.map(e => (
                         <span key={e.playerId} className="text-xs text-orange-300 bg-orange-900/30 border border-orange-700/30 rounded px-2 py-0.5">
                           {e.name} ★
@@ -482,7 +456,6 @@ export function RetentionSetupScreen() {
                         <span className="text-xs text-gray-600 px-2 py-0.5">+{regular.length - 18} more</span>
                       )}
                     </div>
-                  )}
                 </div>
               )
             })}

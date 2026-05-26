@@ -14,6 +14,7 @@ export type AuctionPhase =
   | 'unsold-confirmed'
   | 'set-complete'
   | 'auction-complete'
+  | 'accelerated-selection'
   | 'season-setup'
   | 'season-simulation'
   | 'season-complete'
@@ -46,6 +47,7 @@ export interface GameState {
   isReauction: boolean                      // true during the re-auction phase (unsold at 50% base)
   reauctionPool: PlayerRecord[]             // unsold players with halved base prices
   reauctionIndex: number                    // current position in reauctionPool
+  acceleratedPicks: string[]               // playerIds selected for the accelerated auction pool
   tradeHistory: TradeRecord[]
   auctionLog: string[]
   seasonSetup: SeasonSetup | null

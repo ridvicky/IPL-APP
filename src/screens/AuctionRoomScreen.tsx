@@ -16,6 +16,7 @@ import { useSessionStore } from '@/store/sessionStore'
 import { loadSession } from '@/session/sessionManager'
 import {
   userBid, userInterruptBid, userPass, userSkipPlayer, userExerciseRTM, userDeclineRTM,
+  pickAIAcceleratedPlayers, ACCELERATED_TOTAL, USER_MAX_PICKS,
   runOneAIDecision, isBiddingOver, resolvePlayerSale,
   startPlayerAuction, advanceAuction,
 } from '@/controllers/auctionController'
@@ -23,6 +24,7 @@ import { getCurrentAuctionPlayer } from '@/engine/biddingEngine'
 import { getBidIncrement, getPlayersInSet, loadDataset } from '@/dataset/datasetLoader'
 import { fetchAuctioneerComment, getFormContext } from '@/llm/personaLayer'
 import type { AuctionDataset } from '@/types/dataset'
+import type { GameState } from '@/types/game'
 import type { TeamId } from '@/types/team'
 
 const BID_TIMER_SECONDS    = 10
@@ -418,6 +420,7 @@ export function AuctionRoomScreen() {
   // ── Auction complete ──────────────────────────────────────────────────────
   if (gameState.phase === 'auction-complete') {
     const unsoldCount = gameState.unsoldPlayers.length
+    const canAccelerate = unsoldCount > 0
     return (
       <div className="min-h-screen bg-ipl-darker flex items-center justify-center p-4">
         <div className="text-center max-w-md animate-fade-in w-full">
@@ -428,19 +431,19 @@ export function AuctionRoomScreen() {
           </p>
           <p className="text-gray-500 text-sm mb-6">IPL {gameState.auctionYear}</p>
 
-          {unsoldCount > 0 && (
+          {canAccelerate && (
             <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-left">
-              <p className="text-amber-400 font-black text-sm mb-1">🔄 Re-auction Available</p>
+              <p className="text-amber-400 font-black text-sm mb-1">⚡ Accelerated Auction</p>
               <p className="text-amber-200/70 text-xs leading-relaxed">
-                {unsoldCount} players went unsold. In real IPL, these go back at 50% base price — teams often snag bargains here.
+                {unsoldCount} players went unsold. Pick up to {USER_MAX_PICKS} players you want — AI teams will nominate the rest to fill {ACCELERATED_TOTAL} slots at 50% base price.
               </p>
             </div>
           )}
 
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
-            {unsoldCount > 0 && (
-              <Button variant="secondary" size="lg" onClick={() => useGameStore.getState().startReauction()}>
-                🔄 Re-auction {unsoldCount} unsold at 50% base
+            {canAccelerate && (
+              <Button variant="secondary" size="lg" onClick={() => useGameStore.getState().startAcceleratedSelection()}>
+                ⚡ Start Accelerated Auction
               </Button>
             )}
             <Button variant="primary" size="lg" onClick={() => navigate('/final-squad')}>
@@ -452,6 +455,16 @@ export function AuctionRoomScreen() {
           </div>
         </div>
       </div>
+    )
+  }
+
+  // ── Accelerated auction selection ─────────────────────────────────────────
+  if (gameState.phase === 'accelerated-selection') {
+    return (
+      <AcceleratedSelectionScreen
+        dataset={dataset}
+        gameState={gameState}
+      />
     )
   }
 
@@ -479,19 +492,23 @@ export function AuctionRoomScreen() {
 
   // ── RTM ───────────────────────────────────────────────────────────────────
   if (gameState.phase === 'rtm-decision' && bidState?.rtmPending === userTeam && currentPlayer) {
+    const userTs = gameState.teamStates[userTeam]
+    const rtmSlotsLeft = (userTs?.rtmSlotsAvailable ?? 0) - (userTs?.rtmSlotsUsed ?? 0)
     return (
       <div className="min-h-screen bg-black/95 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-ipl-card border-2 border-ipl-gold rounded-2xl p-7 flex flex-col gap-5">
           <div className="text-center">
             <p className="text-ipl-gold text-3xl font-black mb-1">RTM Available!</p>
-            <p className="text-gray-400 text-sm">Right to Match</p>
+            <p className="text-gray-400 text-sm">Right to Match — {rtmSlotsLeft} slot{rtmSlotsLeft !== 1 ? 's' : ''} remaining</p>
           </div>
           <div className="bg-ipl-dark rounded-xl p-4 text-center">
             <p className="text-white font-black text-xl">{currentPlayer.name}</p>
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-gray-400 text-xs mt-0.5">{currentPlayer.role} · {currentPlayer.isOverseas ? 'Overseas' : 'Indian'}</p>
+            <p className="text-gray-400 text-sm mt-2">
               Going to <span className="text-white font-bold">{bidState.currentLeader}</span> for{' '}
               <span className="text-ipl-accent font-black">₹{bidState.currentBid.toFixed(2)} Cr</span>
             </p>
+            <p className="text-gray-500 text-xs mt-1">Exercise RTM to match this price and reclaim your player</p>
           </div>
           <div className="flex gap-3">
             <Button variant="primary" size="lg" className="flex-1" onClick={() => userExerciseRTM(dataset)}>
@@ -680,7 +697,7 @@ export function AuctionRoomScreen() {
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="border-b border-white/10 bg-black/60 backdrop-blur-sm px-3 py-2.5 flex items-center justify-between flex-shrink-0 z-10">
+      <header className="border-b border-white/10 bg-black/60 backdrop-blur-sm px-3 py-2.5 flex items-center justify-between flex-shrink-0 z-10 safe-top">
         <div className="flex items-center gap-2 min-w-0">
           <TeamBadge teamId={userTeam} size="sm" />
           <div className="min-w-0">
@@ -923,6 +940,207 @@ export function AuctionRoomScreen() {
 
       {/* Bottom nav — mobile only */}
       {!isCalling && <BottomNav active="auction" />}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Accelerated Auction Selection Screen
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ROLE_LABEL_MAP: Record<string, string> = { BAT: 'Bat', BWL: 'Bowl', AR: 'A/R', WK: 'WK' }
+const ROLE_COLOR_MAP: Record<string, string> = {
+  BAT: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  BWL: 'bg-red-500/20 text-red-300 border-red-500/30',
+  AR:  'bg-green-500/20 text-green-300 border-green-500/30',
+  WK:  'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+}
+
+function AcceleratedSelectionScreen({
+  dataset,
+  gameState,
+}: {
+  dataset: AuctionDataset
+  gameState: GameState
+}) {
+  const [userPicks, setUserPicks] = useState<Set<string>>(new Set())
+  const [filter, setFilter] = useState<'ALL' | 'BAT' | 'BWL' | 'AR' | 'WK'>('ALL')
+  const [search, setSearch] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const { startReauction } = useGameStore()
+
+  const unsold = gameState.unsoldPlayers
+  const filtered = unsold
+    .filter(p => filter === 'ALL' || p.role === filter)
+    .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => b.basePrice - a.basePrice)
+
+  const byRole = {
+    BAT: unsold.filter(p => p.role === 'BAT').length,
+    BWL: unsold.filter(p => p.role === 'BWL').length,
+    AR:  unsold.filter(p => p.role === 'AR').length,
+    WK:  unsold.filter(p => p.role === 'WK').length,
+  }
+
+  const togglePick = (playerId: string) => {
+    setUserPicks(prev => {
+      const next = new Set(prev)
+      if (next.has(playerId)) {
+        next.delete(playerId)
+      } else if (next.size < USER_MAX_PICKS) {
+        next.add(playerId)
+      }
+      return next
+    })
+  }
+
+  const handleConfirm = () => {
+    setConfirming(true)
+    const userPickIds = [...userPicks]
+    const aiPickIds = pickAIAcceleratedPlayers(dataset, userPickIds)
+    const allPickIds = new Set([...userPickIds, ...aiPickIds])
+
+    const pool = unsold
+      .filter(p => allPickIds.has(p.playerId))
+      .map(p => ({ ...p }))
+
+    startReauction(pool)
+  }
+
+  const aiSlots = ACCELERATED_TOTAL - userPicks.size
+  const totalPool = Math.min(ACCELERATED_TOTAL, unsold.length)
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] flex flex-col pb-4">
+      {/* Header */}
+      <header className="border-b border-white/10 bg-black/60 px-4 py-3 flex items-center gap-3 flex-shrink-0 safe-top">
+        <div className="flex-1">
+          <p className="text-ipl-gold font-black text-base">⚡ Accelerated Auction</p>
+          <p className="text-gray-500 text-xs">Pick your nominees · AI fills the rest</p>
+        </div>
+        <div className="text-right">
+          <p className="text-white font-black text-lg">{userPicks.size}<span className="text-gray-500 font-normal text-sm">/{USER_MAX_PICKS}</span></p>
+          <p className="text-gray-500 text-xs">your picks</p>
+        </div>
+      </header>
+
+      {/* Pool summary */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="bg-ipl-card border border-ipl-border rounded-xl p-3 flex items-center justify-between">
+          <div className="text-center flex-1">
+            <p className="text-white font-black text-xl">{unsold.length}</p>
+            <p className="text-gray-500 text-xs">Total unsold</p>
+          </div>
+          <div className="w-px h-8 bg-white/10" />
+          <div className="text-center flex-1">
+            <p className="text-ipl-gold font-black text-xl">{userPicks.size}</p>
+            <p className="text-gray-500 text-xs">Your picks</p>
+          </div>
+          <div className="w-px h-8 bg-white/10" />
+          <div className="text-center flex-1">
+            <p className="text-blue-300 font-black text-xl">{Math.min(aiSlots, Math.max(0, unsold.length - userPicks.size))}</p>
+            <p className="text-gray-500 text-xs">AI picks</p>
+          </div>
+          <div className="w-px h-8 bg-white/10" />
+          <div className="text-center flex-1">
+            <p className="text-green-300 font-black text-xl">{totalPool}</p>
+            <p className="text-gray-500 text-xs">Will auction</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Role filter */}
+      <div className="px-4 pb-2 grid grid-cols-4 gap-1.5">
+        {(['BAT', 'BWL', 'AR', 'WK'] as const).map(role => (
+          <button
+            key={role}
+            onClick={() => setFilter(filter === role ? 'ALL' : role)}
+            className={[
+              'rounded-lg py-1.5 text-center border text-xs font-bold transition-all',
+              filter === role ? ROLE_COLOR_MAP[role] : 'bg-ipl-card border-ipl-border text-gray-500',
+            ].join(' ')}
+          >
+            {ROLE_LABEL_MAP[role]} {byRole[role]}
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="px-4 pb-2">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search player..."
+          className="w-full bg-ipl-card border border-ipl-border rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-ipl-accent"
+        />
+      </div>
+
+      {userPicks.size >= USER_MAX_PICKS && (
+        <div className="mx-4 mb-2 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
+          <p className="text-amber-300 text-xs font-semibold text-center">Max {USER_MAX_PICKS} picks reached — deselect one to change</p>
+        </div>
+      )}
+
+      {/* Player list */}
+      <div className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
+        {filtered.map(p => {
+          const picked = userPicks.has(p.playerId)
+          const disabled = !picked && userPicks.size >= USER_MAX_PICKS
+          return (
+            <button
+              key={p.playerId}
+              onClick={() => togglePick(p.playerId)}
+              disabled={disabled}
+              className={[
+                'w-full rounded-xl px-4 py-3 flex items-center gap-3 border transition-all text-left',
+                picked
+                  ? 'bg-ipl-gold/10 border-ipl-gold'
+                  : disabled
+                    ? 'bg-ipl-card/40 border-ipl-border opacity-40'
+                    : 'bg-ipl-card border-ipl-border active:bg-white/5',
+              ].join(' ')}
+            >
+              <span className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-xs font-black border ${ROLE_COLOR_MAP[p.role]}`}>
+                {ROLE_LABEL_MAP[p.role]}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold text-sm truncate ${picked ? 'text-ipl-gold' : 'text-white'}`}>{p.name}</p>
+                <p className="text-gray-500 text-xs">{p.country} · {p.cappedStatus === 'uncapped' ? 'Uncapped' : 'Capped'}{p.isOverseas ? ' · 🌍' : ''}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-gray-400 text-xs">Base</p>
+                <p className="text-gray-300 text-xs font-bold">₹{p.basePrice.toFixed(2)}</p>
+                <p className="text-green-400 text-xs">→ ₹{Math.max(0.2, Math.round(p.basePrice * 0.5 * 4) / 4).toFixed(2)}</p>
+              </div>
+              <div className="shrink-0 w-7 flex items-center justify-center">
+                {picked
+                  ? <span className="text-ipl-gold text-lg font-black">✓</span>
+                  : <span className="w-5 h-5 rounded-full border-2 border-gray-600 block" />
+                }
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Confirm button */}
+      <div className="px-4 pt-3 pb-2">
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full"
+          onClick={handleConfirm}
+          disabled={confirming}
+        >
+          {confirming
+            ? 'Preparing auction...'
+            : `⚡ Begin Accelerated Auction (${totalPool} players)`
+          }
+        </Button>
+        <p className="text-center text-gray-600 text-xs mt-2">
+          Your {userPicks.size} pick{userPicks.size !== 1 ? 's' : ''} + AI {Math.min(aiSlots, Math.max(0, unsold.length - userPicks.size))} picks · all at 50% base price
+        </p>
+      </div>
     </div>
   )
 }

@@ -15,6 +15,8 @@ export const MI_PERSONA: FranchisePersona = {
   rtmThreshold: 0.70,
   tradeOpenness: 0.55,
   maxBidMultiplier: 2.2,  // MI goes big when they want someone
+  potentialWeight: 0.85,  // MI famous for Bumrah, Hardik — built through youth investment
+  youthThreshold: 23,
 
   emotionalTriggers: [
     'former MI player',

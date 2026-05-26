@@ -27,7 +27,7 @@ export function LoginScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker flex flex-col">
       {/* Hero section */}
-      <div className="relative flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8 overflow-hidden">
+      <div className="relative flex-1 flex flex-col items-center justify-center px-6 pb-8 overflow-hidden safe-top">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-hero-gradient" />
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-ipl-accent/5 rounded-full blur-3xl pointer-events-none" />

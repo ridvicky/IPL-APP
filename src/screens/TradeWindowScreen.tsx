@@ -321,7 +321,7 @@ export function TradeWindowScreen() {
     <div className="min-h-screen bg-ipl-darker pb-36">
 
       {/* ── Header ── */}
-      <div className="relative bg-gradient-to-b from-ipl-purple/25 via-ipl-purple/10 to-transparent px-4 pt-10 pb-6">
+      <div className="relative bg-gradient-to-b from-ipl-purple/25 via-ipl-purple/10 to-transparent px-4 pb-6 safe-top">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(99,102,241,0.12)_0%,_transparent_70%)]" />
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-ipl-accent/20 border border-ipl-accent/30 flex items-center justify-center text-xl">🤝</div>

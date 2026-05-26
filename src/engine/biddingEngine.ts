@@ -98,7 +98,7 @@ export function runBiddingPipeline(
                     (currentPlayer.marketValue ?? 0) >= 14
   const emotionalMultiplier = isEmotionalTarget ? 1.30 : isCapStar ? 1.10 : 1.0
 
-  const maxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue) * emotionalMultiplier
+  const maxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer) * emotionalMultiplier
 
   // ── Step 7: Bid or pass ───────────────────────────────────────────────────
   if (nextBid > maxBid) {
@@ -194,6 +194,33 @@ function computeStaticInterest(
 
   // Former player loyalty — strong emotional pull, drives bidding wars
   if (player.previousTeam === persona.teamId) score += persona.loyaltyBonus * 50
+
+  // ── Uncapped player potential ──────────────────────────────────────────────
+  // Potential replaces the tier bonus for uncapped players — a high-rated 19-year-old
+  // matters far more than their ₹0.20 Cr base price suggests.
+  if (player.cappedStatus === 'uncapped' && player.potential != null && player.age != null) {
+    const potential = player.potential                     // 1–10
+    const age = player.age
+    const pw = persona.potentialWeight                     // 0–1 per franchise
+    const youthCutoff = persona.youthThreshold             // e.g. 22
+
+    // Age multiplier: peaks below youthCutoff, fades steadily after
+    const ageMult = age <= youthCutoff        ? 1.5
+                  : age <= youthCutoff + 2    ? 1.2
+                  : age <= youthCutoff + 4    ? 1.0
+                  : age <= youthCutoff + 6    ? 0.80
+                  :                             0.60
+
+    // potentialBonus = 0 for potential:1 up to +40 for potential:10 × franchise weight × age curve
+    const potentialBonus = (potential - 1) / 9 * 40 * pw * ageMult
+
+    // Prospect tier gives an additional bidding-war spark for elite names
+    const tierSpark = player.prospectTier === 'elite'     ? 12 * pw
+                    : player.prospectTier === 'promising' ? 6 * pw
+                    :                                        0
+
+    score += potentialBonus + tierSpark
+  }
 
   return Math.min(100, Math.max(0, score))
 }
@@ -312,6 +339,7 @@ function computeMaxBid(
   persona: FranchisePersona,
   llmResult: LLMPersonaResult | null,
   marketValue?: number | null,
+  currentPlayer?: PlayerRecord | null,
 ): number {
   // Absolute hard ceiling — only Rishabh Pant (₹27 Cr) has ever come close
   const ABSOLUTE_CAP = 28
@@ -325,25 +353,43 @@ function computeMaxBid(
   // marketValue = actual 2025 auction result — primary anchor for formula path
   // desireFraction scales how much of market value a team is willing to pay,
   // persona multiplier adds the 'overpay' character (RCB/MI pay more than RR/DC)
-  if (marketValue && marketValue > 0) {
+  // Only use marketValue as anchor when it's meaningfully above base price.
+  // If marketValue ≈ basePrice the player went unsold or at base price — using it
+  // as the multiplier anchor produces a max bid BELOW base price (desireFraction × tiny number),
+  // which silently blocks all AI bids in the second half of the auction.
+  if (marketValue && marketValue > basePrice * 1.2) {
     const desireFraction = blendedScore / 100
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
-    return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
+    // Floor at base price so a team with positive interest always bids at least the base
+    return Math.max(basePrice, Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP))
   }
 
   // Pure formula fallback (no real price known) — tighter caps, multiplier capped at 1.5
   // desireFraction × realisticCap × bounded multiplier produces realistic ranges
-  const realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
-                     : basePrice < 2  ? Math.min(basePrice * 6, 10)   // ₹2 Cr base → max ₹12 Cr formula ceiling
-                     : basePrice < 5  ? Math.min(basePrice * 5, 16)   // ₹2–5 Cr → max ₹16 Cr
-                     : basePrice < 10 ? Math.min(basePrice * 3, 22)   // ₹5–10 Cr → max ₹22 Cr
-                     :                  Math.min(basePrice * 2, 26)   // ₹10+ Cr → max ₹26 Cr
+  let realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
+                   : basePrice < 2  ? Math.min(basePrice * 6, 10)
+                   : basePrice < 5  ? Math.min(basePrice * 5, 16)
+                   : basePrice < 10 ? Math.min(basePrice * 3, 22)
+                   :                  Math.min(basePrice * 2, 26)
+
+  // Uncapped players with high potential get a lifted ceiling — elite prospects can trigger
+  // bidding wars well above the base-price formula (Suryavanshi-type scenarios).
+  if (currentPlayer?.cappedStatus === 'uncapped' && currentPlayer.potential != null) {
+    const potential = currentPlayer.potential  // 1–10
+    // elite (8–10): up to ₹6 Cr cap; promising (6–7): up to ₹3 Cr; domestic: no lift
+    const potentialCap = potential >= 8 ? 6
+                       : potential >= 6 ? 3
+                       : potential >= 4 ? 1.5
+                       :                  realisticCap
+    realisticCap = Math.max(realisticCap, potentialCap * persona.potentialWeight)
+  }
+
   const desireFraction = blendedScore / 100
-  const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.5)  // cap formula multiplier
+  const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.5)
   let maxBid = realisticCap * desireFraction * effectiveMultiplier
   maxBid *= 0.85 + Math.random() * 0.25
-  return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
+  return Math.max(basePrice, Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

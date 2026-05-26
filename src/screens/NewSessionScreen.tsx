@@ -12,6 +12,15 @@ import type { TeamId } from '@/types/team'
 import type { GameState } from '@/types/game'
 import { ALL_TEAM_IDS } from '@/types/team'
 
+const AUCTION_YEARS = [
+  { year: 2025, type: 'Mega Auction', teams: 10, available: true },
+  { year: 2024, type: 'Mini Auction', teams: 10, available: false },
+  { year: 2023, type: 'Mini Auction', teams: 10, available: false },
+  { year: 2022, type: 'Mega Auction', teams: 10, available: false },
+  { year: 2021, type: 'Mini Auction', teams: 8,  available: false },
+  { year: 2020, type: 'Mini Auction', teams: 8,  available: false },
+]
+
 const DIFFICULTIES = ['easy', 'normal', 'hard'] as const
 
 const TEAM_TAGLINES: Record<string, string> = {
@@ -84,6 +93,7 @@ export function NewSessionScreen() {
   const { initFromSession } = useGameStore()
   const { setActiveSession } = useSessionStore()
 
+  const [selectedYear, setSelectedYear] = useState(2025)
   const [name, setName] = useState('IPL 2025 Mega Auction')
   const [franchise, setFranchise] = useState<TeamId>('CSK')
   const [difficulty, setDifficulty] = useState<'easy' | 'normal' | 'hard'>('normal')
@@ -95,7 +105,7 @@ export function NewSessionScreen() {
     setError(null)
 
     try {
-      const dataset = await loadDataset(2025)
+      const dataset = await loadDataset(selectedYear)
       const retentionResult = applyRetentions(dataset, 'historical')
       if (retentionResult.errors.length > 0) {
         setError(`Retention error: ${retentionResult.errors[0]}`)
@@ -106,7 +116,7 @@ export function NewSessionScreen() {
       const initialState: GameState = {
         sessionId: '',
         userFranchise: franchise,
-        auctionYear: 2025,
+        auctionYear: selectedYear,
         phase: 'set-preview',
         currentSetIndex: 0,
         currentPlayerIndex: 0,
@@ -119,6 +129,7 @@ export function NewSessionScreen() {
         isReauction: false,
         reauctionPool: [],
         reauctionIndex: 0,
+        acceleratedPicks: [],
         tradeHistory: [],
         auctionLog: [`Auction started — ${franchise} selected — ${difficulty} difficulty`],
         seasonSetup: null,
@@ -127,8 +138,8 @@ export function NewSessionScreen() {
 
       const session = await createSession({
         name,
-        auctionYear: 2025,
-        auctionType: 'mega',
+        auctionYear: selectedYear,
+        auctionType: AUCTION_YEARS.find(y => y.year === selectedYear)?.type.toLowerCase().startsWith('mega') ? 'mega' : 'mini',
         userFranchise: franchise,
         difficulty,
         initialState: { ...initialState, sessionId: '' },
@@ -152,7 +163,7 @@ export function NewSessionScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker flex flex-col">
       {/* Header */}
-      <header className="relative overflow-hidden px-4 pt-10 pb-4">
+      <header className="relative overflow-hidden px-4 pb-4 safe-top">
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
         <div className="relative z-10">
           <button
@@ -167,6 +178,43 @@ export function NewSessionScreen() {
       </header>
 
       <main className="flex-1 px-4 pb-8 flex flex-col gap-6 max-w-lg mx-auto w-full">
+
+        {/* Auction Year */}
+        <div>
+          <label className="block text-gray-400 text-xs font-bold uppercase tracking-widest mb-3">Auction Year</label>
+          <div className="grid grid-cols-2 gap-2">
+            {AUCTION_YEARS.map(({ year, type, teams, available }) => {
+              const isSelected = selectedYear === year
+              return (
+                <button
+                  key={year}
+                  disabled={!available}
+                  onClick={() => available && setSelectedYear(year)}
+                  className={[
+                    'relative flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all duration-200',
+                    available
+                      ? isSelected
+                        ? 'bg-ipl-gold/15 border-ipl-gold shadow-md'
+                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                      : 'bg-white/3 border-white/5 opacity-50 cursor-not-allowed',
+                  ].join(' ')}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className={`font-black text-lg ${isSelected && available ? 'text-ipl-gold' : available ? 'text-white' : 'text-gray-600'}`}>
+                      {year}
+                    </span>
+                    {available
+                      ? isSelected && <span className="text-ipl-gold text-sm">✓</span>
+                      : <span className="text-xs bg-white/10 text-gray-500 px-1.5 py-0.5 rounded font-medium">Soon</span>
+                    }
+                  </div>
+                  <p className={`text-xs ${available ? 'text-gray-400' : 'text-gray-600'}`}>{type}</p>
+                  <p className={`text-xs ${available ? 'text-gray-500' : 'text-gray-700'}`}>{teams} teams</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Session name */}
         <div>

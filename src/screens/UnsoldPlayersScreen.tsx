@@ -43,7 +43,7 @@ export function UnsoldPlayersScreen() {
   return (
     <div className="min-h-screen bg-ipl-dark flex flex-col pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-ipl-dark/95 backdrop-blur border-b border-ipl-border px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 z-10 bg-ipl-dark/95 backdrop-blur border-b border-ipl-border px-4 py-3 flex items-center gap-3 safe-top">
         <button
           className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
           onClick={() => navigate('/auction')}

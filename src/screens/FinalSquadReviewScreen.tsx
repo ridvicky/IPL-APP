@@ -100,7 +100,7 @@ export function FinalSquadReviewScreen() {
   return (
     <div className="min-h-screen bg-ipl-darker pb-24">
       {/* Hero header */}
-      <div className={`bg-gradient-to-b ${colors.from} ${colors.to} to-ipl-darker px-4 pt-12 pb-6`}>
+      <div className={`bg-gradient-to-b ${colors.from} ${colors.to} to-ipl-darker px-4 pb-6 safe-top`}>
         <div className="flex items-center gap-3 mb-4">
           <div className="text-2xl">🔨</div>
           <div>

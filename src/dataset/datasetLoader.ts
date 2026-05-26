@@ -74,25 +74,20 @@ export function getPlayersInSet(
  */
 export function getReleasedPlayerSet(
   role: 'BAT' | 'BWL' | 'AR' | 'WK',
-  isOverseas: boolean,
+  _isOverseas: boolean,
   bowlingType?: 'pace' | 'spin',
   retentionPrice?: number,
 ): string {
+  // High-value retained/released players go into Marquee 1 (≥10 Cr) or Batters/role Tier 1
   if (retentionPrice !== undefined && retentionPrice >= 10) {
-    return isOverseas ? 'Marquee Set B' : 'Marquee Set A'
+    return 'Marquee 1'
   }
-  if (isOverseas) {
-    if (role === 'BAT') return 'Overseas Batters'
-    if (role === 'WK')  return 'Overseas Wicket-Keepers'
-    if (role === 'AR')  return 'Overseas All-Rounders'
-    if (role === 'BWL') return bowlingType === 'spin' ? 'Overseas Spinners' : 'Overseas Fast Bowlers'
-  } else {
-    if (role === 'BAT') return 'Indian Batters'
-    if (role === 'WK')  return 'Indian Wicket-Keepers'
-    if (role === 'AR')  return 'Indian All-Rounders'
-    if (role === 'BWL') return bowlingType === 'spin' ? 'Indian Spinners' : 'Indian Fast Bowlers'
-  }
-  return 'Accelerated Set'
+  // Released retained players enter Tier 1 of their role set regardless of nationality
+  if (role === 'BAT') return 'Batters 1'
+  if (role === 'WK')  return 'WK 1'
+  if (role === 'AR')  return 'All Rounders 1'
+  if (role === 'BWL') return bowlingType === 'spin' ? 'Spinners 1' : 'Fast Bowlers 1'
+  return 'Batters 1'
 }
 
 /**

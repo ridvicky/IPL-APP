@@ -15,6 +15,8 @@ export const RCB_PERSONA: FranchisePersona = {
   rtmThreshold: 0.75,
   tradeOpenness: 0.45,
   maxBidMultiplier: 2.5,  // RCB overpays — famously
+  potentialWeight: 0.75,  // RCB loves a big-name prospect (Devdutt, Shahbaz era)
+  youthThreshold: 23,
 
   emotionalTriggers: [
     'former RCB player',

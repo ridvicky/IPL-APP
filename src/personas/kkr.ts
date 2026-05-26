@@ -15,6 +15,8 @@ export const KKR_PERSONA: FranchisePersona = {
   rtmThreshold: 0.65,
   tradeOpenness: 0.60,
   maxBidMultiplier: 1.6,  // disciplined — rarely goes crazy
+  potentialWeight: 0.80,  // KKR academy known for turning uncapped talent into stars (Narine, Rinku)
+  youthThreshold: 24,
 
   emotionalTriggers: [
     'former KKR player',

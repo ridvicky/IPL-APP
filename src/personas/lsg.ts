@@ -15,6 +15,8 @@ export const LSG_PERSONA: FranchisePersona = {
   rtmThreshold: 0.68,
   tradeOpenness: 0.50,
   maxBidMultiplier: 1.75,
+  potentialWeight: 0.60,  // LSG pragmatic — balanced approach, not known for youth focus
+  youthThreshold: 22,
 
   emotionalTriggers: [
     'former LSG player',

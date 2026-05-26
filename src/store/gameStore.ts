@@ -40,10 +40,12 @@ interface GameStoreState {
 
   // Squad/purse mutations (applied after sale/RTM confirmed)
   applyPurchase: (teamId: TeamId, soldRecord: SoldPlayerRecord) => void
+  incrementRTMUsed: (teamId: TeamId) => void
 
   // Auction navigation
   advanceToNextPlayer: (dataset: { auctionSets: string[]; players: { auctionSet: string }[] }) => void
-  startReauction: () => void
+  startAcceleratedSelection: () => void
+  startReauction: (pool?: import('@/types/player').PlayerRecord[]) => void
 
   // Team state direct update (used by retention engine on init)
   setAllTeamStates: (teamStates: Record<TeamId, TeamState>) => void
@@ -75,7 +77,10 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
   error: null,
 
   initFromSession: (session) => {
-    set({ gameState: session.state, activeSession: session, error: null })
+    const state = session.state
+    // Back-fill fields added after initial release so old saves don't crash
+    if (!state.acceleratedPicks) state.acceleratedPicks = []
+    set({ gameState: state, activeSession: session, error: null })
   },
 
   setPhase: (phase) => {
@@ -213,6 +218,23 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     })
   },
 
+  incrementRTMUsed: (teamId) => {
+    set(s => {
+      if (!s.gameState) return {}
+      const ts = s.gameState.teamStates[teamId]
+      if (!ts) return {}
+      return {
+        gameState: {
+          ...s.gameState,
+          teamStates: {
+            ...s.gameState.teamStates,
+            [teamId]: { ...ts, rtmSlotsUsed: ts.rtmSlotsUsed + 1 },
+          },
+        },
+      }
+    })
+  },
+
   advanceToNextPlayer: (dataset) => {
     set(s => {
       if (!s.gameState) return {}
@@ -269,21 +291,28 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     void get().saveNow()
   },
 
-  startReauction: () => {
+  startAcceleratedSelection: () => {
+    set(s => s.gameState
+      ? { gameState: { ...s.gameState, phase: 'accelerated-selection', acceleratedPicks: [] } }
+      : {})
+    void get().saveNow()
+  },
+
+  startReauction: (pool) => {
     set(s => {
       if (!s.gameState) return {}
-      const pool = s.gameState.unsoldPlayers.map(p => ({
+      const source = pool ?? s.gameState.unsoldPlayers
+      const reauctionPool = source.map(p => ({
         ...p,
-        // Round to nearest 0.25 Cr increment, minimum 0.2 Cr
         basePrice: Math.max(0.2, Math.round(p.basePrice * 0.5 * 4) / 4),
       }))
       return {
         gameState: {
           ...s.gameState,
           isReauction: true,
-          reauctionPool: pool,
+          reauctionPool,
           reauctionIndex: 0,
-          unsoldPlayers: [],   // moved to pool; re-unsold ones will re-enter unsoldPlayers
+          unsoldPlayers: [],
           phase: 'set-preview',
           currentBidState: null,
         },

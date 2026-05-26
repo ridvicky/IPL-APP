@@ -38,6 +38,10 @@ export interface FranchisePersona {
   tradeOpenness: number       // 0–1, how open to trades
   maxBidMultiplier: number    // multiplier on safeBidLimit for max bid calculation
 
+  // Uncapped / youth strategy
+  potentialWeight: number     // 0–1, how heavily this team values uncapped player potential
+  youthThreshold: number      // age at or below which youth bonus fully applies (e.g. 22)
+
   // Character
   emotionalTriggers: string[]
   llmPersonaPrompt: string    // system prompt context for LLM calls (Phase 2)
