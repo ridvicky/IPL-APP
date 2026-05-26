@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { BottomNav } from '@components/ui/BottomNav'
 import { TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
@@ -79,7 +80,7 @@ export function AuctionHistoryScreen() {
         {(['sales', 'log'] as Tab[]).map(t => (
           <button
             key={t}
-            onClick={() => setTab(t)}
+            onClick={() => { tap(); setTab(t) }}
             className={[
               'flex-1 py-2 rounded-xl text-sm font-bold border transition-all',
               tab === t

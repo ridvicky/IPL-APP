@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { TeamBadge, TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
 import { BottomNav } from '@components/ui/BottomNav'
@@ -434,7 +435,7 @@ export function FinalSquadReviewScreen() {
               key={tid}
               teamId={tid}
               active={tid === selectedTeam}
-              onClick={() => { setSelectedTeam(tid as TeamId); setTab('squad') }}
+              onClick={() => { tap(); setSelectedTeam(tid as TeamId); setTab('squad') }}
             />
           ))}
         </div>
@@ -493,7 +494,7 @@ export function FinalSquadReviewScreen() {
       <div className="px-4 mb-4">
         <div className="flex bg-ipl-card rounded-xl p-1 border border-ipl-border">
           <button
-            onClick={() => setTab('squad')}
+            onClick={() => { tap(); setTab('squad') }}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
               tab === 'squad' ? 'bg-ipl-accent text-white shadow-md' : 'text-gray-500 hover:text-gray-300'
             }`}
@@ -501,7 +502,7 @@ export function FinalSquadReviewScreen() {
             Squad
           </button>
           <button
-            onClick={() => setTab('report')}
+            onClick={() => { tap(); setTab('report') }}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
               tab === 'report' ? 'bg-ipl-accent text-white shadow-md' : 'text-gray-500 hover:text-gray-300'
             }`}

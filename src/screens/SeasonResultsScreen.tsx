@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { TeamBadge, TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
 import { BottomNav } from '@components/ui/BottomNav'
@@ -205,7 +206,7 @@ export function SeasonResultsScreen() {
         {tabs.map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => { tap(); setTab(t.id) }}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
               tab === t.id
                 ? 'border-ipl-accent text-ipl-accent'

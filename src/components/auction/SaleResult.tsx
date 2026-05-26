@@ -1,4 +1,5 @@
 import { Button } from '@components/ui/Button'
+import { tap, success } from '@/utils/haptics'
 import type { SoldPlayerRecord, UnsoldPlayerRecord } from '@/types/player'
 
 interface SaleResultProps {
@@ -54,7 +55,7 @@ export function SaleResult({ result, onContinue }: SaleResultProps) {
           </span>
         </div>
 
-        <Button variant="primary" size="lg" onClick={onContinue} className="relative w-full mt-1">
+        <Button variant="primary" size="lg" onClick={() => { success(); onContinue() }} className="relative w-full mt-1">
           Next Player →
         </Button>
       </div>
@@ -66,7 +67,7 @@ export function SaleResult({ result, onContinue }: SaleResultProps) {
       <p className="text-gray-500 text-5xl font-black tracking-widest">UNSOLD</p>
       <p className="text-white text-2xl font-bold">{result.record.name}</p>
       <p className="text-gray-500 text-sm">No bids received</p>
-      <Button variant="secondary" size="lg" onClick={onContinue} className="w-full mt-1">
+      <Button variant="secondary" size="lg" onClick={() => { tap(); onContinue() }} className="w-full mt-1">
         Next Player →
       </Button>
     </div>

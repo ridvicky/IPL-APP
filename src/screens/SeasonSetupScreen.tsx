@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap, action, confirm } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { TeamBadge } from '@components/ui/TeamBadge'
 import { simulateSeason, generateOpponentSetups } from '@/engine/seasonSimulator'
@@ -100,6 +101,7 @@ export function SeasonSetupScreen() {
               <button
                 key={p.playerId}
                 onClick={() => {
+                  action()
                   setCaptainId(p.playerId)
                   if (vcId === p.playerId) setVcId(null)
                 }}
@@ -132,7 +134,7 @@ export function SeasonSetupScreen() {
             {squad.filter(p => p.playerId !== captainId).map(p => (
               <button
                 key={p.playerId}
-                onClick={() => setVcId(vcId === p.playerId ? null : p.playerId)}
+                onClick={() => { tap(); setVcId(vcId === p.playerId ? null : p.playerId) }}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all text-left ${
                   vcId === p.playerId
                     ? 'border-ipl-accent bg-ipl-accent/10 text-white'
@@ -160,7 +162,7 @@ export function SeasonSetupScreen() {
             {INSTRUCTIONS.map(instr => (
               <button
                 key={instr.value}
-                onClick={() => setInstruction(instr.value)}
+                onClick={() => { tap(); setInstruction(instr.value) }}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
                   instruction === instr.value
                     ? 'border-ipl-accent bg-ipl-accent/10'
@@ -185,7 +187,7 @@ export function SeasonSetupScreen() {
         {/* Simulate button */}
         <div className="sticky bottom-4">
           <button
-            onClick={handleSimulate}
+            onClick={() => { confirm(); handleSimulate() }}
             disabled={!captainId || simulating}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-ipl-accent to-red-700 text-white font-black text-base
                        disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity

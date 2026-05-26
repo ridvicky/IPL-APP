@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap, action, warning } from '@/utils/haptics'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { TeamBadge, TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
 import { useAuthStore } from '@/store/authStore'
@@ -85,7 +86,7 @@ export function HomeScreen() {
       <main className="flex-1 px-4 py-5 flex flex-col gap-5">
         {/* New Session CTA */}
         <button
-          onClick={() => navigate('/new-session')}
+          onClick={() => { action(); navigate('/new-session') }}
           className="relative overflow-hidden w-full rounded-2xl group"
         >
           {/* Outer glow border */}
@@ -196,7 +197,7 @@ function SessionCard({ session: s, onDelete }: { session: SessionMeta; onDelete:
     >
       <button
         className="w-full text-left px-4 pt-4 pb-3"
-        onClick={() => navigate(`/session/${s.id}`)}
+        onClick={() => { tap(); navigate(`/session/${s.id}`) }}
       >
         <div className="flex items-center gap-3">
           <TeamBadge teamId={s.userFranchise} size="lg" showRing />
@@ -219,13 +220,13 @@ function SessionCard({ session: s, onDelete }: { session: SessionMeta; onDelete:
 
       <div className="border-t border-white/5 px-4 py-2 flex items-center justify-between">
         <button
-          onClick={() => navigate(`/session/${s.id}`)}
+          onClick={() => { tap(); navigate(`/session/${s.id}`) }}
           className="text-ipl-accent text-xs font-bold hover:text-red-400 transition-colors"
         >
           Continue →
         </button>
         <button
-          onClick={onDelete}
+          onClick={() => { warning(); onDelete() }}
           className="text-gray-700 hover:text-ipl-accent text-xs transition-colors"
         >
           Delete

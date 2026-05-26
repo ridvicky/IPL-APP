@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap, action, confirm } from '@/utils/haptics'
 import { Button } from '@components/ui/Button'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
@@ -189,7 +190,7 @@ export function NewSessionScreen() {
                 <button
                   key={year}
                   disabled={!available}
-                  onClick={() => available && setSelectedYear(year)}
+                  onClick={() => { if (available) { tap(); setSelectedYear(year) } }}
                   className={[
                     'relative flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all duration-200',
                     available
@@ -254,7 +255,7 @@ export function NewSessionScreen() {
               return (
                 <button
                   key={id}
-                  onClick={() => setFranchise(id)}
+                  onClick={() => { action(); setFranchise(id) }}
                   className={[
                     'relative rounded-xl py-4 flex items-center justify-center font-black text-sm transition-all duration-200',
                     `bg-gradient-to-br ${c.from} ${c.to}`,
@@ -281,7 +282,7 @@ export function NewSessionScreen() {
               return (
                 <button
                   key={d}
-                  onClick={() => setDifficulty(d)}
+                  onClick={() => { tap(); setDifficulty(d) }}
                   className={[
                     'flex items-center gap-4 py-4 px-5 rounded-xl text-sm font-bold border-2 transition-all duration-200 text-left',
                     isSelected
@@ -317,7 +318,7 @@ export function NewSessionScreen() {
         {loading ? (
           <LoadingSpinner label="Setting up auction..." />
         ) : (
-          <Button variant="primary" size="lg" onClick={() => void handleStart()} disabled={!name.trim()} className="h-14 text-base font-black">
+          <Button variant="primary" size="lg" onClick={() => { confirm(); void handleStart() }} disabled={!name.trim()} className="h-14 text-base font-black">
             Begin Auction Setup →
           </Button>
         )}

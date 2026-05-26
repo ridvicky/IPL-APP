@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap, action, warning, confirm } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { loadDataset, getPlayersInSet, getReleasedPlayerSet } from '@/dataset/datasetLoader'
 import { Button } from '@components/ui/Button'
@@ -270,7 +271,7 @@ export function RetentionSetupScreen() {
       {/* Tabs */}
       <div className="flex border-b border-white/10 flex-shrink-0">
         {(['retentions', 'pool'] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)}
+          <button key={t} onClick={() => { tap(); setTab(t) }}
             className={`px-6 py-3 text-sm font-semibold capitalize transition-colors border-b-2 ${
               tab === t ? 'border-ipl-accent text-white' : 'border-transparent text-gray-600 hover:text-gray-400'
             }`}
@@ -312,7 +313,7 @@ export function RetentionSetupScreen() {
                   {/* Team header */}
                   <button
                     className="w-full flex items-center justify-between px-4 py-3 text-left"
-                    onClick={() => setExpandedTeam(isExpanded ? null : teamId as TeamId)}
+                    onClick={() => { tap(); setExpandedTeam(isExpanded ? null : teamId as TeamId) }}
                   >
                     <div className="flex items-center gap-3">
                       <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${colors.dot}`} />
@@ -343,7 +344,7 @@ export function RetentionSetupScreen() {
                             return (
                               <div
                                 key={entry.playerId}
-                                onClick={() => toggleRelease(teamId as TeamId, entry.playerId)}
+                                onClick={() => { action(); toggleRelease(teamId as TeamId, entry.playerId) }}
                                 className={`flex items-center justify-between rounded-lg px-3 py-2.5 border cursor-pointer transition-all select-none ${
                                   entry.released
                                     ? 'bg-red-950/40 border-red-800/40 opacity-60'
@@ -386,7 +387,7 @@ export function RetentionSetupScreen() {
                               </span>
                               {hasChanges && (
                                 <button
-                                  onClick={e => { e.stopPropagation(); resetTeam(teamId as TeamId) }}
+                                  onClick={e => { e.stopPropagation(); warning(); resetTeam(teamId as TeamId) }}
                                   className="text-gray-600 hover:text-gray-400 text-xs underline"
                                 >
                                   Reset
@@ -482,7 +483,7 @@ export function RetentionSetupScreen() {
             })()).toFixed(1)} Cr · {(retentions.get(userTeam) ?? []).filter(e => !e.released).length} retained
           </p>
         </div>
-        <Button variant="primary" size="lg" onClick={handleBeginAuction}>
+        <Button variant="primary" size="lg" onClick={() => { confirm(); handleBeginAuction() }}>
           Begin Auction →
         </Button>
       </div>

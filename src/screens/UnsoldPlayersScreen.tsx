@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { tap } from '@/utils/haptics'
 import { useGameStore } from '@/store/gameStore'
 import { BottomNav } from '@components/ui/BottomNav'
 import type { UnsoldPlayerRecord } from '@/types/player'
@@ -61,7 +62,7 @@ export function UnsoldPlayersScreen() {
         {(['BAT', 'BWL', 'AR', 'WK'] as const).map(role => (
           <button
             key={role}
-            onClick={() => setFilter(filter === role ? 'ALL' : role)}
+            onClick={() => { tap(); setFilter(filter === role ? 'ALL' : role) }}
             className={[
               'rounded-xl p-2.5 text-center border transition-all',
               filter === role

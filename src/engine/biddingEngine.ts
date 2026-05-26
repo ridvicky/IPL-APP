@@ -191,12 +191,14 @@ function computeStaticInterest(
   // on the first set and leave themselves short for elite overseas players later.
   let overseasMult = 1.0
   if (player.isOverseas) {
-    const slotsUsed = teamState.overseasCount
-    const slotsLeft = dataset.overseasLimit - slotsUsed
+    const slotsLeft = dataset.overseasLimit - teamState.overseasCount
+    // Elite overseas (₹6 Cr+ market value) are worth using a precious slot on —
+    // teams don't conserve slots past the point where a Josh Inglis is on the block.
+    const isEliteOverseas = (player.marketValue ?? 0) >= 6 || player.basePrice >= 2
     overseasMult = slotsLeft >= 4 ? 1.0
-                 : slotsLeft === 3 ? 0.75
-                 : slotsLeft === 2 ? 0.45
-                 : slotsLeft === 1 ? 0.25
+                 : slotsLeft === 3 ? 0.80
+                 : slotsLeft === 2 ? (isEliteOverseas ? 0.62 : 0.45)
+                 : slotsLeft === 1 ? (isEliteOverseas ? 0.48 : 0.25)
                  :                   0.0   // full — already caught by guard above
   }
 
@@ -234,6 +236,25 @@ function computeStaticInterest(
 
   // Apply role saturation and overseas conservation
   score *= saturationMultiplier * overseasMult
+
+  // ── Star / recency appeal (applied AFTER saturation) ─────────────────────
+  // Elite proven players always attract more bidders regardless of role coverage.
+  // A team with a WK won't completely ignore Ishan Kishan or Josh Inglis — they
+  // watch the bidding and may engage if the price is right. This models "auction
+  // spotlight" for big-name players.
+  const mv = player.marketValue ?? 0
+  if (player.cappedStatus === 'capped') {
+    const starAppeal = mv >= 15 ? 20     // elite marquee (Pant, Gill tier)
+                     : mv >= 8  ? 14     // top international (Ishan, Inglis tier)
+                     : mv >= 5  ? 9      // quality capped (reliable internationals)
+                     : mv >= 2  ? 5      // solid capped (proven but not headline)
+                     : player.basePrice >= 2 ? 4   // high base = expected quality
+                     : 0
+    score += starAppeal
+  } else if (player.cappedStatus === 'uncapped' && mv >= 3) {
+    // Breakout uncapped players (Suryavanshi etc.) get some buzz too
+    score += mv >= 8 ? 10 : mv >= 5 ? 6 : 3
+  }
 
   // ── Uncapped player potential ──────────────────────────────────────────────
   if (player.cappedStatus === 'uncapped' && player.potential != null && player.age != null) {
@@ -393,7 +414,13 @@ function computeMaxBid(
     const desireFraction = blendedScore / 100
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
-    // No floor at basePrice — if max < base, team passes at step 7 (player may go unsold)
+    // Star floor: proven high-value players shouldn't sell for pennies even when
+    // bidders are few. A team drawn in by star appeal should at least bid
+    // proportionally to the player's established market value.
+    if (currentPlayer?.cappedStatus === 'capped' && marketValue >= 5) {
+      const starFloor = marketValue * 0.30 * (0.7 + persona.maxBidMultiplier * 0.2)
+      maxBid = Math.max(maxBid, Math.min(starFloor, safeBidLimit))
+    }
     return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
   }
 

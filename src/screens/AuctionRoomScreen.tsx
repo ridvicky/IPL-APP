@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { tap, action, confirm, success, warning } from '@/utils/haptics'
 import { Button } from '@components/ui/Button'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { PlayerCard } from '@components/auction/PlayerCard'
@@ -217,9 +218,9 @@ export function AuctionRoomScreen() {
   const startCalling = useCallback((ds: AuctionDataset) => {
     clearCalling()
     if (pausedRef.current) return   // don't start calling while paused
-    setCallingStage(1)
+    setCallingStage(1); tap()
     const callMs = Math.round(BASE_CALL_MS / speedRef.current)
-    const t1 = setTimeout(() => setCallingStage(2), callMs)
+    const t1 = setTimeout(() => { setCallingStage(2); tap() }, callMs)
     const t2 = setTimeout(() => setCallingStage(3), callMs * 2)
     const t3 = setTimeout(() => {
       setCallingStage(0)
@@ -361,11 +362,13 @@ export function AuctionRoomScreen() {
     setActionError(null)
     const err = userInterruptBid(dataset, amount)
     if (err) { setActionError(err); return }
+    success()
     void startAILoop(dataset)
   }, [dataset, startAILoop])
 
   const handlePassBid = useCallback(() => {
     if (!dataset) return
+    cancelCalling()
     const err = userPass()
     if (err) { setActionError(err); return }
     void startAILoop(dataset)
@@ -373,6 +376,7 @@ export function AuctionRoomScreen() {
 
   const handleSkipPlayer = useCallback(() => {
     if (!dataset) return
+    cancelCalling()
     userSkipPlayer()
     void startAILoop(dataset)
   }, [dataset, startAILoop])
@@ -444,7 +448,7 @@ export function AuctionRoomScreen() {
             <span className="text-gray-500">{userTeam} purse</span>
             <span className="text-white font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)} Cr</span>
           </div>
-          <Button variant="primary" size="lg" className="w-full" onClick={handleContinue}>
+          <Button variant="primary" size="lg" className="w-full" onClick={() => { action(); handleContinue() }}>
             {nextSet ? `Start ${nextSet} →` : 'Continue →'}
           </Button>
         </div>
@@ -546,10 +550,10 @@ export function AuctionRoomScreen() {
             <p className="text-gray-500 text-xs mt-1">Exercise RTM to match this price and reclaim your player</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="primary" size="lg" className="flex-1" onClick={() => userExerciseRTM(dataset)}>
+            <Button variant="primary" size="lg" className="flex-1" onClick={() => { confirm(); userExerciseRTM(dataset) }}>
               Exercise RTM
             </Button>
-            <Button variant="ghost" size="lg" className="flex-1" onClick={() => userDeclineRTM(dataset)}>
+            <Button variant="ghost" size="lg" className="flex-1" onClick={() => { action(); userDeclineRTM(dataset) }}>
               Decline
             </Button>
           </div>
@@ -591,7 +595,7 @@ export function AuctionRoomScreen() {
             <p className="text-white font-black text-3xl mb-2">Paused</p>
             <p className="text-gray-400 text-sm mb-6">Auction is frozen — AI bids and timer are stopped</p>
             <button
-              onClick={togglePause}
+              onClick={() => { action(); togglePause() }}
               className="flex items-center gap-3 px-10 py-4 bg-ipl-gold text-black font-black text-lg rounded-2xl hover:bg-yellow-400 active:scale-95 transition-all shadow-lg shadow-ipl-gold/30"
             >
               <svg width="18" height="18" viewBox="0 0 14 14" fill="currentColor">
@@ -648,7 +652,7 @@ export function AuctionRoomScreen() {
           {userCanInterrupt && callingStage < 3 && currentPlayer && (
             <div className="text-center">
               <button
-                onClick={() => handleInterruptBid(interruptBid)}
+                onClick={() => { handleInterruptBid(interruptBid) }}
                 className="bg-ipl-accent hover:bg-ipl-accent/90 text-white font-black text-xl px-10 py-5 rounded-2xl shadow-2xl shadow-ipl-accent/30 active:scale-95 transition-all animate-pulse"
               >
                 ✋ BID ₹{interruptBid.toFixed(2)} Cr
@@ -676,12 +680,12 @@ export function AuctionRoomScreen() {
       {menuOpen && (
         <div className="fixed inset-0 z-40 flex">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-0 bg-black/70" onClick={() => { tap(); setMenuOpen(false) }} />
           {/* Drawer */}
           <div className="relative ml-auto w-72 h-full bg-[#111118] border-l border-white/10 flex flex-col shadow-2xl">
             <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
               <span className="text-white font-bold">Menu</span>
-              <button onClick={() => setMenuOpen(false)} className="text-gray-500 hover:text-white text-xl leading-none">✕</button>
+              <button onClick={() => { tap(); setMenuOpen(false) }} className="text-gray-500 hover:text-white text-xl leading-none">✕</button>
             </div>
 
             {/* Session info */}
@@ -704,7 +708,7 @@ export function AuctionRoomScreen() {
               ].map(item => (
                 <button
                   key={item.path}
-                  onClick={() => { setMenuOpen(false); navigate(item.path) }}
+                  onClick={() => { tap(); setMenuOpen(false); navigate(item.path) }}
                   className="flex items-center justify-between px-5 py-3.5 hover:bg-white/5 transition-colors text-left"
                 >
                   <span className="text-white text-sm font-medium">{item.label}</span>
@@ -715,13 +719,13 @@ export function AuctionRoomScreen() {
 
             <div className="mt-auto flex flex-col gap-0 border-t border-white/10">
               <button
-                onClick={() => { setMenuOpen(false); navigate('/') }}
+                onClick={() => { tap(); setMenuOpen(false); navigate('/') }}
                 className="px-5 py-4 text-left text-gray-400 hover:text-white hover:bg-white/5 text-sm transition-colors"
               >
                 ← Home <span className="text-gray-500 text-xs ml-2">Session saved</span>
               </button>
               <button
-                onClick={() => { setMenuOpen(false); setQuitConfirm(true) }}
+                onClick={() => { action(); setMenuOpen(false); setQuitConfirm(true) }}
                 className="px-5 py-4 text-left text-red-500 hover:text-red-400 hover:bg-red-950/30 text-sm font-medium transition-colors border-t border-white/5"
               >
                 Quit Auction
@@ -743,13 +747,13 @@ export function AuctionRoomScreen() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setQuitConfirm(false)}
+                onClick={() => { tap(); setQuitConfirm(false) }}
                 className="flex-1 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 text-sm font-medium transition-colors"
               >
                 Keep Playing
               </button>
               <button
-                onClick={() => { setQuitConfirm(false); navigate('/') }}
+                onClick={() => { warning(); setQuitConfirm(false); navigate('/') }}
                 className="flex-1 py-3 rounded-xl bg-red-900/60 border border-red-700/50 text-red-300 hover:bg-red-900/80 text-sm font-medium transition-colors"
               >
                 Quit &amp; Save
@@ -790,7 +794,7 @@ export function AuctionRoomScreen() {
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Pause / Resume */}
           <button
-            onClick={togglePause}
+            onClick={() => { action(); togglePause() }}
             className={`flex items-center justify-center w-9 h-9 rounded-lg border-2 transition-all active:scale-95 flex-shrink-0 ${
               paused
                 ? 'bg-ipl-gold border-ipl-gold text-black shadow-md shadow-ipl-gold/40'
@@ -814,7 +818,7 @@ export function AuctionRoomScreen() {
           {/* Speed control */}
           <div className={`flex rounded-lg overflow-hidden border border-white/10 transition-opacity ${paused ? 'opacity-40 pointer-events-none' : ''}`}>
             {([1, 2, 3] as const).map(s => (
-              <button key={s} onClick={() => setSpeed(s)}
+              <button key={s} onClick={() => { tap(); setSpeed(s) }}
                 className={`px-2 py-1 text-[10px] font-black transition-colors ${
                   speed === s ? 'bg-ipl-accent text-white' : 'bg-white/5 text-gray-600 hover:text-gray-300'
                 }`}
@@ -825,7 +829,7 @@ export function AuctionRoomScreen() {
             <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
           </div>
           <button
-            onClick={() => setMenuOpen(true)}
+            onClick={() => { tap(); setMenuOpen(true) }}
             className="flex flex-col gap-1 justify-center items-center w-9 h-9 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
             title="Menu"
           >
@@ -1139,7 +1143,7 @@ function AcceleratedSelectionScreen({
         {(['BAT', 'BWL', 'AR', 'WK'] as const).map(role => (
           <button
             key={role}
-            onClick={() => setFilter(filter === role ? 'ALL' : role)}
+            onClick={() => { tap(); setFilter(filter === role ? 'ALL' : role) }}
             className={[
               'rounded-lg py-1.5 text-center border text-xs font-bold transition-all',
               filter === role ? ROLE_COLOR_MAP[role] : 'bg-ipl-card border-ipl-border text-gray-500',
@@ -1174,7 +1178,7 @@ function AcceleratedSelectionScreen({
           return (
             <button
               key={p.playerId}
-              onClick={() => togglePick(p.playerId)}
+              onClick={() => { tap(); togglePick(p.playerId) }}
               disabled={disabled}
               className={[
                 'w-full rounded-xl px-4 py-3 flex items-center gap-3 border transition-all text-left',
@@ -1214,7 +1218,7 @@ function AcceleratedSelectionScreen({
           variant="primary"
           size="lg"
           className="w-full"
-          onClick={handleConfirm}
+          onClick={() => { confirm(); handleConfirm() }}
           disabled={confirming}
         >
           {confirming

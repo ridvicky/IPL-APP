@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { tap, action, confirm } from '@/utils/haptics'
 import type { AuctionDataset } from '@/types/dataset'
 import type { GameState } from '@/types/game'
 import type { PlayerRecord } from '@/types/player'
@@ -66,7 +67,7 @@ export function UserActionPanel({
       {/* BID button — hero */}
       <button
         disabled={disabled || !canBid}
-        onClick={() => onBid(nextBid)}
+        onClick={() => { confirm(); onBid(nextBid) }}
         className={`w-full py-6 font-black text-2xl tracking-widest transition-all duration-150
           ${canBid && !disabled
             ? 'bg-gradient-to-r from-ipl-accent via-ipl-accent to-red-600 text-white active:scale-[0.98] hover:opacity-95 shadow-lg shadow-ipl-accent/30'
@@ -87,7 +88,7 @@ export function UserActionPanel({
       <div className="grid grid-cols-2 divide-x divide-ipl-border border-t border-ipl-border">
         <button
           disabled={disabled}
-          onClick={onPassBid}
+          onClick={() => { action(); onPassBid() }}
           className="py-4 flex flex-col items-center gap-0.5 text-gray-400 hover:text-white hover:bg-white/5
                      transition-all disabled:opacity-40 active:bg-white/8"
         >
@@ -97,7 +98,7 @@ export function UserActionPanel({
         </button>
         <button
           disabled={disabled}
-          onClick={onSkipPlayer}
+          onClick={() => { action(); onSkipPlayer() }}
           className="py-4 flex flex-col items-center gap-0.5 text-gray-600 hover:text-gray-300 hover:bg-white/5
                      transition-all disabled:opacity-40 active:bg-white/8"
         >
@@ -126,14 +127,14 @@ export function UserActionPanel({
                            placeholder:text-gray-500"
               />
               <button
-                onClick={handleCustomBid}
+                onClick={() => { action(); handleCustomBid() }}
                 className="px-4 py-2.5 bg-ipl-accent text-white text-sm font-black rounded-xl
                            hover:bg-ipl-accent/90 transition-colors"
               >
                 Go
               </button>
               <button
-                onClick={() => { setShowCustom(false); setCustomError('') }}
+                onClick={() => { tap(); setShowCustom(false); setCustomError('') }}
                 className="px-3 py-2.5 text-gray-500 hover:text-gray-300 text-sm transition-colors"
               >
                 ✕
@@ -143,7 +144,7 @@ export function UserActionPanel({
           </div>
         ) : (
           <button
-            onClick={() => { setShowCustom(true); setCustomBid(nextBid.toFixed(2)); setCustomError('') }}
+            onClick={() => { tap(); setShowCustom(true); setCustomBid(nextBid.toFixed(2)); setCustomError('') }}
             className="w-full py-2.5 text-gray-500 hover:text-gray-300 text-xs tracking-wide
                        transition-colors font-semibold"
           >

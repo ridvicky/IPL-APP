@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { tap } from '../../utils/haptics'
 
 type NavItem = 'auction' | 'my-squad' | 'all-squads' | 'unsold'
 
@@ -24,7 +25,7 @@ export function BottomNav({ active }: BottomNavProps) {
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => { tap(); navigate(item.path) }}
               className={[
                 'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors min-h-[56px]',
                 isActive ? 'text-ipl-accent' : 'text-gray-600 hover:text-gray-400',
