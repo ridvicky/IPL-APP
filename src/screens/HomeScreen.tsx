@@ -4,6 +4,7 @@ import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 import { TeamBadge, TEAM_BADGE_COLORS } from '@components/ui/TeamBadge'
 import { useAuthStore } from '@/store/authStore'
 import { useSessionStore } from '@/store/sessionStore'
+import gplLogo from '@/assets/gpl_logo.svg'
 import type { SessionMeta } from '@/types/session'
 
 const PHASE_LABEL: Record<string, string> = {
@@ -31,71 +32,6 @@ function phaseColor(phase: string) {
   return 'text-gray-500'
 }
 
-/** Giant cricket ball SVG for the hero */
-function CricketBallHero() {
-  return (
-    <svg width="160" height="160" viewBox="0 0 160 160" fill="none" className="drop-shadow-2xl">
-      <defs>
-        <radialGradient id="ballGrad" cx="38%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#f87171" />
-          <stop offset="50%" stopColor="#e94560" />
-          <stop offset="100%" stopColor="#7f1d1d" />
-        </radialGradient>
-        <radialGradient id="ballGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#e94560" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#e94560" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {/* Glow ring */}
-      <circle cx="80" cy="80" r="78" fill="url(#ballGlow)" />
-      {/* Ball body */}
-      <circle cx="80" cy="80" r="70" fill="url(#ballGrad)" />
-      {/* Highlight */}
-      <ellipse cx="58" cy="52" rx="18" ry="12" fill="white" fillOpacity="0.12" />
-      {/* Seam — vertical */}
-      <path d="M44 18 Q52 50 44 80 Q36 110 44 142" stroke="white" strokeOpacity="0.55" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <path d="M116 18 Q108 50 116 80 Q124 110 116 142" stroke="white" strokeOpacity="0.55" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* Seam stitches left */}
-      {[24, 36, 48, 60, 72, 84, 96, 108, 120, 132].map((y, i) => (
-        <line key={`sl${i}`}
-          x1={44 + (i % 2 === 0 ? -3 : 3)} y1={y}
-          x2={44 + (i % 2 === 0 ? 3 : -3)} y2={y + 6}
-          stroke="white" strokeOpacity="0.45" strokeWidth="1.2" strokeLinecap="round"
-        />
-      ))}
-      {/* Seam stitches right */}
-      {[24, 36, 48, 60, 72, 84, 96, 108, 120, 132].map((y, i) => (
-        <line key={`sr${i}`}
-          x1={116 + (i % 2 === 0 ? -3 : 3)} y1={y}
-          x2={116 + (i % 2 === 0 ? 3 : -3)} y2={y + 6}
-          stroke="white" strokeOpacity="0.45" strokeWidth="1.2" strokeLinecap="round"
-        />
-      ))}
-    </svg>
-  )
-}
-
-/** Decorative stumps SVG */
-function StumpsSvg() {
-  return (
-    <svg width="48" height="56" viewBox="0 0 48 56" fill="none" className="opacity-20">
-      <rect x="8"  y="16" width="5" height="38" rx="2.5" fill="#d4af37" />
-      <rect x="21" y="14" width="5" height="40" rx="2.5" fill="#d4af37" />
-      <rect x="34" y="16" width="5" height="38" rx="2.5" fill="#d4af37" />
-      <rect x="5"  y="10" width="38" height="5" rx="2.5" fill="#d4af37" />
-    </svg>
-  )
-}
-
-/** Bat silhouette SVG */
-function BatSvg() {
-  return (
-    <svg width="32" height="72" viewBox="0 0 32 72" fill="none" className="opacity-15">
-      <ellipse cx="16" cy="28" rx="14" ry="22" fill="#d4af37" />
-      <rect x="13" y="48" width="6" height="22" rx="3" fill="#d4af37" />
-    </svg>
-  )
-}
 
 const ALL_TEAMS = ['CSK','MI','RCB','KKR','DC','RR','SRH','PBKS','GT','LSG']
 
@@ -119,17 +55,9 @@ export function HomeScreen() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-ipl-accent/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-ipl-gold/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Decorative cricket elements */}
-        <div className="absolute top-6 left-4 pointer-events-none">
-          <StumpsSvg />
-        </div>
-        <div className="absolute top-10 right-6 pointer-events-none">
-          <BatSvg />
-        </div>
-
-        <div className="relative z-10 px-4 pt-10 pb-6 flex flex-col items-center text-center">
+        <div className="relative z-10 px-4 pt-6 pb-4 flex flex-col items-center text-center">
           {/* Top bar */}
-          <div className="w-full flex items-center justify-between mb-8">
+          <div className="w-full flex items-center justify-between mb-4">
             <div className="text-left">
               <p className="text-gray-500 text-xs font-medium tracking-widest uppercase">Welcome back</p>
               <h2 className="text-white font-black text-base">@{displayName}</h2>
@@ -142,16 +70,12 @@ export function HomeScreen() {
             </button>
           </div>
 
-          {/* Giant ball + title */}
-          <div className="relative mb-4">
-            <CricketBallHero />
-          </div>
-
-          <h1 className="text-white font-black text-4xl tracking-tight leading-none mb-1">
-            IPL <span className="text-ipl-gold">AUCTION</span>
-          </h1>
-          <p className="text-ipl-gold font-bold text-sm tracking-[0.3em] uppercase mb-1">SIM 2025</p>
-          <p className="text-gray-500 text-xs tracking-widest uppercase">Stadium Night · Bid Like a Pro</p>
+          {/* GPL Logo */}
+          <img
+            src={gplLogo}
+            alt="GPL Auction"
+            className="w-56 h-auto drop-shadow-[0_0_24px_rgba(201,162,39,0.35)]"
+          />
         </div>
 
         {/* Bottom fade */}
@@ -279,7 +203,7 @@ function SessionCard({ session: s, onDelete }: { session: SessionMeta; onDelete:
           <div className="flex-1 min-w-0">
             <p className="text-white font-bold text-sm truncate">{s.name}</p>
             <p className="text-gray-500 text-xs mt-0.5">
-              IPL {s.auctionYear} · {s.auctionType}
+              GPL {s.auctionYear} · {s.auctionType}
             </p>
             {/* Team color pill */}
             <div className={`inline-flex mt-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r ${colors?.from ?? 'from-gray-600'} ${colors?.to ?? 'to-gray-800'} bg-opacity-20`}>

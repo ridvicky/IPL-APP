@@ -429,7 +429,7 @@ export function AuctionRoomScreen() {
           <p className="text-gray-400 mb-2">
             {gameState.soldPlayers.length} players sold · {unsoldCount} unsold
           </p>
-          <p className="text-gray-500 text-sm mb-6">IPL {gameState.auctionYear}</p>
+          <p className="text-gray-500 text-sm mb-6">GPL {gameState.auctionYear}</p>
 
           {canAccelerate && (
             <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-left">
@@ -537,6 +537,13 @@ export function AuctionRoomScreen() {
     ? (currentBid === 0 ? currentPlayer.basePrice : currentBid + getBidIncrement(dataset, currentBid))
     : 0
 
+  // Squad composition strip for header
+  const userSquad = gameState.teamStates[userTeam]?.squad ?? []
+  const squadComp = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+  for (const p of userSquad) squadComp[p.role] = (squadComp[p.role] ?? 0) + 1
+  const userOverseas = gameState.teamStates[userTeam]?.overseasCount ?? 0
+  const rtmRemaining = Math.max(0, (gameState.teamStates[userTeam]?.rtmSlotsAvailable ?? 0) - (gameState.teamStates[userTeam]?.rtmSlotsUsed ?? 0))
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col pb-16 lg:pb-0">
 
@@ -623,7 +630,7 @@ export function AuctionRoomScreen() {
 
             {/* Session info */}
             <div className="px-5 py-4 border-b border-white/10">
-              <p className="text-ipl-gold font-black text-sm">IPL {gameState.auctionYear} Auction</p>
+              <p className="text-ipl-gold font-black text-sm">GPL {gameState.auctionYear} Auction</p>
               <p className="text-gray-500 text-xs mt-1">{setName} · Set {gameState.currentSetIndex + 1}/{dataset.auctionSets.length}</p>
               <p className="text-gray-600 text-xs mt-0.5">{gameState.soldPlayers.length} sold · {gameState.unsoldPlayers.length} unsold</p>
               <p className="text-gray-500 text-xs mt-0.5">
@@ -707,8 +714,20 @@ export function AuctionRoomScreen() {
             <p className="text-gray-600 text-[10px] leading-tight">
               {gameState.isReauction
                 ? `${gameState.reauctionIndex + 1}/${gameState.reauctionPool.length} · 50% base`
-                : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · ${gameState.soldPlayers.length} sold`
+                : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · Player ${gameState.currentPlayerIndex + 1}/${playersInSet.length}`
               }
+            </p>
+            <p className="text-[9px] leading-tight mt-0.5 text-gray-700">
+              <span className="text-blue-500">{squadComp.BAT}B</span>
+              <span className="text-gray-800 mx-0.5">·</span>
+              <span className="text-green-600">{squadComp.BWL}P</span>
+              <span className="text-gray-800 mx-0.5">·</span>
+              <span className="text-purple-500">{squadComp.AR}A</span>
+              <span className="text-gray-800 mx-0.5">·</span>
+              <span className="text-yellow-600">{squadComp.WK}W</span>
+              <span className="text-gray-800 mx-1">|</span>
+              <span className="text-orange-500">🌍{userOverseas}/{dataset.overseasLimit}</span>
+              {rtmRemaining > 0 && <span className="text-gray-700 mx-1">| RTM {rtmRemaining}</span>}
             </p>
           </div>
         </div>
@@ -773,6 +792,8 @@ export function AuctionRoomScreen() {
                 teamStates={gameState.teamStates}
                 bidState={bidState}
                 userTeam={userTeam}
+                maximumSquadSize={dataset.maximumSquadSize}
+                nextBidAmount={interruptBid}
               />
             </div>
 
@@ -927,6 +948,8 @@ export function AuctionRoomScreen() {
               teamStates={gameState.teamStates}
               bidState={bidState}
               userTeam={userTeam}
+              maximumSquadSize={dataset.maximumSquadSize}
+              nextBidAmount={interruptBid}
             />
           </div>
 

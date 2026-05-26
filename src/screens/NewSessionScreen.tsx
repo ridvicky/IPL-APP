@@ -94,7 +94,7 @@ export function NewSessionScreen() {
   const { setActiveSession } = useSessionStore()
 
   const [selectedYear, setSelectedYear] = useState(2025)
-  const [name, setName] = useState('IPL 2025 Mega Auction')
+  const [name, setName] = useState('GPL 2025 Mega Auction')
   const [franchise, setFranchise] = useState<TeamId>('CSK')
   const [difficulty, setDifficulty] = useState<'easy' | 'normal' | 'hard'>('normal')
   const [loading, setLoading] = useState(false)
@@ -223,7 +223,7 @@ export function NewSessionScreen() {
             value={name}
             onChange={e => setName(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-accent focus:ring-1 focus:ring-ipl-accent/20 transition-colors placeholder-gray-700"
-            placeholder="IPL 2025 Mega Auction"
+            placeholder="GPL 2025 Mega Auction"
           />
         </div>
 

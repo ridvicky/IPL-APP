@@ -76,7 +76,7 @@ export async function callLLM(
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://ipl-auction-sim.vercel.app',
-            'X-Title': 'IPL Auction Simulator',
+            'X-Title': 'GPL Auction',
           },
           body: JSON.stringify({
             model,

@@ -249,7 +249,7 @@ export function RetentionSetupScreen() {
       {/* Header */}
       <header className="border-b border-white/10 bg-black/60 px-5 py-4 flex items-center justify-between flex-shrink-0 safe-top">
         <div>
-          <p className="text-ipl-gold font-black text-lg">IPL {gameState.auctionYear} Mega Auction</p>
+          <p className="text-ipl-gold font-black text-lg">GPL {gameState.auctionYear} Mega Auction</p>
           <p className="text-gray-500 text-xs mt-0.5">Review and edit team retentions before the auction</p>
         </div>
         <div className="flex items-center gap-2 text-xs">

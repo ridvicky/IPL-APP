@@ -5,6 +5,8 @@ interface TeamPaddlesProps {
   teamStates: Record<string, TeamState>
   bidState: BidState | null
   userTeam: TeamId
+  maximumSquadSize: number
+  nextBidAmount: number
 }
 
 type PaddleStatus = 'leading' | 'active' | 'passed' | 'skipped'
@@ -34,7 +36,7 @@ function getStatus(teamId: string, bidState: BidState | null): PaddleStatus {
   return 'active'
 }
 
-export function TeamPaddles({ teamStates, bidState, userTeam }: TeamPaddlesProps) {
+export function TeamPaddles({ teamStates, bidState, userTeam, maximumSquadSize, nextBidAmount }: TeamPaddlesProps) {
   const teams = Object.keys(teamStates) as TeamId[]
 
   return (
@@ -47,15 +49,21 @@ export function TeamPaddles({ teamStates, bidState, userTeam }: TeamPaddlesProps
         const isLeading = status === 'leading'
         const isDead    = status === 'passed' || status === 'skipped'
 
+        const squadCount  = ts?.squad.length ?? 0
+        const isFull      = squadCount >= maximumSquadSize
+        const isLowPurse  = !isFull && (ts?.currentPurse ?? 0) < nextBidAmount && status !== 'leading'
+
         return (
           <div
             key={teamId}
             className={`relative flex-shrink-0 flex flex-col items-center rounded-2xl border transition-all duration-300
-              px-3 py-2.5 min-w-[68px]
+              px-3 py-2 min-w-[68px]
               ${isLeading
                 ? `${c.bg} ${c.border} shadow-lg ${c.glow} scale-105`
                 : isDead
                 ? 'bg-gray-900/40 border-gray-800/60 opacity-40 scale-95'
+                : isFull
+                ? 'bg-amber-900/20 border-amber-700/40 opacity-60 scale-95'
                 : `${c.bg} border-white/10`
               }
               ${isUser ? 'ring-2 ring-white/30 ring-offset-1 ring-offset-ipl-darker' : ''}
@@ -66,7 +74,7 @@ export function TeamPaddles({ teamStates, bidState, userTeam }: TeamPaddlesProps
               {isLeading && (
                 <span className={`w-2 h-2 rounded-full ${c.dot} animate-pulse block`} />
               )}
-              {status === 'active' && (
+              {status === 'active' && !isFull && !isLowPurse && (
                 <span className="w-2 h-2 rounded-full bg-green-400 block" />
               )}
               {status === 'passed' && (
@@ -79,25 +87,42 @@ export function TeamPaddles({ teamStates, bidState, userTeam }: TeamPaddlesProps
 
             {/* Team name */}
             <span className={`font-black text-sm leading-tight ${
-              isLeading ? c.text : isDead ? 'text-gray-700' : 'text-gray-200'
+              isLeading ? c.text : isDead || isFull ? 'text-gray-700' : 'text-gray-200'
             }`}>
               {teamId}
             </span>
 
+            {/* Squad count */}
+            <span className={`text-[10px] font-bold mt-0.5 ${
+              isFull ? 'text-amber-500' : isLeading ? c.text : 'text-gray-600'
+            }`}>
+              {squadCount}/{maximumSquadSize}
+            </span>
+
             {/* Purse */}
             <span className={`text-[11px] font-mono font-bold mt-0.5 ${
-              isLeading ? c.text : isDead ? 'text-gray-800' : 'text-gray-500'
+              isLeading ? c.text : isDead || isFull ? 'text-gray-800' : isLowPurse ? 'text-red-700' : 'text-gray-500'
             }`}>
               ₹{ts?.currentPurse.toFixed(0)}Cr
             </span>
 
             {/* Status label */}
-            {isLeading && (
+            {isFull && (
+              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-amber-600">
+                FULL
+              </span>
+            )}
+            {isLowPurse && !isFull && (
+              <span className="text-[9px] font-black mt-0.5 uppercase tracking-wide text-red-800">
+                LOW
+              </span>
+            )}
+            {isLeading && !isFull && (
               <span className={`text-[9px] font-black mt-0.5 uppercase tracking-wide ${c.text}`}>
                 LEAD
               </span>
             )}
-            {isUser && !isLeading && (
+            {isUser && !isLeading && !isFull && !isLowPurse && (
               <span className="text-white text-[9px] font-black mt-0.5 uppercase tracking-wide">
                 YOU
               </span>

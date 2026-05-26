@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name: 'IPL Auction Simulator',
-        short_name: 'IPL Auction',
-        description: 'Realistic IPL auction simulator with AI franchise owners',
+        name: 'GPL Auction',
+        short_name: 'GPL Auction',
+        description: 'Geek Premier League — GPL Auction Simulator with AI franchise owners',
         theme_color: '#1a1a2e',
         background_color: '#1a1a2e',
         display: 'standalone',

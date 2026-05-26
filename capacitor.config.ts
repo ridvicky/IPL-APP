@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.iplauction.simulator',
-  appName: 'IPL Auction',
+  appName: 'GPL Auction',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
