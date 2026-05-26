@@ -113,6 +113,7 @@ export function AuctionRoomScreen() {
   const [quitConfirm, setQuitConfirm] = useState(false)
   const [speed, setSpeed] = useState<1 | 2 | 3>(() => (Number(localStorage.getItem('auctionSpeed')) as 1|2|3) || 1)
   const [auctioneeerLine, setAuctioneeerLine] = useState<string | null>(null)
+  const [paused, setPaused] = useState(false)
 
   const aiLoopRef = useRef(false)
   const callingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -120,11 +121,14 @@ export function AuctionRoomScreen() {
   const hasAutoPassedRef = useRef(false)
   const speedRef = useRef<1|2|3>(speed)
   const commentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pausedRef = useRef(false)
 
   useEffect(() => {
     speedRef.current = speed
     localStorage.setItem('auctionSpeed', String(speed))
   }, [speed])
+
+  useEffect(() => { pausedRef.current = paused }, [paused])
 
   const showComment = useCallback((text: string) => {
     if (commentTimerRef.current) clearTimeout(commentTimerRef.current)
@@ -159,6 +163,17 @@ export function AuctionRoomScreen() {
       .then(setDataset)
       .catch(e => setActionError(`Failed to load dataset: ${String(e)}`))
   }, [gameState?.auctionYear])
+
+  // ── Save on app backgrounding (covers Android abrupt kill) ───────────────
+  useEffect(() => {
+    const save = () => { void useGameStore.getState().saveNow() }
+    document.addEventListener('visibilitychange', save)
+    window.addEventListener('beforeunload', save)
+    return () => {
+      document.removeEventListener('visibilitychange', save)
+      window.removeEventListener('beforeunload', save)
+    }
+  }, [])
 
   // ── Auto-start on set-preview ─────────────────────────────────────────────
   useEffect(() => {
@@ -201,6 +216,7 @@ export function AuctionRoomScreen() {
 
   const startCalling = useCallback((ds: AuctionDataset) => {
     clearCalling()
+    if (pausedRef.current) return   // don't start calling while paused
     setCallingStage(1)
     const callMs = Math.round(BASE_CALL_MS / speedRef.current)
     const t1 = setTimeout(() => setCallingStage(2), callMs)
@@ -221,6 +237,19 @@ export function AuctionRoomScreen() {
     setCallingStage(0)
   }
 
+  const togglePause = useCallback(() => {
+    setPaused(prev => {
+      const next = !prev
+      pausedRef.current = next
+      if (next) {
+        // Pausing: freeze calling countdown
+        clearCalling()
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+      }
+      return next
+    })
+  }, [])
+
   // ── Bid timer ─────────────────────────────────────────────────────────────
   const bidState = gameState?.currentBidState ?? null
   const uTeam = gameState?.userFranchise as TeamId | undefined
@@ -237,13 +266,14 @@ export function AuctionRoomScreen() {
   const userCanInterrupt = isCalling && !userIsLeader
 
   useEffect(() => {
-    if (!userCanBidNormal || !dataset) {
+    if (!userCanBidNormal || !dataset || paused) {
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
       return
     }
     hasAutoPassedRef.current = false
     setTimeLeft(BID_TIMER_SECONDS)
     timerRef.current = setInterval(() => {
+      if (pausedRef.current) return
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current!); timerRef.current = null
@@ -259,7 +289,7 @@ export function AuctionRoomScreen() {
     }, 1000)
     return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null } }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userCanBidNormal, dataset])
+  }, [userCanBidNormal, dataset, paused])
 
   // ── AI loop ───────────────────────────────────────────────────────────────
   const startAILoop = useCallback(async (ds: AuctionDataset) => {
@@ -268,6 +298,11 @@ export function AuctionRoomScreen() {
     setAiRunning(true)
 
     while (true) {
+      // Pause: wait in small increments until resumed
+      while (pausedRef.current) {
+        await new Promise(r => setTimeout(r, 100))
+      }
+
       const state = useGameStore.getState().gameState
       if (!state || state.phase !== 'bidding') break
 
@@ -547,6 +582,27 @@ export function AuctionRoomScreen() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col pb-16 lg:pb-0">
 
+      {/* ── Paused overlay ────────────────────────────────────────────────── */}
+      {paused && (
+        <div className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
+             style={{ background: 'rgba(0,0,0,0.65)' }}>
+          <div className="pointer-events-auto text-center">
+            <div className="text-6xl mb-4">⏸</div>
+            <p className="text-white font-black text-3xl mb-2">Paused</p>
+            <p className="text-gray-400 text-sm mb-6">Auction is frozen — AI bids and timer are stopped</p>
+            <button
+              onClick={togglePause}
+              className="flex items-center gap-3 px-10 py-4 bg-ipl-gold text-black font-black text-lg rounded-2xl hover:bg-yellow-400 active:scale-95 transition-all shadow-lg shadow-ipl-gold/30"
+            >
+              <svg width="18" height="18" viewBox="0 0 14 14" fill="currentColor">
+                <polygon points="3,1 13,7 3,13" />
+              </svg>
+              Resume
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Auctioneer calling overlay ─────────────────────────────────────── */}
       {isCalling && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center"
@@ -732,8 +788,31 @@ export function AuctionRoomScreen() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Pause / Resume */}
+          <button
+            onClick={togglePause}
+            className={`flex items-center justify-center w-9 h-9 rounded-lg border-2 transition-all active:scale-95 flex-shrink-0 ${
+              paused
+                ? 'bg-ipl-gold border-ipl-gold text-black shadow-md shadow-ipl-gold/40'
+                : 'bg-white/15 border-white/30 text-white hover:bg-white/25 hover:border-white/50'
+            }`}
+            title={paused ? 'Resume auction' : 'Pause auction'}
+          >
+            {paused ? (
+              /* Play triangle */
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <polygon points="3,1 13,7 3,13" />
+              </svg>
+            ) : (
+              /* Pause bars */
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <rect x="2" y="1" width="4" height="12" rx="1"/>
+                <rect x="8" y="1" width="4" height="12" rx="1"/>
+              </svg>
+            )}
+          </button>
           {/* Speed control */}
-          <div className="flex rounded-lg overflow-hidden border border-white/10">
+          <div className={`flex rounded-lg overflow-hidden border border-white/10 transition-opacity ${paused ? 'opacity-40 pointer-events-none' : ''}`}>
             {([1, 2, 3] as const).map(s => (
               <button key={s} onClick={() => setSpeed(s)}
                 className={`px-2 py-1 text-[10px] font-black transition-colors ${
@@ -745,23 +824,6 @@ export function AuctionRoomScreen() {
           <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1.5">
             <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
           </div>
-          {/* Quick squad access */}
-          <button
-            onClick={() => navigate('/my-squad')}
-            className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-ipl-accent/15 border border-ipl-accent/30 hover:bg-ipl-accent/25 active:scale-95 transition-all flex-shrink-0"
-            title="My Squad"
-          >
-            <span className="text-sm leading-none">⭐</span>
-            <span className="text-[8px] text-ipl-accent font-bold leading-none mt-0.5">Mine</span>
-          </button>
-          <button
-            onClick={() => navigate('/all-squads')}
-            className="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/12 hover:bg-white/15 active:scale-95 transition-all flex-shrink-0"
-            title="All Squads"
-          >
-            <span className="text-sm leading-none">🏟</span>
-            <span className="text-[8px] text-gray-400 font-bold leading-none mt-0.5">All</span>
-          </button>
           <button
             onClick={() => setMenuOpen(true)}
             className="flex flex-col gap-1 justify-center items-center w-9 h-9 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"

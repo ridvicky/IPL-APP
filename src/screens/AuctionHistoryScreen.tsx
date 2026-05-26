@@ -134,7 +134,7 @@ export function AuctionHistoryScreen() {
         </div>
       )}
 
-      <BottomNav active="history" />
+      <BottomNav active="auction" />
     </div>
   )
 }

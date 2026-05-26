@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 
-type NavItem = 'auction' | 'my-squad' | 'all-squads' | 'history' | 'unsold' | 'trade'
+type NavItem = 'auction' | 'my-squad' | 'all-squads' | 'unsold'
 
 interface BottomNavProps {
   active: NavItem
@@ -9,9 +9,8 @@ interface BottomNavProps {
 const NAV_ITEMS: { id: NavItem; label: string; icon: string; path: string }[] = [
   { id: 'auction',    label: 'Auction',   icon: '🔨', path: '/auction' },
   { id: 'my-squad',  label: 'My Squad',  icon: '⭐', path: '/my-squad' },
-  { id: 'trade',     label: 'Trade',     icon: '🔄', path: '/trade-window' },
-  { id: 'all-squads',label: 'Squads',    icon: '🏟', path: '/all-squads' },
-  { id: 'history',   label: 'History',   icon: '📋', path: '/history' },
+  { id: 'all-squads', label: 'Squads',   icon: '🏟', path: '/all-squads' },
+  { id: 'unsold',    label: 'Unsold',    icon: '📋', path: '/unsold-players' },
 ]
 
 export function BottomNav({ active }: BottomNavProps) {

@@ -62,9 +62,11 @@ export function runBiddingPipeline(
   const bidState = state.currentBidState!
 
   // ── Step 1: Static franchise intent ───────────────────────────────────────
+  // Threshold 40: keeps only genuinely interested teams in each auction.
+  // In real IPL most players attract 2–4 bidders, not all 9 opponents.
   const staticInterest = computeStaticInterest(persona, teamState, currentPlayer, dataset)
-  if (staticInterest < 10) {
-    return pass(teamId, staticInterest, 'No franchise interest in this player profile')
+  if (staticInterest < 40) {
+    return pass(teamId, staticInterest, 'Insufficient franchise interest')
   }
 
   // ── Step 2: Rule Engine hard gate ─────────────────────────────────────────
@@ -154,7 +156,9 @@ export function runAllOpponentDecisions(
 
 /**
  * Step 1 — Static interest based on persona config and player profile.
- * Returns 0–100. Below 10 = immediate pass (no LLM call wasted in Phase 2).
+ * Returns 0–100. Below 40 = immediate pass — this threshold is the primary
+ * mechanism that keeps most teams out of most auctions, producing realistic
+ * unsold rates and bid counts (2–4 active teams per player, not 9).
  */
 function computeStaticInterest(
   persona: FranchisePersona,
@@ -162,63 +166,92 @@ function computeStaticInterest(
   player: PlayerRecord,
   dataset: AuctionDataset,
 ): number {
-  // Overseas check — skip if no slot
+  // Hard guards — no interest possible
   if (player.isOverseas && teamState.overseasCount >= dataset.overseasLimit) return 0
-
-  // Squad full — no interest at all
   if (teamState.squad.length >= dataset.maximumSquadSize) return 0
 
-  // Tier baseline — ₹0.3Cr → 50, ₹2Cr → 68, ₹10Cr+ → 82
-  const tierBonus = Math.min(32, Math.log10(Math.max(player.basePrice, 0.3) + 1) * 35)
-  let score = 50 + tierBonus
+  const squad = teamState.squad
+  const roleCounts = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+  for (const p of squad) { if (p.role in roleCounts) roleCounts[p.role as keyof typeof roleCounts]++ }
+  const thisRoleCount = roleCounts[player.role] ?? 0
 
-  // Capped star players drive intense multi-team bidding wars
-  if (player.cappedStatus === 'capped') score += 15
+  // ── Role saturation: biggest single filter ────────────────────────────────
+  // If a team already has enough of this role, they step aside. In real IPL
+  // franchises routinely skip entire sets because they're already covered.
+  const saturationMultiplier =
+    player.role === 'WK'
+      ? (thisRoleCount === 0 ? 1.0 : thisRoleCount === 1 ? 0.50 : 0.08)
+      : thisRoleCount <= 2 ? 1.0
+      : thisRoleCount <= 4 ? 0.70
+      : thisRoleCount <= 6 ? 0.35
+      :                      0.12
 
-  // Players with high base price are known stars — every team wants them
-  if (player.basePrice >= 10) score += 12   // elite bracket (retained/star price)
-  else if (player.basePrice >= 4) score += 6  // solid international
+  // ── Overseas slot conservation ────────────────────────────────────────────
+  // Teams plan their overseas slots across the auction — they don't fill up
+  // on the first set and leave themselves short for elite overseas players later.
+  let overseasMult = 1.0
+  if (player.isOverseas) {
+    const slotsUsed = teamState.overseasCount
+    const slotsLeft = dataset.overseasLimit - slotsUsed
+    overseasMult = slotsLeft >= 4 ? 1.0
+                 : slotsLeft === 3 ? 0.75
+                 : slotsLeft === 2 ? 0.45
+                 : slotsLeft === 1 ? 0.25
+                 :                   0.0   // full — already caught by guard above
+  }
 
-  // Role weight
+  // ── Tier baseline — tighter range so threshold is meaningful ─────────────
+  // Low base (₹0.2–0.5) → 30, ₹2 Cr → 42, ₹10 Cr+ → 55
+  const tierBonus = Math.min(25, Math.log10(Math.max(player.basePrice, 0.2) + 1) * 30)
+  let score = 30 + tierBonus
+
+  // Capped international adds genuine multi-team competition — but not guaranteed
+  if (player.cappedStatus === 'capped') score += 10
+  if (player.basePrice >= 10) score += 8   // elite marquee
+  else if (player.basePrice >= 4) score += 4
+
+  // Role weight by persona
   const roleWeight = persona.roleWeights[player.role] ?? 0.75
   score *= roleWeight
 
-  // Capped/uncapped preference
-  if (player.cappedStatus === 'capped' && persona.prefersCapped) score += 6
-  if (player.cappedStatus === 'uncapped' && !persona.prefersCapped) score += 4
+  // Capped/uncapped preference — small bonus only
+  if (player.cappedStatus === 'capped' && persona.prefersCapped) score += 5
+  if (player.cappedStatus === 'uncapped' && !persona.prefersCapped) score += 3
 
-  // Nationality preference
-  if (!player.isOverseas && persona.prefersIndian) score += 5
-  if (player.isOverseas && !persona.prefersIndian) score += 5
-  if (player.isOverseas && persona.overseasCaution > 0) score -= persona.overseasCaution * 8
+  // Nationality fit
+  if (!player.isOverseas && persona.prefersIndian) score += 4
+  if (player.isOverseas && !persona.prefersIndian) score += 4
+  if (player.isOverseas && persona.overseasCaution > 0) score -= persona.overseasCaution * 10
 
-  // Former player loyalty — strong emotional pull, drives bidding wars
-  if (player.previousTeam === persona.teamId) score += persona.loyaltyBonus * 50
+  // Former player loyalty — meaningful pull but capped
+  if (player.previousTeam === persona.teamId) score += persona.loyaltyBonus * 40
+
+  // Per-player non-determinism: each franchise has a random affinity [-8, +12]
+  // seeded on (teamId + playerId) so it's stable across the same player
+  const affinityHash = (persona.teamId + player.playerId).split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)
+  const affinity = ((Math.abs(affinityHash) % 20) - 8)   // -8 to +11
+  score += affinity
+
+  // Apply role saturation and overseas conservation
+  score *= saturationMultiplier * overseasMult
 
   // ── Uncapped player potential ──────────────────────────────────────────────
-  // Potential replaces the tier bonus for uncapped players — a high-rated 19-year-old
-  // matters far more than their ₹0.20 Cr base price suggests.
   if (player.cappedStatus === 'uncapped' && player.potential != null && player.age != null) {
-    const potential = player.potential                     // 1–10
+    const potential = player.potential
     const age = player.age
-    const pw = persona.potentialWeight                     // 0–1 per franchise
-    const youthCutoff = persona.youthThreshold             // e.g. 22
+    const pw = persona.potentialWeight
+    const youthCutoff = persona.youthThreshold
 
-    // Age multiplier: peaks below youthCutoff, fades steadily after
-    const ageMult = age <= youthCutoff        ? 1.5
-                  : age <= youthCutoff + 2    ? 1.2
-                  : age <= youthCutoff + 4    ? 1.0
-                  : age <= youthCutoff + 6    ? 0.80
-                  :                             0.60
+    const ageMult = age <= youthCutoff     ? 1.5
+                  : age <= youthCutoff + 2 ? 1.2
+                  : age <= youthCutoff + 4 ? 1.0
+                  : age <= youthCutoff + 6 ? 0.80
+                  :                          0.60
 
-    // potentialBonus = 0 for potential:1 up to +40 for potential:10 × franchise weight × age curve
     const potentialBonus = (potential - 1) / 9 * 40 * pw * ageMult
-
-    // Prospect tier gives an additional bidding-war spark for elite names
     const tierSpark = player.prospectTier === 'elite'     ? 12 * pw
                     : player.prospectTier === 'promising' ? 6 * pw
                     :                                        0
-
     score += potentialBonus + tierSpark
   }
 
@@ -244,34 +277,33 @@ function computeNeedScore(
     if (p.role in roleCounts) roleCounts[p.role as keyof typeof roleCounts]++
   }
 
-  // Basic need heuristics
+  // Basic need heuristics — sharper drop-off to reflect real franchise selectivity
   const roleCount = roleCounts[player.role]
   let needScore = 50
 
-  // More need if short on this role
-  if (player.role === 'WK' && roleCount === 0) needScore = 90
-  else if (player.role === 'WK' && roleCount === 1) needScore = 60
-  else if (player.role === 'WK' && roleCount >= 2) needScore = 20
-
-  if (player.role !== 'WK') {
-    if (roleCount <= 2) needScore = 75
-    else if (roleCount <= 4) needScore = 55
-    else if (roleCount <= 6) needScore = 35
-    else needScore = 20
+  if (player.role === 'WK') {
+    needScore = roleCount === 0 ? 90 : roleCount === 1 ? 55 : 10
+  } else {
+    needScore = roleCount <= 1 ? 80
+              : roleCount <= 3 ? 60
+              : roleCount <= 5 ? 35
+              : roleCount <= 7 ? 15
+              :                   5
   }
 
-  // Urgency rises as auction progresses and slots fill up
+  // Urgency rises as squad fills (fewer slots = must pick now)
   const fillRatio = squad.length / totalSlots
-  needScore *= (1 + fillRatio * 0.3)
+  needScore *= (1 + fillRatio * 0.25)
 
-  // Overseas slot urgency
+  // Overseas scarcity bonus when only 1 slot left — they really need to use it
   if (player.isOverseas) {
     const overseasLeft = dataset.overseasLimit - teamState.overseasCount
-    if (overseasLeft <= 1) needScore *= 1.2
+    if (overseasLeft === 1) needScore *= 1.15
   }
 
-  // Purse efficiency — if purse is very tight, be more selective
-  if (teamState.currentPurse < 10) needScore *= 0.85
+  // Tight purse = more selective about every bid
+  if (teamState.currentPurse < 15) needScore *= 0.85
+  if (teamState.currentPurse < 8)  needScore *= 0.70
 
   return Math.min(100, Math.max(0, needScore))
 }
@@ -361,23 +393,20 @@ function computeMaxBid(
     const desireFraction = blendedScore / 100
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
-    // Floor at base price so a team with positive interest always bids at least the base
-    return Math.max(basePrice, Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP))
+    // No floor at basePrice — if max < base, team passes at step 7 (player may go unsold)
+    return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
   }
 
-  // Pure formula fallback (no real price known) — tighter caps, multiplier capped at 1.5
-  // desireFraction × realisticCap × bounded multiplier produces realistic ranges
-  let realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
-                   : basePrice < 2  ? Math.min(basePrice * 6, 10)
-                   : basePrice < 5  ? Math.min(basePrice * 5, 16)
-                   : basePrice < 10 ? Math.min(basePrice * 3, 22)
-                   :                  Math.min(basePrice * 2, 26)
+  // Pure formula fallback (no real price known)
+  let realisticCap = basePrice < 1  ? Math.min(basePrice * 6,  4)
+                   : basePrice < 2  ? Math.min(basePrice * 5,  8)
+                   : basePrice < 5  ? Math.min(basePrice * 4, 14)
+                   : basePrice < 10 ? Math.min(basePrice * 2.5, 18)
+                   :                  Math.min(basePrice * 1.8, 24)
 
-  // Uncapped players with high potential get a lifted ceiling — elite prospects can trigger
-  // bidding wars well above the base-price formula (Suryavanshi-type scenarios).
+  // Uncapped players with high potential can trigger bidding wars above formula
   if (currentPlayer?.cappedStatus === 'uncapped' && currentPlayer.potential != null) {
-    const potential = currentPlayer.potential  // 1–10
-    // elite (8–10): up to ₹6 Cr cap; promising (6–7): up to ₹3 Cr; domestic: no lift
+    const potential = currentPlayer.potential
     const potentialCap = potential >= 8 ? 6
                        : potential >= 6 ? 3
                        : potential >= 4 ? 1.5
@@ -386,10 +415,11 @@ function computeMaxBid(
   }
 
   const desireFraction = blendedScore / 100
-  const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.5)
+  const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.4)
   let maxBid = realisticCap * desireFraction * effectiveMultiplier
   maxBid *= 0.85 + Math.random() * 0.25
-  return Math.max(basePrice, Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP))
+  // No floor — genuinely disinterested teams drop out, player may go unsold
+  return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

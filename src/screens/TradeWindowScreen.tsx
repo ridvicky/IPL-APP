@@ -622,7 +622,7 @@ export function TradeWindowScreen() {
         </button>
       </div>
 
-      <BottomNav active="trade" />
+      <BottomNav active="my-squad" />
     </div>
   )
 }
