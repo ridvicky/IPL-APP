@@ -81,26 +81,27 @@ export function runBiddingPipeline(
   // only block on: already passed, already leading, squad full, overseas limit, raw purse.
   const REAUCTION_MIN_SQUAD = 19
   if (state.isReauction && squadSize < REAUCTION_MIN_SQUAD) {
-    const nextBidForced = getNextBidAmount(dataset, bidState, currentPlayer.basePrice)
+    // Role-aware check: only force-bid if this role fills a genuine gap OR squad is critically thin
+    const roleCounts = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+    for (const p of teamState.squad) {
+      if (p.role in roleCounts) roleCounts[p.role as keyof typeof roleCounts]++
+    }
+    const ROLE_MINIMUM = { BAT: 4, BWL: 4, AR: 2, WK: 1 }
+    const roleMin = ROLE_MINIMUM[currentPlayer.role as keyof typeof ROLE_MINIMUM] ?? 3
+    const roleCount = roleCounts[currentPlayer.role as keyof typeof roleCounts] ?? 0
+    const roleNeeded = roleCount < roleMin
+    const criticallyThin = squadSize < 15  // below 15 — bid on anything affordable
 
-    // Hard eligibility checks only — no reserve math
-    if (bidState.teamsPassed.includes(teamId)) {
-      return pass(teamId, 0, 'Already passed this player')
+    if (roleNeeded || criticallyThin) {
+      const nextBidForced = getNextBidAmount(dataset, bidState, currentPlayer.basePrice)
+      if (bidState.teamsPassed.includes(teamId)) return pass(teamId, 0, 'Already passed')
+      if (bidState.currentLeader === teamId && !bidState.rtmPending) return pass(teamId, 0, 'Already leading')
+      if (squadSize >= maxSquad) return pass(teamId, 0, 'Squad full')
+      if (currentPlayer.isOverseas && teamState.overseasCount >= dataset.overseasLimit) return pass(teamId, 0, 'Overseas limit')
+      if (teamState.currentPurse < nextBidForced) return pass(teamId, 0, 'Insufficient purse')
+      return { action: 'bid', teamId, bidAmount: nextBidForced, interestScore: 100, reasoning: 'Re-auction squad minimum override' }
     }
-    if (bidState.currentLeader === teamId && !bidState.rtmPending) {
-      return pass(teamId, 0, 'Already leading bid')
-    }
-    if (squadSize >= maxSquad) {
-      return pass(teamId, 0, 'Squad full')
-    }
-    if (currentPlayer.isOverseas && teamState.overseasCount >= dataset.overseasLimit) {
-      return pass(teamId, 0, 'Overseas limit reached')
-    }
-    if (teamState.currentPurse < nextBidForced) {
-      return pass(teamId, 0, 'Insufficient purse')
-    }
-
-    return { action: 'bid', teamId, bidAmount: nextBidForced, interestScore: 100, reasoning: 'Re-auction squad minimum override' }
+    // Role not needed AND squad not critically thin — fall through to normal pipeline
   }
 
   // ── Step 1: Static franchise intent ───────────────────────────────────────
@@ -128,6 +129,15 @@ export function runBiddingPipeline(
                     :                               40
   if (slotsRemaining >= 15) passThreshold -= 12   // critically thin — desperate mode
   else if (slotsRemaining >= 10) passThreshold -= 6
+
+  // Wire auctionStyle into pass threshold — selective teams bid less often, aggressive teams more
+  const styleModifier = persona.auctionStyle === 'calculated' ?  +5
+                      : persona.auctionStyle === 'analytical' ?  +4
+                      : persona.auctionStyle === 'moneyball'  ?  +3
+                      : persona.auctionStyle === 'aggressive' ?  -5
+                      : persona.auctionStyle === 'emotional'  ?  -3
+                      : 0
+  passThreshold += styleModifier
 
   if (effectiveInterest < passThreshold) {
     return pass(teamId, staticInterest, 'Insufficient franchise interest')
@@ -516,7 +526,7 @@ function computeStaticInterest(
                       : dataset.maximumSquadSize
   const overQuota = squad.length - stageMaxSquad
   if (overQuota > 0) {
-    score -= Math.min(overQuota * 8, 32)
+    score -= Math.min(overQuota * 12, 48)
   }
 
   // ── Uncapped quota nudge ───────────────────────────────────────────────────
@@ -800,9 +810,10 @@ function computeMaxBid(
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
 
-    // Star floor: raised to 45% so marquee stars don't sell cheap
-    if (currentPlayer?.cappedStatus === 'capped' && marketValue >= 5) {
-      const starFloor = marketValue * 0.45 * (0.7 + persona.maxBidMultiplier * 0.2)
+    // Star floor: only apply when team genuinely needs this player (blendedScore ≥ 35)
+    // Saturated teams don't get an artificial floor — reduces mechanical price inflation
+    if (currentPlayer?.cappedStatus === 'capped' && marketValue >= 5 && blendedScore >= 35) {
+      const starFloor = marketValue * 0.40 * (0.7 + persona.maxBidMultiplier * 0.2)
       maxBid = Math.max(maxBid, Math.min(starFloor, safeBidLimit))
     }
 
