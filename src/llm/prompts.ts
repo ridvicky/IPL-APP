@@ -429,3 +429,44 @@ React as the real owner. ownerComment: 1–2 vivid in-character sentences. count
     },
   ]
 }
+
+// ─── Squad Analysis prompt ────────────────────────────────────────────────────
+
+export interface SquadAnalysisContext {
+  teamId: string
+  auctionYear: number
+  squad: {
+    name: string
+    role: string
+    country: string
+    soldPrice: number
+    isOverseas: boolean
+    cappedStatus: string
+    isRetained: boolean
+  }[]
+  allSquads: Record<string, { name: string; role: string; soldPrice: number }[]>
+}
+
+export function buildSquadAnalysisMessages(ctx: SquadAnalysisContext): ChatMessage[] {
+  const squadText = ctx.squad
+    .map((p, i) =>
+      `${i + 1}. ${p.name} [${p.role}] ${p.isOverseas ? '(Overseas)' : '(Indian)'} ${p.cappedStatus === 'capped' ? 'Capped' : 'Uncapped'} ₹${p.soldPrice.toFixed(1)}Cr${p.isRetained ? ' [Retained]' : ''}`
+    )
+    .join('\n')
+
+  const leagueText = Object.entries(ctx.allSquads)
+    .filter(([tid]) => tid !== ctx.teamId)
+    .map(([tid, sq]) => `${tid}: ${sq.map(p => `${p.name}(${p.role})`).join(', ')}`)
+    .join('\n')
+
+  return [
+    {
+      role: 'system',
+      content: `You are a sharp IPL cricket analyst. Evaluate squads built in the GPL ${ctx.auctionYear} auction. Be direct and specific. Pick the best XI for T20 cricket. Respond ONLY with valid JSON matching this exact schema: { "bestXI": [{"name":string,"role":string,"reason":string}], "twelfthMan": {"name":string,"role":string,"reason":string}|null, "strengths": string[], "weaknesses": string[], "roleGaps": string[], "analystNote": string }. Exactly 11 players in bestXI. Max 4 items each in strengths/weaknesses. roleGaps contains role codes (BAT/BWL/AR/WK) that are thin or missing. Each reason is one short sentence. analystNote is 2–3 sentences.`,
+    },
+    {
+      role: 'user',
+      content: `Analyze the ${ctx.teamId} squad from GPL ${ctx.auctionYear}:\n\n${squadText}\n\nIPL rules: max 4 overseas players in the playing XI, 11 players total.\n\nLeague context (other teams for comparison):\n${leagueText}\n\nPick the best XI, name a 12th man, list strengths, weaknesses, any role gaps, and give an overall analyst verdict.`,
+    },
+  ]
+}

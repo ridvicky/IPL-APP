@@ -90,7 +90,7 @@ export function runBiddingPipeline(
     const roleMin = ROLE_MINIMUM[currentPlayer.role as keyof typeof ROLE_MINIMUM] ?? 3
     const roleCount = roleCounts[currentPlayer.role as keyof typeof roleCounts] ?? 0
     const roleNeeded = roleCount < roleMin
-    const criticallyThin = squadSize < 15  // below 15 — bid on anything affordable
+    const criticallyThin = squadSize < 18  // below 18 — bid on anything affordable
 
     if (roleNeeded || criticallyThin) {
       const nextBidForced = getNextBidAmount(dataset, bidState, currentPlayer.basePrice)
@@ -117,6 +117,12 @@ export function runBiddingPipeline(
     squadFloor = slotsRemaining * 2.0          // very thin
   } else if (slotsRemaining >= 5 && state.currentSetIndex >= 12) {
     squadFloor = slotsRemaining * 1.5          // thin — original behaviour
+  }
+
+  // Re-auction minimum safety net: one slot short of the 19-player floor — heavy nudge
+  // Forces interest high enough to almost always pass the passThreshold via normal pipeline
+  if (state.isReauction && squadSize === REAUCTION_MIN_SQUAD - 1) {
+    squadFloor += 40
   }
 
   const effectiveInterest = staticInterest + squadFloor
