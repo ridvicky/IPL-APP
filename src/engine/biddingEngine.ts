@@ -19,6 +19,15 @@ import type { PlayerRecord } from '@/types/player'
 import { validateBid, getSafeBidLimit } from '@/engine/ruleEngine'
 import { getBidIncrement, getPlayersInSet } from '@/dataset/datasetLoader'
 import { getPersona } from '@/personas/index'
+import { FRANCHISE_TARGETS } from '@/data/franchiseTargets'
+import { AR_BOWLING_TYPES } from '@/data/arBowlingTypes'
+import { BATTING_POSITIONS } from '@/data/battingPositions'
+import { CAPTAIN_CANDIDATES, getCaptainScore } from '@/data/captainCandidates'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Session salt — randomises per-team affinity each auction so no two runs feel identical
+// ─────────────────────────────────────────────────────────────────────────────
+const SESSION_SALT = Math.floor(Math.random() * 99991).toString()
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public types
@@ -61,11 +70,66 @@ export function runBiddingPipeline(
   const teamState = state.teamStates[teamId]
   const bidState = state.currentBidState!
 
+  const squadSize = teamState.squad.length
+  const maxSquad = dataset.maximumSquadSize   // 25
+  const slotsRemaining = maxSquad - squadSize
+
+  // ── Re-auction hard override: squad < 19 → force bid, bypass reserve checks ──
+  // Teams MUST reach minimum 19 players. The normal reserve check (slotsNeeded × ₹0.20)
+  // blocks bids when purse is tight because it assumes full base prices — but re-auction
+  // players cost 50% base, so the reserve is too conservative. Bypass it entirely and
+  // only block on: already passed, already leading, squad full, overseas limit, raw purse.
+  const REAUCTION_MIN_SQUAD = 19
+  if (state.isReauction && squadSize < REAUCTION_MIN_SQUAD) {
+    const nextBidForced = getNextBidAmount(dataset, bidState, currentPlayer.basePrice)
+
+    // Hard eligibility checks only — no reserve math
+    if (bidState.teamsPassed.includes(teamId)) {
+      return pass(teamId, 0, 'Already passed this player')
+    }
+    if (bidState.currentLeader === teamId && !bidState.rtmPending) {
+      return pass(teamId, 0, 'Already leading bid')
+    }
+    if (squadSize >= maxSquad) {
+      return pass(teamId, 0, 'Squad full')
+    }
+    if (currentPlayer.isOverseas && teamState.overseasCount >= dataset.overseasLimit) {
+      return pass(teamId, 0, 'Overseas limit reached')
+    }
+    if (teamState.currentPurse < nextBidForced) {
+      return pass(teamId, 0, 'Insufficient purse')
+    }
+
+    return { action: 'bid', teamId, bidAmount: nextBidForced, interestScore: 100, reasoning: 'Re-auction squad minimum override' }
+  }
+
   // ── Step 1: Static franchise intent ───────────────────────────────────────
-  // Threshold 40: keeps only genuinely interested teams in each auction.
-  // In real IPL most players attract 2–4 bidders, not all 9 opponents.
-  const staticInterest = computeStaticInterest(persona, teamState, currentPlayer, dataset)
-  if (staticInterest < 40) {
+  const staticInterest = computeStaticInterest(persona, teamState, currentPlayer, dataset, state.currentSetIndex, bidState)
+
+  // Squad-thin floor: scales against max squad size (25), not a hard-coded 20.
+  // Starts earlier (set 8+) and becomes very aggressive when the squad is critically thin.
+  // A team with 10 players in set 25 should be bidding on almost everything it can afford.
+  let squadFloor = 0
+  if (slotsRemaining >= 15) {
+    squadFloor = slotsRemaining * 2.5          // critically thin — up to +37 at 15 slots short
+  } else if (slotsRemaining >= 10 && state.currentSetIndex >= 8) {
+    squadFloor = slotsRemaining * 2.0          // very thin
+  } else if (slotsRemaining >= 5 && state.currentSetIndex >= 12) {
+    squadFloor = slotsRemaining * 1.5          // thin — original behaviour
+  }
+
+  const effectiveInterest = staticInterest + squadFloor
+
+  // Pass threshold drops progressively through the auction and with squad thinness.
+  // A thin squad late in the auction should almost never pass on an affordable player.
+  let passThreshold = state.currentSetIndex >= 25 ? 22
+                    : state.currentSetIndex >= 20 ? 28
+                    : state.currentSetIndex >= 15 ? 33
+                    :                               40
+  if (slotsRemaining >= 15) passThreshold -= 12   // critically thin — desperate mode
+  else if (slotsRemaining >= 10) passThreshold -= 6
+
+  if (effectiveInterest < passThreshold) {
     return pass(teamId, staticInterest, 'Insufficient franchise interest')
   }
 
@@ -78,29 +142,37 @@ export function runBiddingPipeline(
 
   // ── Step 3: Safe bid limit ────────────────────────────────────────────────
   const currentSetName = dataset.auctionSets[state.currentSetIndex] ?? ''
-  const safeBidLimit = getSafeBidLimit(teamState, dataset, currentSetName, state.currentSetIndex)
+  const safeBidLimit = getSafeBidLimit(teamState, dataset, currentSetName, state.currentSetIndex, state.isReauction)
   if (safeBidLimit <= 0 || nextBid > safeBidLimit) {
     return pass(teamId, staticInterest, 'Insufficient safe purse to bid')
   }
 
   // ── Step 4: Squad need score ──────────────────────────────────────────────
-  const needScore = computeNeedScore(persona, teamState, currentPlayer, dataset)
+  const needScore = computeNeedScore(persona, teamState, currentPlayer, dataset, state.currentSetIndex, state.auctionLog ?? [])
 
   // ── Step 5: Emotion score ─────────────────────────────────────────────────
-  const emotionScore = computeEmotionScore(persona, teamState, currentPlayer, llmResult)
+  const emotionScore = computeEmotionScore(persona, teamState, currentPlayer, llmResult, state.auctionLog ?? [])
 
   // ── Step 6: Max bid calculation ───────────────────────────────────────────
   const blendedScore = blendScores(staticInterest, needScore, emotionScore, llmResult)
 
-  // Emotional star bonus: former franchise players and capped stars drive 30% higher ceilings
-  // This models the real IPL phenomenon where teams go crazy for their own players
+  // Emotional star bonus: former franchise players and marquee stars push ceilings up.
+  // Only truly elite players (MV ≥ ₹18 Cr) can reach the ₹25 Cr+ tier —
+  // otherwise the emotional bonus is capped to avoid inflating mid-tier stars.
   const isEmotionalTarget = currentPlayer.previousTeam === persona.teamId ||
                             currentPlayer.rtmEligibleFor === persona.teamId
-  const isCapStar = currentPlayer.cappedStatus === 'capped' &&
-                    (currentPlayer.marketValue ?? 0) >= 14
-  const emotionalMultiplier = isEmotionalTarget ? 1.30 : isCapStar ? 1.10 : 1.0
+  const mv = currentPlayer.marketValue ?? 0
+  const isTrulyMarquee = currentPlayer.cappedStatus === 'capped' && mv >= 18  // Pant / Gill tier
+  const emotionalMultiplier = isEmotionalTarget
+    ? (isTrulyMarquee ? 1.25 : 1.15)  // loyalty bonus scaled to player tier
+    : isTrulyMarquee ? 1.08            // genuine marquee — tiny premium only
+    : 1.0                              // everyone else: no emotional inflation
 
-  const maxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer) * emotionalMultiplier
+  // Hard absolute cap — enforced AFTER all multipliers so it truly holds.
+  // Real IPL record is Rishabh Pant ₹27 Cr. ₹25+ Cr bids are rare (3–9 players per mega auction).
+  const AUCTION_HARD_CAP = 28
+  const rawMaxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer, bidState) * emotionalMultiplier
+  const maxBid = Math.min(rawMaxBid, safeBidLimit, AUCTION_HARD_CAP)
 
   // ── Step 7: Bid or pass ───────────────────────────────────────────────────
   if (nextBid > maxBid) {
@@ -154,6 +226,92 @@ export function runAllOpponentDecisions(
 // Step helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Player classification helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function getPlayerTier(player: PlayerRecord): 'prime' | 'reliable' | 'depth' {
+  const mv = player.marketValue ?? 0
+  if (player.cappedStatus === 'capped') {
+    if (mv >= 8 || player.basePrice >= 2)   return 'prime'
+    if (mv >= 2.5 || player.basePrice >= 1) return 'reliable'
+    return 'depth'
+  }
+  const pot = player.potential ?? 0
+  if (pot >= 8 || player.prospectTier === 'elite')     return 'prime'
+  if (pot >= 6 || player.prospectTier === 'promising') return 'reliable'
+  return 'depth'
+}
+
+function getARArchetype(player: PlayerRecord): string | null {
+  if (player.role !== 'AR') return null
+  const bowlType = (player as PlayerRecord & { bowlingType?: string }).bowlingType
+    ?? AR_BOWLING_TYPES[player.playerId]
+  const batPos = getBattingPosition(player)
+  if (!bowlType || !batPos) return null
+  return `${bowlType}-${batPos}`  // e.g. 'spin-middleOrder', 'pace-finisher'
+}
+
+function getBattingPosition(player: PlayerRecord): 'opener' | 'middleOrder' | 'finisher' | null {
+  if (BATTING_POSITIONS[player.playerId]) return BATTING_POSITIONS[player.playerId]
+  const set = player.auctionSet?.toLowerCase() ?? ''
+  if (set.includes('batters 1') || set.includes('marquee')) return 'opener'
+  if (set.includes('batters 2')) return 'middleOrder'
+  if (set.includes('batters 3') || set.includes('batters 4')) return 'finisher'
+  return null
+}
+
+/**
+ * Assembles live context for LLM prompt — squad snapshot, purse, current bid, player profile.
+ * The persona's llmPersonaPrompt provides character; this provides the live situation.
+ */
+export function buildLLMContext(
+  persona: FranchisePersona,
+  teamState: TeamState,
+  player: PlayerRecord,
+  bidState: BidState,
+  currentSetIndex: number,
+  dataset: AuctionDataset,
+): string {
+  const roleCounts = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+  for (const p of teamState.squad) {
+    if (p.role in roleCounts) roleCounts[p.role as keyof typeof roleCounts]++
+  }
+  const recentBuys = teamState.squad
+    .slice(-5)
+    .map(p => `${p.name} (${p.role})`)
+    .join(', ') || 'None yet'
+
+  const hasCaptain = teamState.squad.some(p => {
+    const profile = CAPTAIN_CANDIDATES[(p as PlayerRecord).playerId]
+    return profile && getCaptainScore(profile) >= 55
+  })
+
+  const playerTier = getPlayerTier(player)
+  const batPos = getBattingPosition(player)
+  const bowlingType = (player as PlayerRecord & { bowlingType?: string }).bowlingType
+    ?? (player.role === 'AR' ? AR_BOWLING_TYPES[player.playerId] : undefined)
+
+  return `[AUCTION — Set ${currentSetIndex + 1}]
+Team: ${persona.displayName} | Purse: ₹${teamState.currentPurse.toFixed(1)} Cr | Squad: ${teamState.squad.length} players
+Role counts — BAT:${roleCounts.BAT} BWL:${roleCounts.BWL} AR:${roleCounts.AR} WK:${roleCounts.WK}
+Has captain figure in squad: ${hasCaptain ? 'Yes' : 'No — actively seeking'}
+Overseas slots: ${teamState.overseasCount}/${dataset.overseasLimit} used
+Recent buys: ${recentBuys}
+
+Current player: ${player.name} | Role: ${player.role}${batPos ? ` (${batPos})` : ''}${bowlingType ? ` | ${bowlingType} bowler` : ''}
+Status: ${player.cappedStatus} | Tier: ${playerTier} | Base: ₹${player.basePrice} Cr | Market value: ₹${player.marketValue ?? '?'} Cr
+Current bid: ₹${bidState.currentBid > 0 ? bidState.currentBid.toFixed(1) : player.basePrice.toFixed(1)} Cr | Leader: ${bidState.currentLeader ?? 'None'}
+
+Respond ONLY with valid JSON:
+{
+  "bid": true | false,
+  "ownerComment": "1–2 sentence in-character comment referencing the player by name and your squad situation",
+  "reasoning": "1 sentence internal reasoning",
+  "jumpBid": null
+}`
+}
+
 /**
  * Step 1 — Static interest based on persona config and player profile.
  * Returns 0–100. Below 40 = immediate pass — this threshold is the primary
@@ -165,6 +323,8 @@ function computeStaticInterest(
   teamState: TeamState,
   player: PlayerRecord,
   dataset: AuctionDataset,
+  currentSetIndex = 0,
+  bidState?: BidState | null,
 ): number {
   // Hard guards — no interest possible
   if (player.isOverseas && teamState.overseasCount >= dataset.overseasLimit) return 0
@@ -176,15 +336,16 @@ function computeStaticInterest(
   const thisRoleCount = roleCounts[player.role] ?? 0
 
   // ── Role saturation: biggest single filter ────────────────────────────────
-  // If a team already has enough of this role, they step aside. In real IPL
-  // franchises routinely skip entire sets because they're already covered.
+  // Raised floor from 0.12 → 0.22 so deep-squad teams still consider depth picks.
+  // WK stays strict (you never need 3 WKs) but non-WK roles need 7-8 players in a 25-man squad.
   const saturationMultiplier =
     player.role === 'WK'
       ? (thisRoleCount === 0 ? 1.0 : thisRoleCount === 1 ? 0.50 : 0.08)
       : thisRoleCount <= 2 ? 1.0
-      : thisRoleCount <= 4 ? 0.70
-      : thisRoleCount <= 6 ? 0.35
-      :                      0.12
+      : thisRoleCount <= 4 ? 0.72
+      : thisRoleCount <= 6 ? 0.42
+      : thisRoleCount <= 8 ? 0.28
+      :                      0.18
 
   // ── Overseas slot conservation ────────────────────────────────────────────
   // Teams plan their overseas slots across the auction — they don't fill up
@@ -230,18 +391,57 @@ function computeStaticInterest(
 
   // Per-player non-determinism: each franchise has a random affinity [-8, +12]
   // seeded on (teamId + playerId) so it's stable across the same player
-  const affinityHash = (persona.teamId + player.playerId).split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)
-  const affinity = ((Math.abs(affinityHash) % 20) - 8)   // -8 to +11
+  // SESSION_SALT changes every app launch — same player draws different interest each auction
+  const affinityHash = (SESSION_SALT + persona.teamId + player.playerId).split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)
+  const affinity = ((Math.abs(affinityHash) % 22) - 9)   // -9 to +12 per session
   score += affinity
 
-  // Apply role saturation and overseas conservation
-  score *= saturationMultiplier * overseasMult
+  // Rivalry escalation: more active bidders validate the player's worth → FOMO kicks in
+  if (bidState) {
+    const bidderTeams = new Set((bidState.bids ?? []).map(b => b.teamId))
+    const activeBidderCount = [...bidderTeams].filter(t => !bidState.teamsPassed.includes(t as TeamId)).length
+    if (activeBidderCount >= 3) score += 8
+    if (activeBidderCount >= 5) score += 8
+    if (activeBidderCount >= 7) score += 6
+  }
 
-  // ── Star / recency appeal (applied AFTER saturation) ─────────────────────
+  // Apply role saturation and overseas conservation.
+  // Late auction relief scales with both set index AND how thin the squad is —
+  // a team with 10 players should be almost fully relieved of saturation penalties.
+  const slotsShort = Math.max(0, dataset.maximumSquadSize - teamState.squad.length)
+  const thinSquadRelief = slotsShort >= 15 ? 0.55
+                        : slotsShort >= 10 ? 0.40
+                        : slotsShort >= 5  ? 0.20
+                        : 0
+  const lateSaturationRelief = currentSetIndex >= 20 ? 0.35
+                              : currentSetIndex >= 15 ? 0.20
+                              : currentSetIndex >= 10 ? 0.10
+                              : 0
+  const adjustedSaturation = Math.min(1.0, saturationMultiplier + lateSaturationRelief + thinSquadRelief)
+  score *= adjustedSaturation * overseasMult
+
+  // ── Post-saturation bonuses (all applied AFTER saturation so they aren't suppressed) ──
+
+  // Franchise targeting: a team pursuing their real-world target ignores role coverage
+  const targetBonus = (FRANCHISE_TARGETS[player.playerId] ?? []).includes(persona.teamId) ? 22 : 0
+  score += targetBonus
+
+  // ── Session unpredictability: surprise bidder + cold room ─────────────────
+  // Reduced cold room to 4% (was 8%) — too frequent at 8%, caused squads to stall.
+  // Surprise bidder stays at 7% — adds excitement without blocking completion.
+  // Cold room is also suppressed when squad is critically thin (team can't afford to skip).
+  const surpriseHash = Math.abs((SESSION_SALT + persona.teamId + player.playerId + currentSetIndex)
+    .split('').reduce((h, c) => (h * 37 + c.charCodeAt(0)) | 0, 0))
+  const surpriseRoll = surpriseHash % 100
+  if (surpriseRoll < 7) {
+    score += 14   // surprise bidder
+  } else if (surpriseRoll >= 92 && slotsShort < 10) {
+    // Cold room only fires when squad isn't critically thin (4% chance)
+    score -= 10
+  }
+
+  // ── Star / recency appeal ─────────────────────────────────────────────────
   // Elite proven players always attract more bidders regardless of role coverage.
-  // A team with a WK won't completely ignore Ishan Kishan or Josh Inglis — they
-  // watch the bidding and may engage if the price is right. This models "auction
-  // spotlight" for big-name players.
   const mv = player.marketValue ?? 0
   if (player.cappedStatus === 'capped') {
     const starAppeal = mv >= 15 ? 20     // elite marquee (Pant, Gill tier)
@@ -252,8 +452,88 @@ function computeStaticInterest(
                      : 0
     score += starAppeal
   } else if (player.cappedStatus === 'uncapped' && mv >= 3) {
-    // Breakout uncapped players (Suryavanshi etc.) get some buzz too
     score += mv >= 8 ? 10 : mv >= 5 ? 6 : 3
+  }
+
+  // ── AR archetype affinity (unified bowling × batting style for All-Rounders) ──
+  if (player.role === 'AR') {
+    const archetype = getARArchetype(player)
+    if (archetype) {
+      score *= persona.arArchetypeAffinity[archetype] ?? 1.0
+    } else {
+      // Unknown archetype — fall back to generic bowling affinity
+      const bowlType = (player as PlayerRecord & { bowlingType?: 'pace' | 'spin' }).bowlingType
+        ?? AR_BOWLING_TYPES[player.playerId]
+      if (bowlType) score *= persona.bowlingAffinity[bowlType]
+    }
+  }
+
+  // ── Bowling type affinity — pure bowlers only (ARs handled above) ─────────
+  if (player.role === 'BWL') {
+    const bowlingType = (player as PlayerRecord & { bowlingType?: 'pace' | 'spin' }).bowlingType
+    if (bowlingType) score *= persona.bowlingAffinity[bowlingType]
+  }
+
+  // ── Batting position affinity — BAT and WK only (ARs handled above) ───────
+  if (player.role === 'BAT' || player.role === 'WK') {
+    const batPos = getBattingPosition(player)
+    if (batPos) score *= persona.battingPositionAffinity[batPos]
+  }
+
+  // ── Captaincy premium ──────────────────────────────────────────────────────
+  const captainProfile = CAPTAIN_CANDIDATES[player.playerId]
+  if (captainProfile) {
+    const captainScore = getCaptainScore(captainProfile)
+    const hasCaptainInSquad = squad.some(p => {
+      const profile = CAPTAIN_CANDIDATES[(p as PlayerRecord).playerId]
+      return profile && getCaptainScore(profile) >= 55
+    })
+    if (!hasCaptainInSquad) {
+      score += (captainScore / 100) * 20 * persona.captaincyWeight
+    } else if (captainScore >= 70) {
+      score += (captainScore / 100) * 8 * persona.captaincyWeight
+    }
+  }
+
+  // ── Player type affinity (stars / youth / value) ──────────────────────────
+  const { stars, youth, value } = persona.playerTypeAffinity
+  const bp = player.basePrice
+  if (player.cappedStatus === 'capped' && mv >= 8) {
+    score *= stars   // RCB ×1.30 on marquee stars, RR ×0.80
+  }
+  if (player.cappedStatus === 'uncapped' && (player.potential ?? 0) >= 7) {
+    score *= youth   // GT ×1.25, CSK ×0.60
+  }
+  if (mv > 0 && bp > 0 && mv / bp >= 3) {
+    score *= value   // RR ×1.30 on value buys, RCB ×0.70
+  }
+
+  // ── Stage squad-size ceiling: penalise over-acquisition per stage ────────────
+  // Prevents teams from hoarding 8+ players in marquee sets and starving later sets.
+  const stageMaxSquad = currentSetIndex <= 2  ? 7
+                      : currentSetIndex <= 9  ? 12
+                      : currentSetIndex <= 15 ? 18
+                      : dataset.maximumSquadSize
+  const overQuota = squad.length - stageMaxSquad
+  if (overQuota > 0) {
+    score -= Math.min(overQuota * 8, 32)
+  }
+
+  // ── Uncapped quota nudge ───────────────────────────────────────────────────
+  // Teams aim for 2 minimum and ~5 typically. This is a nudge, not a mandate —
+  // team affinity, player potential, and player worth still do most of the filtering.
+  // A low-potential wrong-fit player won't clear the threshold; a good-fit prospect will.
+  if (player.cappedStatus === 'uncapped' && currentSetIndex >= 16) {
+    const uncappedInSquad = squad.filter(p => (p as PlayerRecord).cappedStatus === 'uncapped').length
+    if (uncappedInSquad < 2) {
+      score += 12
+    } else if (uncappedInSquad < 5) {
+      score += 10
+    } else if (uncappedInSquad < 8) {
+      score += 8
+    } else if (uncappedInSquad < 11) {
+      score += 8
+    }
   }
 
   // ── Uncapped player potential ──────────────────────────────────────────────
@@ -284,49 +564,151 @@ function computeStaticInterest(
  * Analyses current squad composition gaps.
  */
 function computeNeedScore(
-  _persona: FranchisePersona,
+  persona: FranchisePersona,
   teamState: TeamState,
   player: PlayerRecord,
   dataset: AuctionDataset,
+  currentSetIndex = 0,
+  auctionLog: string[] = [],
 ): number {
   const squad = teamState.squad
   const totalSlots = dataset.maximumSquadSize
+  const tierTargets = persona.squadTierTargets
 
-  // Count roles in squad
   const roleCounts = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
   for (const p of squad) {
     if (p.role in roleCounts) roleCounts[p.role as keyof typeof roleCounts]++
   }
 
-  // Basic need heuristics — sharper drop-off to reflect real franchise selectivity
-  const roleCount = roleCounts[player.role]
-  let needScore = 50
+  // Tier-specific need: how many of this role+tier does the team have vs their target?
+  const playerTier = getPlayerTier(player)
+  const roleKey = player.role as 'BAT' | 'BWL' | 'AR' | 'WK'
+  const tierTarget = tierTargets[roleKey]?.[playerTier] ?? 2
 
-  if (player.role === 'WK') {
-    needScore = roleCount === 0 ? 90 : roleCount === 1 ? 55 : 10
-  } else {
-    needScore = roleCount <= 1 ? 80
-              : roleCount <= 3 ? 60
-              : roleCount <= 5 ? 35
-              : roleCount <= 7 ? 15
-              :                   5
+  let tierCount = squad.filter(p =>
+    p.role === player.role && getPlayerTier(p as PlayerRecord) === playerTier
+  ).length
+
+  // AR duality: ARs count toward BAT need (0.5×) and BWL need (0.6×)
+  if (player.role === 'BAT') {
+    const arSameTier = squad.filter(p => p.role === 'AR' && getPlayerTier(p as PlayerRecord) === playerTier).length
+    const wkSameTier = squad.filter(p => p.role === 'WK' && getPlayerTier(p as PlayerRecord) === playerTier).length
+    tierCount += arSameTier * 0.50 + wkSameTier * 0.50
+  }
+  if (player.role === 'BWL') {
+    const arSameTier = squad.filter(p => p.role === 'AR' && getPlayerTier(p as PlayerRecord) === playerTier).length
+    tierCount += arSameTier * 0.60
   }
 
-  // Urgency rises as squad fills (fewer slots = must pick now)
+  const tierGap = Math.max(0, tierTarget - tierCount)
+  const tierGapRatio = tierGap / Math.max(tierTarget, 1)
+
+  let needScore: number
+  if (player.role === 'WK') {
+    if (playerTier === 'prime')      needScore = tierGapRatio > 0 ? 85 : 15
+    else if (playerTier === 'reliable') needScore = tierGapRatio > 0 ? 55 : 20
+    else                              needScore = tierGapRatio > 0 ? 35 : 10
+  } else {
+    needScore = 20 + tierGapRatio * 70   // 20 (saturated) → 90 (tier empty)
+  }
+
+  // Dynamic pivot: if team recently missed a player of the same role, urgency rises
+  if (tierGapRatio > 0 && auctionLog.length > 0) {
+    const recentLog = auctionLog.slice(-8)
+    const teamRecentLoss = recentLog.some(entry =>
+      entry.includes(`[${persona.teamId}]`) &&
+      entry.toLowerCase().includes('pass') &&
+      entry.toLowerCase().includes(player.role.toLowerCase())
+    )
+    if (teamRecentLoss) needScore *= 1.18
+  }
+
+  // Batting position need bonus — does the team need an opener vs middleOrder vs finisher?
+  if (player.role === 'BAT' || player.role === 'WK' || player.role === 'AR') {
+    const playerPos = getBattingPosition(player)
+    if (playerPos) {
+      const POSITION_TARGETS = { opener: 3, middleOrder: 4, finisher: 3 } as const
+      const posCount = squad.filter(p =>
+        (p.role === 'BAT' || p.role === 'WK' || p.role === 'AR') &&
+        getBattingPosition(p as PlayerRecord) === playerPos
+      ).length
+      const posGap = Math.max(0, POSITION_TARGETS[playerPos] - posCount)
+      if (posGap > 0) needScore *= (1 + posGap * 0.08)
+    }
+  }
+
+  // AR bowling-type need: reduce need when team already has >60% of ARs in the same bowling style
+  if (player.role === 'AR') {
+    const archetype = getARArchetype(player)
+    if (archetype) {
+      const bowlType = archetype.startsWith('pace') ? 'pace' : 'spin'
+      const totalARs = squad.filter(p => p.role === 'AR').length
+      if (totalARs >= 3) {
+        const sameBowlTypeARs = squad.filter(p => {
+          if (p.role !== 'AR') return false
+          const arch = getARArchetype(p as PlayerRecord)
+          return arch ? arch.startsWith(bowlType) : false
+        }).length
+        if (sameBowlTypeARs / totalARs > 0.60) needScore *= 0.75
+      }
+    }
+  }
+
+  // Urgency rises as squad fills
   const fillRatio = squad.length / totalSlots
   needScore *= (1 + fillRatio * 0.25)
 
-  // Overseas scarcity bonus when only 1 slot left — they really need to use it
+  // Overseas scarcity
   if (player.isOverseas) {
     const overseasLeft = dataset.overseasLimit - teamState.overseasCount
     if (overseasLeft === 1) needScore *= 1.15
   }
 
-  // Tight purse = more selective about every bid
+  // Tight purse
   if (teamState.currentPurse < 15) needScore *= 0.85
   if (teamState.currentPurse < 8)  needScore *= 0.70
 
+  // Late-auction desperation
+  if (currentSetIndex >= 12 && squad.length < 23) {
+    needScore *= 1.0 + (23 - squad.length) * 0.07
+  }
+
   return Math.min(100, Math.max(0, needScore))
+}
+
+function computeMomentumAdjustment(persona: FranchisePersona, auctionLog: string[], player: PlayerRecord): number {
+  if (auctionLog.length === 0) return 0
+  const recentEntries = auctionLog.slice(-6)
+  let momentumScore = 0
+
+  // Team just spent big → cautious about next purchase
+  const justSpentBig = recentEntries.some(e => {
+    if (!e.includes('SOLD:') || !e.includes(persona.teamId)) return false
+    const match = e.match(/₹(\d+\.?\d*)/)
+    return match ? parseFloat(match[1]) >= 10 : false
+  })
+  if (justSpentBig) momentumScore -= 8
+
+  // Team won 2 recent lots → confident momentum
+  const teamWins = recentEntries.filter(e => e.includes('SOLD:') && e.includes(persona.teamId)).length
+  if (teamWins >= 2) momentumScore += 6
+
+  // Team got outbid repeatedly on same role → frustrated aggression
+  const roleStr = player.role.toLowerCase()
+  const recentRoleLosses = recentEntries.filter(e =>
+    e.includes(`[${persona.teamId}]`) &&
+    e.toLowerCase().includes('pass') &&
+    e.toLowerCase().includes(roleStr)
+  ).length
+  if (recentRoleLosses >= 2) momentumScore += 10
+
+  // Style amplifiers
+  if (persona.auctionStyle === 'emotional')   momentumScore *= 1.4
+  if (persona.auctionStyle === 'aggressive')  momentumScore *= 1.2
+  if (persona.auctionStyle === 'analytical')  momentumScore *= 0.6
+  if (persona.auctionStyle === 'moneyball')   momentumScore *= 0.4
+
+  return Math.max(-15, Math.min(20, momentumScore))
 }
 
 /**
@@ -337,6 +719,7 @@ function computeEmotionScore(
   _teamState: TeamState,
   player: PlayerRecord,
   _llmResult: LLMPersonaResult | null,
+  auctionLog: string[] = [],
 ): number {
   let score = 40 // neutral baseline
 
@@ -344,15 +727,15 @@ function computeEmotionScore(
   if (player.previousTeam === persona.teamId) score += 25
   if (player.rtmEligibleFor === persona.teamId) score += 20
 
-  // LLM-provided emotional triggers (Phase 2) — not used in new architecture
-  // (personalCeiling already incorporates emotional factors)
-
   // Auction style modifiers
   if (persona.auctionStyle === 'aggressive') score *= 1.15
   if (persona.auctionStyle === 'emotional') score *= 1.25
   if (persona.auctionStyle === 'analytical') score *= 0.85
   if (persona.auctionStyle === 'moneyball') score *= 0.80
   if (persona.auctionStyle === 'calculated') score *= 0.90
+
+  // Momentum adjustment based on recent auction events
+  score += computeMomentumAdjustment(persona, auctionLog, player)
 
   return Math.min(100, Math.max(0, score))
 }
@@ -393,6 +776,7 @@ function computeMaxBid(
   llmResult: LLMPersonaResult | null,
   marketValue?: number | null,
   currentPlayer?: PlayerRecord | null,
+  bidState?: BidState | null,
 ): number {
   // Absolute hard ceiling — only Rishabh Pant (₹27 Cr) has ever come close
   const ABSOLUTE_CAP = 28
@@ -403,40 +787,63 @@ function computeMaxBid(
     return Math.min(ceiling, safeBidLimit, ABSOLUTE_CAP)
   }
 
-  // marketValue = actual 2025 auction result — primary anchor for formula path
-  // desireFraction scales how much of market value a team is willing to pay,
-  // persona multiplier adds the 'overpay' character (RCB/MI pay more than RR/DC)
-  // Only use marketValue as anchor when it's meaningfully above base price.
-  // If marketValue ≈ basePrice the player went unsold or at base price — using it
-  // as the multiplier anchor produces a max bid BELOW base price (desireFraction × tiny number),
-  // which silently blocks all AI bids in the second half of the auction.
+  // Active bidder count for scarcity calculations
+  const activeBidderCount = bidState
+    ? (() => {
+        const bidderTeams = new Set((bidState.bids ?? []).map(b => b.teamId))
+        return [...bidderTeams].filter(t => !bidState.teamsPassed.includes(t as TeamId)).length
+      })()
+    : 0
+
   if (marketValue && marketValue > basePrice * 1.2) {
     const desireFraction = blendedScore / 100
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
-    // Star floor: proven high-value players shouldn't sell for pennies even when
-    // bidders are few. A team drawn in by star appeal should at least bid
-    // proportionally to the player's established market value.
+
+    // Star floor: raised to 45% so marquee stars don't sell cheap
     if (currentPlayer?.cappedStatus === 'capped' && marketValue >= 5) {
-      const starFloor = marketValue * 0.30 * (0.7 + persona.maxBidMultiplier * 0.2)
+      const starFloor = marketValue * 0.45 * (0.7 + persona.maxBidMultiplier * 0.2)
       maxBid = Math.max(maxBid, Math.min(starFloor, safeBidLimit))
     }
+
+    // Scarcity inflation: crowded rooms push franchise ceilings higher.
+    // Only truly marquee (MV ≥ ₹18 Cr) can reach full inflation — keeps ₹25+ Cr as a rare event.
+    const playerMV = currentPlayer?.marketValue ?? 0
+    const isTrulyMarqueeTier = playerMV >= 18 || (currentPlayer?.basePrice ?? 0) >= 12
+    const isMarqueeTier      = playerMV >= 14 || (currentPlayer?.basePrice ?? 0) >= 10
+    const isPrimeTier        = playerMV >= 8
+    let scarcityMult = 1.0
+    if (isTrulyMarqueeTier && activeBidderCount >= 5)  scarcityMult = 1.30
+    else if (isTrulyMarqueeTier && activeBidderCount >= 3) scarcityMult = 1.15
+    else if (isMarqueeTier && activeBidderCount >= 5)  scarcityMult = 1.18
+    else if (isMarqueeTier && activeBidderCount >= 3)  scarcityMult = 1.10
+    else if (isPrimeTier && activeBidderCount >= 5)    scarcityMult = 1.10
+    else if (isPrimeTier && activeBidderCount >= 3)    scarcityMult = 1.05
+    // Taper: when blendedScore is already high, need score has priced in the urgency — don't double-count
+    if (scarcityMult > 1.0 && blendedScore > 72) {
+      const taper = 1 - Math.min((blendedScore - 72) / 28, 0.65)
+      scarcityMult = 1.0 + (scarcityMult - 1.0) * taper
+    }
+    maxBid *= scarcityMult
+
     return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
   }
 
-  // Pure formula fallback (no real price known)
-  let realisticCap = basePrice < 1  ? Math.min(basePrice * 6,  4)
-                   : basePrice < 2  ? Math.min(basePrice * 5,  8)
+  // Pure formula fallback (no real price known) — raised ceilings for uncapped stars
+  let realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
+                   : basePrice < 2  ? Math.min(basePrice * 6, 10)
                    : basePrice < 5  ? Math.min(basePrice * 4, 14)
                    : basePrice < 10 ? Math.min(basePrice * 2.5, 18)
                    :                  Math.min(basePrice * 1.8, 24)
 
-  // Uncapped players with high potential can trigger bidding wars above formula
+  // Uncapped potential: raised caps to reflect real auction results (Suryavanshi-tier)
   if (currentPlayer?.cappedStatus === 'uncapped' && currentPlayer.potential != null) {
     const potential = currentPlayer.potential
-    const potentialCap = potential >= 8 ? 6
-                       : potential >= 6 ? 3
-                       : potential >= 4 ? 1.5
+    const potentialCap = potential >= 9 ? 18
+                       : potential >= 8 ? 12
+                       : potential >= 7 ? 7
+                       : potential >= 6 ? 4
+                       : potential >= 4 ? 2
                        :                  realisticCap
     realisticCap = Math.max(realisticCap, potentialCap * persona.potentialWeight)
   }
@@ -445,7 +852,6 @@ function computeMaxBid(
   const effectiveMultiplier = Math.min(persona.maxBidMultiplier, 1.4)
   let maxBid = realisticCap * desireFraction * effectiveMultiplier
   maxBid *= 0.85 + Math.random() * 0.25
-  // No floor — genuinely disinterested teams drop out, player may go unsold
   return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
 }
 

@@ -29,11 +29,27 @@ export const MI_PERSONA: FranchisePersona = {
 
   franchiseStrength: 0.90,   // 5 IPL titles — most successful
 
-  llmPersonaPrompt: `You are the Mumbai Indians auction team, backed by Reliance Industries.
-MI has the deepest pockets and the most titles — you know it, everyone knows it.
-You build squads with a mix of seasoned IPL warriors and raw, exciting young Indian talent.
-You are aggressive when a marquee player enters your radar — you bid first, bid big, and stare others down.
-The Paltan spirit means once a player is part of MI, you always consider bringing them back.
-You love match-winners who perform under pressure at the death.
-Cost is not your primary concern — impact is.`,
+  squadTierTargets: {
+    BAT: { prime: 2, reliable: 3, depth: 3 },
+    BWL: { prime: 2, reliable: 3, depth: 2 },  // Bumrah-era — always chase elite fast bowlers
+    AR:  { prime: 1, reliable: 3, depth: 2 },
+    WK:  { prime: 1, reliable: 1, depth: 1 },
+  },
+  battingPositionAffinity: { opener: 1.00, middleOrder: 0.95, finisher: 1.10 },
+  arArchetypeAffinity: {
+    'spin-opener': 0.90, 'spin-middleOrder': 0.95, 'spin-finisher': 1.30,
+    'pace-opener': 1.10, 'pace-middleOrder': 1.05, 'pace-finisher': 1.35,
+  },
+  captaincyWeight: 1.10,     // Rohit/Hardik — always want a leader in the XI
+
+  bowlingAffinity: { pace: 1.12, spin: 0.88 },               // Bumrah / pace identity
+  playerTypeAffinity: { stars: 1.10, youth: 1.20, value: 0.90 }, // youth scouting powerhouse
+
+  llmPersonaPrompt: `You are the Mumbai Indians auction team — Mahela Jayawardene on strategy, Akash Ambani on resources.
+CHARACTER: Composed and data-driven. You know your squad needs before the auction starts. You don't panic, you execute.
+STRATEGY LENS: You want match-winners — elite pace bowlers, powerful finishers, and exciting young Indians who can develop within the MI system. Five titles teach you what winning looks like.
+DECISION STYLE: Clinical. You bid early and big on your priority targets to send a message. You stop precisely when the value disappears.
+When you bid: Mention the player's role in your squad plan. "He gives us the pace depth we need" or "That's exactly the profile we were targeting for the lower middle-order."
+When you pass: Brief and certain. "The price doesn't match our assessment." You never chase.
+Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
 }

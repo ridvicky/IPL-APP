@@ -16,7 +16,7 @@
  */
 
 import type { AuctionDataset } from '@/types/dataset'
-import type { TeamId } from '@/types/team'
+import type { TeamId, TeamState } from '@/types/team'
 import type { SoldPlayerRecord, UnsoldPlayerRecord } from '@/types/player'
 import type { BidState } from '@/types/game'
 import {
@@ -549,7 +549,7 @@ export function validateAndStart(_dataset: AuctionDataset): string | null {
 // Accelerated auction pool selection
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const ACCELERATED_TOTAL = 30
+export const ACCELERATED_TOTAL = 40
 export const USER_MAX_PICKS = 5
 
 /**
@@ -572,31 +572,243 @@ export function pickAIAcceleratedPlayers(
     return available.map(p => p.playerId)
   }
 
-  // Score each candidate across all AI teams weighted by squad need
-  const scores = new Map<string, number>()
-  for (const player of available) {
-    let total = 0
-    for (const teamId of dataset.teams) {
-      if (teamId === state.userFranchise) continue
-      const ts = state.teamStates[teamId]
-      if (!ts) continue
-      if (ts.squad.length >= dataset.maximumSquadSize) continue
-      if (player.isOverseas && ts.overseasCount >= dataset.overseasLimit) continue
+  const TARGET_AFTER_ACCEL = 20
 
-      const roleCounts: Record<string, number> = { WK: 0, BAT: 0, AR: 0, BWL: 0 }
-      for (const sq of ts.squad) roleCounts[sq.role] = (roleCounts[sq.role] ?? 0) + 1
-
-      const roleGap = Math.max(0, 3 - (roleCounts[player.role] ?? 0))
-      const affordScore = ts.currentPurse > player.basePrice * 2 ? 1 : 0.3
-      const baseScore = Math.min(player.basePrice / 2, 1)
-
-      total += roleGap * 2 + baseScore + affordScore
-    }
-    scores.set(player.playerId, total)
+  // Score every candidate for every AI team individually
+  function scorePlayerForTeam(player: (typeof available)[number], ts: TeamState | undefined): number {
+    if (!ts || ts.squad.length >= dataset.maximumSquadSize) return 0
+    if (player.isOverseas && ts.overseasCount >= dataset.overseasLimit) return 0
+    const roleCounts: Record<string, number> = { WK: 0, BAT: 0, AR: 0, BWL: 0 }
+    for (const sq of ts.squad) roleCounts[sq.role] = (roleCounts[sq.role] ?? 0) + 1
+    const roleGap = Math.max(0, 3 - (roleCounts[player.role] ?? 0))
+    const affordScore = ts.currentPurse > player.basePrice * 2 ? 1 : 0.3
+    const baseScore = Math.min(player.basePrice / 2, 1)
+    return roleGap * 2 + baseScore + affordScore
   }
 
-  return [...scores.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, aiSlots)
-    .map(([id]) => id)
+  const picked = new Set<string>()
+  const result: string[] = []
+
+  // Phase 1 — guaranteed minimum 2 per eligible AI team
+  // Each team locks in their top 2 needed players before global competition begins
+  for (const teamId of dataset.teams) {
+    if (teamId === state.userFranchise) continue
+    const ts = state.teamStates[teamId]
+    if (!ts || ts.squad.length >= dataset.maximumSquadSize) continue
+
+    const ranked = available
+      .filter(p => !picked.has(p.playerId))
+      .map(p => ({ id: p.playerId, score: scorePlayerForTeam(p, ts) }))
+      .filter(p => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, Math.max(2, TARGET_AFTER_ACCEL - ts.squad.length))
+
+    for (const { id } of ranked) {
+      if (result.length >= aiSlots) break
+      picked.add(id)
+      result.push(id)
+    }
+  }
+
+  // Phase 2 — fill remaining slots with globally highest-scoring players
+  const globalScores = available
+    .filter(p => !picked.has(p.playerId))
+    .map(p => {
+      let total = 0
+      for (const teamId of dataset.teams) {
+        if (teamId === state.userFranchise) continue
+        total += scorePlayerForTeam(p, state.teamStates[teamId])
+      }
+      return { id: p.playerId, score: total }
+    })
+    .sort((a, b) => b.score - a.score)
+
+  for (const { id } of globalScores) {
+    if (result.length >= aiSlots) break
+    result.push(id)
+  }
+
+  return result
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Simulation helpers (Issues 3 & 4) — formula-only, no LLM, no delays
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Runs one complete player auction using formula-only AI (no LLM, no delays).
+ * All AI teams bid or pass based on the static pipeline. User team auto-passes.
+ * Returns after the player is sold or marked unsold.
+ */
+function simulateOnePlayer(dataset: AuctionDataset): void {
+  const state = useGameStore.getState().gameState
+  if (!state || state.phase !== 'bidding') return
+
+  const userTeam = state.userFranchise as TeamId
+
+  // Auto-pass user so only AI bids
+  useGameStore.getState().markTeamPermanentPass(userTeam)
+
+  // Run bidding rounds until all AI teams have acted
+  let maxRounds = 50 // safety limit
+  while (maxRounds-- > 0) {
+    const fresh = useGameStore.getState().gameState
+    if (!fresh || fresh.phase !== 'bidding') break
+    const bidState = fresh.currentBidState
+    if (!bidState) break
+
+    const currentPlayer = getCurrentAuctionPlayer(fresh, dataset)
+    if (!currentPlayer) break
+
+    const out = new Set([...bidState.teamsPassed, ...(bidState.permanentPass ?? [])])
+    const eligible = (Object.keys(fresh.teamStates) as TeamId[]).filter(
+      id => id !== userTeam && id !== bidState.currentLeader && !out.has(id),
+    )
+    if (eligible.length === 0) break
+
+    const teamId = eligible[Math.floor(Math.random() * eligible.length)]
+    const decision = runBiddingPipeline(fresh, dataset, teamId, currentPlayer, null)
+
+    if (decision.action === 'bid' && decision.bidAmount != null) {
+      const recheck = validateBid(fresh, dataset, teamId, decision.bidAmount)
+      if (recheck.valid) {
+        useGameStore.getState().advanceBid(teamId, decision.bidAmount)
+        continue
+      }
+    }
+    useGameStore.getState().markTeamPassed(teamId)
+  }
+
+  // Resolve sale
+  resolvePlayerSale(dataset)
+}
+
+/**
+ * Core simulation loop. Drives the state machine forward until `stopCondition` returns true.
+ * Yields to the event loop between players so the UI can update a progress indicator.
+ * `onProgress(soldCount, totalProcessed)` is called after each player resolves.
+ */
+async function simulateUntil(
+  dataset: AuctionDataset,
+  stopCondition: () => boolean,
+  onProgress?: (processed: number) => void,
+  shouldStop?: () => boolean,
+): Promise<void> {
+  let processed = 0
+
+  while (!stopCondition()) {
+    if (shouldStop?.()) break
+
+    const state = useGameStore.getState().gameState
+    if (!state) break
+
+    const phase = state.phase
+
+    if (phase === 'set-preview') {
+      startPlayerAuction(dataset)
+    } else if (phase === 'bidding') {
+      simulateOnePlayer(dataset)
+      processed++
+      onProgress?.(processed)
+      // Yield to React render cycle
+      await new Promise(resolve => setTimeout(resolve, 0))
+    } else if (phase === 'sale-confirmed' || phase === 'unsold-confirmed') {
+      advanceAuction(dataset)
+    } else if (phase === 'set-complete') {
+      if (stopCondition()) break
+      advanceAuction(dataset)
+    } else if (phase === 'auction-complete') {
+      break
+    } else if (phase === 'rtm-decision') {
+      // Auto-decline user RTM during simulation — no interaction possible
+      const gs = useGameStore.getState().gameState
+      if (gs?.currentBidState?.rtmPending === gs?.userFranchise) {
+        userDeclineRTM(dataset)
+      } else {
+        // AI RTM is resolved synchronously elsewhere; if stuck here, advance
+        advanceAuction(dataset)
+      }
+    } else {
+      break
+    }
+  }
+}
+
+/**
+ * Simulates all remaining players in the current set, then stops at set-complete.
+ * Used by "Skip Rest of Set" button during bidding.
+ */
+export async function simulateRemainingSet(
+  dataset: AuctionDataset,
+  onProgress?: (processed: number) => void,
+  shouldStop?: () => boolean,
+): Promise<void> {
+  const startState = useGameStore.getState().gameState
+  if (!startState) return
+  const startSetIndex = startState.currentSetIndex
+
+  await simulateUntil(
+    dataset,
+    () => {
+      const s = useGameStore.getState().gameState
+      if (!s) return true
+      return s.phase === 'set-complete' || s.phase === 'auction-complete' || s.currentSetIndex !== startSetIndex
+    },
+    onProgress,
+    shouldStop,
+  )
+}
+
+/**
+ * Simulates an entire next set (from set-complete, through all players, to next set-complete).
+ * Used by "Skip Next Set" button at set-complete screen.
+ */
+export async function simulateOneSet(
+  dataset: AuctionDataset,
+  onProgress?: (processed: number) => void,
+  shouldStop?: () => boolean,
+): Promise<void> {
+  const startState = useGameStore.getState().gameState
+  if (!startState) return
+  const targetSetIndex = startState.currentSetIndex + 1
+
+  // Advance past current set-complete first
+  if (startState.phase === 'set-complete') {
+    advanceAuction(dataset)
+  }
+
+  await simulateUntil(
+    dataset,
+    () => {
+      const s = useGameStore.getState().gameState
+      if (!s) return true
+      return (
+        s.phase === 'auction-complete' ||
+        (s.phase === 'set-complete' && s.currentSetIndex >= targetSetIndex) ||
+        s.currentSetIndex > targetSetIndex
+      )
+    },
+    onProgress,
+    shouldStop,
+  )
+}
+
+/**
+ * Simulates the entire remaining auction from any phase to auction-complete.
+ * Used by "Simulate Rest of Auction" button.
+ */
+export async function simulateRemainingAuction(
+  dataset: AuctionDataset,
+  onProgress?: (processed: number) => void,
+  shouldStop?: () => boolean,
+): Promise<void> {
+  await simulateUntil(
+    dataset,
+    () => {
+      const s = useGameStore.getState().gameState
+      return !s || s.phase === 'auction-complete'
+    },
+    onProgress,
+    shouldStop,
+  )
 }

@@ -80,6 +80,7 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     const state = session.state
     // Back-fill fields added after initial release so old saves don't crash
     if (!state.acceleratedPicks) state.acceleratedPicks = []
+    if (state.acceleratedRoundsCompleted === undefined) state.acceleratedRoundsCompleted = 0
     // If killed mid-bid, reset to set-preview so the player gets a clean restart
     // rather than resuming a half-finished bid round with no running timers
     if (state.phase === 'bidding') {
@@ -323,6 +324,7 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
           unsoldPlayers: [],
           phase: 'set-preview',
           currentBidState: null,
+          acceleratedRoundsCompleted: (s.gameState.acceleratedRoundsCompleted ?? 0) + 1,
         },
       }
     })

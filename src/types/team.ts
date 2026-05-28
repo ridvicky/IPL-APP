@@ -48,4 +48,29 @@ export interface FranchisePersona {
 
   // Season simulation
   franchiseStrength: number   // 0–1, historical IPL franchise quality baseline
+
+  // Tier targets per role — prime (star), reliable (professional), depth (youth/backup)
+  // Total of all tiers = ideal squad count for that role
+  squadTierTargets: {
+    BAT: { prime: number; reliable: number; depth: number }
+    BWL: { prime: number; reliable: number; depth: number }
+    AR:  { prime: number; reliable: number; depth: number }
+    WK:  { prime: number; reliable: number; depth: number }
+  }
+
+  // Batting position affinity — multiplier for opener/middleOrder/finisher preference (BAT/WK only)
+  battingPositionAffinity: { opener: number; middleOrder: number; finisher: number }
+
+  // AR archetype affinity — unified bowling-style × batting-role preference for All-Rounders
+  // Keys: 'spin-opener' | 'spin-middleOrder' | 'spin-finisher' | 'pace-opener' | 'pace-middleOrder' | 'pace-finisher'
+  arArchetypeAffinity: Record<string, number>
+
+  // How much this team values having a captain figure in the squad (0.8–1.2)
+  captaincyWeight: number
+
+  // Bowling type affinity — multiplier applied to BWL (pure bowlers) only
+  bowlingAffinity: { pace: number; spin: number }
+
+  // Player type preference — multipliers for star / youth / value archetypes
+  playerTypeAffinity: { stars: number; youth: number; value: number }
 }

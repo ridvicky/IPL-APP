@@ -44,19 +44,45 @@ export function getSafeBidLimit(
   dataset: AuctionDataset,
   currentSetName?: string,
   currentSetIndex?: number,
+  isReauction?: boolean,
 ): number {
   const minSquadReserve = getMinReservedPurse(teamState, dataset)
 
   const isMarquee = currentSetName?.toLowerCase().includes('marquee') ?? false
-  const marqueeReserve = isMarquee ? 30 : 0
+  const marqueeReserve = isMarquee ? 22 : 0
 
   const squadSize = teamState.squad.length
-  const earlySquadReserve = squadSize < 12 ? 20 : 0
+  const maxSquad = dataset.maximumSquadSize
+  const slotsNeeded = Math.max(0, maxSquad - squadSize)
 
-  // Suppress unused param warning — kept for API compatibility
-  void currentSetIndex
+  // Early-squad reserve: reduced when team is already thin on players.
+  // A team with only 10 players should not be hoarding reserve — they need to spend it.
+  const earlySquadReserve = squadSize < 10 ? 5
+                           : squadSize < 14 ? 8
+                           : squadSize < 18 ? 12
+                           : 0
 
-  const totalReserved = Math.max(minSquadReserve, marqueeReserve, earlySquadReserve)
+  // During re-auction (50% base price, cheap players), bypass all extra reserves —
+  // teams must be free to spend every rupee they have on filling their squad.
+  if (isReauction) {
+    return Math.max(0, teamState.currentPurse - minSquadReserve)
+  }
+
+  // When critically thin (need 12+ more players), only reserve the bare minimum
+  // so cheap uncapped bids are never blocked by over-conservative purse management.
+  const criticallyThin = slotsNeeded >= 12
+  const effectiveMarqueeReserve = criticallyThin ? 0 : marqueeReserve
+  const effectiveEarlyReserve = criticallyThin ? 0 : earlySquadReserve
+
+  const stageReserve = currentSetIndex !== undefined
+    ? currentSetIndex <= 2  ? 35
+    : currentSetIndex <= 9  ? 20
+    : currentSetIndex <= 15 ? 10
+    : currentSetIndex <= 19 ? 6
+    : 0
+    : 0
+
+  const totalReserved = Math.max(minSquadReserve, effectiveMarqueeReserve, effectiveEarlyReserve, stageReserve)
   return Math.max(0, teamState.currentPurse - totalReserved)
 }
 

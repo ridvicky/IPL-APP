@@ -8,7 +8,6 @@ import { BidTimeline } from '@components/auction/BidTimeline'
 import { UserActionPanel } from '@components/auction/UserActionPanel'
 import { TeamPaddles } from '@components/auction/TeamPaddles'
 import { OpponentReactions } from '@components/auction/OpponentReactions'
-import { LiveReactionBubble } from '@components/auction/LiveReactionBubble'
 import { SaleResult } from '@components/auction/SaleResult'
 import { BottomNav } from '@components/ui/BottomNav'
 import { TeamBadge } from '@components/ui/TeamBadge'
@@ -20,6 +19,7 @@ import {
   pickAIAcceleratedPlayers, ACCELERATED_TOTAL, USER_MAX_PICKS,
   runOneAIDecision, isBiddingOver, resolvePlayerSale,
   startPlayerAuction, advanceAuction,
+  simulateRemainingSet, simulateOneSet, simulateRemainingAuction,
 } from '@/controllers/auctionController'
 import { getCurrentAuctionPlayer } from '@/engine/biddingEngine'
 import { getBidIncrement, getPlayersInSet, loadDataset } from '@/dataset/datasetLoader'
@@ -51,6 +51,33 @@ const TEAM_CHIP_COLORS: Record<string, string> = {
   GT:  'text-cyan-300 bg-cyan-400/10 border-cyan-500/30',
   LSG: 'text-teal-300 bg-teal-400/10 border-teal-500/30',
 }
+
+// Owner thought lines — formula-based per-team voice, no LLM needed for inline display
+const OWNER_NAMES: Record<string, string> = {
+  CSK: 'Fleming (CSK)', MI: 'Jayawardene (MI)', RCB: 'Kohli / Flower (RCB)',
+  KKR: 'Pandit (KKR)', DC: 'Ponting (DC)', RR: 'Sangakkara (RR)',
+  SRH: 'Vettori (SRH)', PBKS: 'Zinta (PBKS)', GT: 'Nehra (GT)', LSG: 'Langer (LSG)',
+}
+
+const OWNER_BID_LINES: Record<string, string[]> = {
+  CSK:  ['We know what we need from this player.', 'He fits the CSK system — calm heads win.', 'Experience you can count on. Worth every rupee.'],
+  MI:   ['This is exactly the profile we targeted.', 'Impact player — the Paltan needs him.', 'MI goes big when it matters. This is that moment.'],
+  RCB:  ['RCB needs a batter of this calibre. We\'re going for it.', 'Ee sala cup namde — he\'s part of the plan.', 'Virat would love playing alongside him.'],
+  KKR:  ['That\'s the all-round profile Kolkata wins with.', 'KKR has found their guy. The data said so.', 'Mystery and power — KKR\'s identity right there.'],
+  DC:   ['Consistent, reliable — exactly what Delhi needs.', 'He fills our gap perfectly. Calculated bid.', 'Delhi\'s building for the future. He fits.'],
+  RR:   ['Exceptional value at this price — RR\'s kind of buy.', 'The numbers said bid. We bid.', 'Undervalued by the market. Not by us.'],
+  SRH:  ['He attacks from ball one — that\'s SRH cricket.', 'Sunrisers need that aggression at the top.', 'Kavya wants this player. So do we.'],
+  PBKS: ['Punjab NEEDS this match-winner!', 'Go on — don\'t let them take him!', 'This is the player that changes everything for us.'],
+  GT:   ['Does he make us better as a unit? Yes. We bid.', 'Squad balance, not star power. He fits GT.', 'Methodical choice — Nehra\'s already mapped the role.'],
+  LSG:  ['Proven performer — LSG doesn\'t gamble.', 'We\'ve tracked him all season. This is our bid.', 'Goenka wants consistency. This player delivers it.'],
+}
+
+function getOwnerThought(teamId: string, _bid: number, _state: GameState): string | null {
+  const lines = OWNER_BID_LINES[teamId]
+  if (!lines) return null
+  return lines[Math.floor(Math.random() * lines.length)]
+}
+
 
 function MobileReactionsFeed({ log }: { log: string[] }) {
   const [open, setOpen] = useState(true)
@@ -115,8 +142,13 @@ export function AuctionRoomScreen() {
   const [speed, setSpeed] = useState<1 | 2 | 3>(() => (Number(localStorage.getItem('auctionSpeed')) as 1|2|3) || 1)
   const [auctioneeerLine, setAuctioneeerLine] = useState<string | null>(null)
   const [paused, setPaused] = useState(false)
+  const [simulating, setSimulating] = useState(false)
+  const [simProgress, setSimProgress] = useState(0)
+  const [ownerThought, setOwnerThought] = useState<{ teamId: TeamId; comment: string; ts: number } | null>(null)
+  const ownerThoughtTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const aiLoopRef = useRef(false)
+  const simStopRef = useRef(false)
   const callingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const hasAutoPassedRef = useRef(false)
@@ -208,6 +240,30 @@ export function AuctionRoomScreen() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.phase])
+
+  // ── Owner thought bubble — fires on notable AI bids ──────────────────────
+  const lastBidLeaderRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!gameState || gameState.phase !== 'bidding') return
+    const bs = gameState.currentBidState
+    if (!bs || !bs.currentLeader) return
+    const leader = bs.currentLeader as TeamId
+    const bid = bs.currentBid
+    // Only trigger for AI teams (not the user) on meaningful bids
+    if (leader === gameState.userFranchise) { lastBidLeaderRef.current = leader; return }
+    // Avoid re-triggering for the same leader at the same price
+    const key = `${leader}-${bid}`
+    if (lastBidLeaderRef.current === key) return
+    lastBidLeaderRef.current = key
+    // Only show for bids ≥ ₹5 Cr — otherwise too noisy
+    if (bid < 5) return
+    const thought = getOwnerThought(leader, bid, gameState)
+    if (!thought) return
+    if (ownerThoughtTimerRef.current) clearTimeout(ownerThoughtTimerRef.current)
+    setOwnerThought({ teamId: leader, comment: thought, ts: Date.now() })
+    ownerThoughtTimerRef.current = setTimeout(() => setOwnerThought(null), 5000)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState?.currentBidState?.currentLeader, gameState?.currentBidState?.currentBid])
 
   // ── Auctioneer calling ────────────────────────────────────────────────────
   const clearCalling = () => {
@@ -451,6 +507,34 @@ export function AuctionRoomScreen() {
           <Button variant="primary" size="lg" className="w-full" onClick={() => { action(); handleContinue() }}>
             {nextSet ? `Start ${nextSet} →` : 'Continue →'}
           </Button>
+          {nextSet && dataset && (
+            <button
+              onClick={() => {
+                action()
+                setSimulating(true)
+                setSimProgress(0)
+                simStopRef.current = false
+                void simulateOneSet(dataset, p => setSimProgress(p), () => simStopRef.current).then(() => setSimulating(false))
+              }}
+              className="w-full py-3 text-sm font-black text-orange-300 bg-orange-500/10 border border-orange-500/25 rounded-2xl hover:bg-orange-500/20 transition-colors"
+            >
+              ⏭ Simulate {nextSet} (AI buys players)
+            </button>
+          )}
+          {dataset && (
+            <button
+              onClick={() => {
+                confirm()
+                setSimulating(true)
+                setSimProgress(0)
+                simStopRef.current = false
+                void simulateRemainingAuction(dataset, p => setSimProgress(p), () => simStopRef.current).then(() => setSimulating(false))
+              }}
+              className="w-full py-3 text-sm font-black text-purple-300 bg-purple-500/10 border border-purple-500/25 rounded-2xl hover:bg-purple-500/20 transition-colors"
+            >
+              ⚡ Simulate Rest of Auction
+            </button>
+          )}
         </div>
       </div>
     )
@@ -459,7 +543,31 @@ export function AuctionRoomScreen() {
   // ── Auction complete ──────────────────────────────────────────────────────
   if (gameState.phase === 'auction-complete') {
     const unsoldCount = gameState.unsoldPlayers.length
-    const canAccelerate = unsoldCount > 0
+    const roundsDone = gameState.acceleratedRoundsCompleted ?? 0
+    const canAccelerate = unsoldCount > 0 && roundsDone < 2
+
+    // After 2 accelerated rounds, skip straight to final squad review
+    if (roundsDone >= 2) {
+      return (
+        <div className="min-h-screen bg-ipl-darker flex items-center justify-center p-4">
+          <div className="text-center max-w-md animate-fade-in w-full">
+            <div className="text-8xl mb-6">🏆</div>
+            <p className="text-ipl-gold text-4xl font-black mb-2">Auction Complete!</p>
+            <p className="text-gray-400 mb-2">{gameState.soldPlayers.length} players sold</p>
+            <p className="text-gray-500 text-sm mb-8">GPL {gameState.auctionYear} · All rounds done</p>
+            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+              <Button variant="primary" size="lg" onClick={() => navigate('/final-squad')}>
+                🏏 View Squad Reports
+              </Button>
+              <Button variant="secondary" size="lg" onClick={() => navigate('/my-squad')}>
+                My Squad
+              </Button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-screen bg-ipl-darker flex items-center justify-center p-4">
         <div className="text-center max-w-md animate-fade-in w-full">
@@ -472,7 +580,7 @@ export function AuctionRoomScreen() {
 
           {canAccelerate && (
             <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-left">
-              <p className="text-amber-400 font-black text-sm mb-1">⚡ Accelerated Auction</p>
+              <p className="text-amber-400 font-black text-sm mb-1">⚡ Accelerated Auction — Round {roundsDone + 1} of 2</p>
               <p className="text-amber-200/70 text-xs leading-relaxed">
                 {unsoldCount} players went unsold. Pick up to {USER_MAX_PICKS} players you want — AI teams will nominate the rest to fill {ACCELERATED_TOTAL} slots at 50% base price.
               </p>
@@ -580,8 +688,7 @@ export function AuctionRoomScreen() {
   const userSquad = gameState.teamStates[userTeam]?.squad ?? []
   const squadComp = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
   for (const p of userSquad) squadComp[p.role] = (squadComp[p.role] ?? 0) + 1
-  const userOverseas = gameState.teamStates[userTeam]?.overseasCount ?? 0
-  const rtmRemaining = Math.max(0, (gameState.teamStates[userTeam]?.rtmSlotsAvailable ?? 0) - (gameState.teamStates[userTeam]?.rtmSlotsUsed ?? 0))
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col pb-16 lg:pb-0">
@@ -777,18 +884,6 @@ export function AuctionRoomScreen() {
                 : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · Player ${gameState.currentPlayerIndex + 1}/${playersInSet.length}`
               }
             </p>
-            <p className="text-[9px] leading-tight mt-0.5">
-              <span className="text-blue-400">{squadComp.BAT}B</span>
-              <span className="text-gray-600 mx-0.5">·</span>
-              <span className="text-green-400">{squadComp.BWL}P</span>
-              <span className="text-gray-600 mx-0.5">·</span>
-              <span className="text-purple-400">{squadComp.AR}A</span>
-              <span className="text-gray-600 mx-0.5">·</span>
-              <span className="text-yellow-400">{squadComp.WK}W</span>
-              <span className="text-gray-600 mx-1">|</span>
-              <span className="text-orange-400">🌍{userOverseas}/{dataset.overseasLimit}</span>
-              {rtmRemaining > 0 && <span className="text-cyan-400 mx-1">| RTM {rtmRemaining}</span>}
-            </p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -828,6 +923,24 @@ export function AuctionRoomScreen() {
           <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1.5">
             <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
           </div>
+          {/* Skip Rest of Set */}
+          {gameState.phase === 'bidding' && dataset && (
+            <button
+              onClick={() => {
+                action()
+                setSimulating(true)
+                setSimProgress(0)
+                cancelCalling()
+                aiLoopRef.current = false
+                simStopRef.current = false
+                void simulateRemainingSet(dataset, p => setSimProgress(p), () => simStopRef.current).then(() => setSimulating(false))
+              }}
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-black text-orange-300 bg-orange-500/15 border border-orange-500/30 rounded-lg hover:bg-orange-500/25 transition-colors flex-shrink-0"
+              title="Skip rest of set — AI buys remaining players"
+            >
+              ⏭ Skip
+            </button>
+          )}
           <button
             onClick={() => { tap(); setMenuOpen(true) }}
             className="flex flex-col gap-1 justify-center items-center w-9 h-9 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
@@ -863,17 +976,27 @@ export function AuctionRoomScreen() {
               />
             </div>
 
-            {/* Live reaction bubble — mobile only, purely visual, never blocks taps */}
-            <div className="lg:hidden fixed top-16 left-3 right-3 z-30 pointer-events-none">
-              <LiveReactionBubble log={gameState.auctionLog ?? []} />
-            </div>
-            {/* Auctioneer commentary banner */}
-            {auctioneeerLine && (
-              <div className="flex items-start gap-2.5 bg-ipl-gold/10 border border-ipl-gold/25 rounded-2xl px-4 py-3 animate-slide-up">
-                <span className="text-lg shrink-0">🎙️</span>
-                <p className="text-ipl-gold text-sm font-semibold leading-snug italic">"{auctioneeerLine}"</p>
+            {/* ── Auction Dynamics Panel — commentary + owner thoughts + room feed ── */}
+            <div className="bg-black/50 border border-white/12 rounded-2xl overflow-hidden">
+              {auctioneeerLine && (
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8 bg-ipl-gold/8">
+                  <span className="text-base shrink-0">🎙️</span>
+                  <p className="text-ipl-gold text-sm font-semibold italic leading-snug">{auctioneeerLine}</p>
+                </div>
+              )}
+              {ownerThought && (
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8">
+                  <TeamBadge teamId={ownerThought.teamId} size="sm" />
+                  <p className="text-gray-200 text-sm leading-snug">
+                    <span className="font-semibold mr-1">{OWNER_NAMES[ownerThought.teamId] ?? ownerThought.teamId}:</span>
+                    <span className="italic opacity-90">"{ownerThought.comment}"</span>
+                  </p>
+                </div>
+              )}
+              <div className="px-1 py-1">
+                <MobileReactionsFeed log={gameState.auctionLog ?? []} />
               </div>
-            )}
+            </div>
 
             {/* Player spotlight */}
             {currentPlayer ? (
@@ -998,10 +1121,6 @@ export function AuctionRoomScreen() {
               </div>
             )}
 
-            {/* Owner Reactions feed — mobile only persistent panel */}
-            <div className="lg:hidden">
-              <MobileReactionsFeed log={gameState.auctionLog ?? []} />
-            </div>
           </div>
         </div>
 
@@ -1029,6 +1148,24 @@ export function AuctionRoomScreen() {
 
       {/* Bottom nav — mobile only */}
       {!isCalling && <BottomNav active="auction" />}
+
+      {/* Simulation overlay */}
+      {simulating && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-[#111118] border border-white/10 rounded-3xl p-8 w-72 text-center">
+            <div className="text-5xl mb-4 animate-pulse">⚡</div>
+            <p className="text-white font-black text-xl mb-1">Simulating…</p>
+            <p className="text-gray-400 text-sm mb-4">AI is buying players</p>
+            <p className="text-ipl-gold font-bold text-lg mb-6">{simProgress} players processed</p>
+            <button
+              onClick={() => { simStopRef.current = true }}
+              className="px-6 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-bold hover:bg-white/20 active:scale-95 transition-all"
+            >
+              Stop Simulation
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

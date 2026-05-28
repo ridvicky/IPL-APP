@@ -310,7 +310,7 @@ export async function getFightOrFoldDecision(
     maxTokens: 180,
     temperature: 0.6,
   })
-  const timeoutPromise = new Promise<null>(r => setTimeout(() => r(null), 3000))
+  const timeoutPromise = new Promise<null>(r => setTimeout(() => r(null), 2000))
 
   const result = await Promise.race([llmPromise, timeoutPromise])
 

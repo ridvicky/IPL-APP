@@ -14,10 +14,17 @@ export async function loadDataset(year: number): Promise<AuctionDataset> {
     return cache.get(year)!
   }
 
+  // Static import map — Capacitor Android webview can't resolve template-literal
+  // dynamic imports reliably at runtime; explicit entries guarantee chunk resolution.
+  const DATASET_LOADERS: Record<number, () => Promise<{ default: unknown }>> = {
+    2025: () => import('../data/datasets/ipl2025.json'),
+  }
+
   let raw: unknown
   try {
-    // Dynamic import — Vite bundles JSON files in src/data/datasets/
-    const mod = await import(`../data/datasets/ipl${year}.json`)
+    const loader = DATASET_LOADERS[year]
+    if (!loader) throw new Error('no loader')
+    const mod = await loader()
     raw = mod.default
   } catch {
     throw new Error(

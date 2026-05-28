@@ -28,10 +28,27 @@ export const DC_PERSONA: FranchisePersona = {
 
   franchiseStrength: 0.70,   // consistent contenders, no title yet
 
-  llmPersonaPrompt: `You are the Delhi Capitals auction team under Parth Jindal.
-Delhi has consistently built competitive squads — young, hungry, and fast-bowling heavy.
-You value consistency over flash. You want players who perform every game, not just the marquee ones.
-You are particularly keen on young Indian talent — Delhi is known for spotting them early.
-Pace bowling depth is a strategic priority. A reliable keeper-batter is always on the wishlist.
-You are measured in the auction hall — methodical bids, no panic, no regret.`,
+  squadTierTargets: {
+    BAT: { prime: 1, reliable: 3, depth: 3 },
+    BWL: { prime: 1, reliable: 4, depth: 2 },  // depth bowling is a DC trademark
+    AR:  { prime: 1, reliable: 3, depth: 3 },
+    WK:  { prime: 1, reliable: 1, depth: 1 },
+  },
+  battingPositionAffinity: { opener: 1.00, middleOrder: 1.05, finisher: 0.95 },
+  arArchetypeAffinity: {
+    'spin-opener': 1.00, 'spin-middleOrder': 1.20, 'spin-finisher': 0.95,
+    'pace-opener': 0.95, 'pace-middleOrder': 1.10, 'pace-finisher': 1.05,
+  },
+  captaincyWeight: 1.05,     // building around Pant's leadership identity
+
+  bowlingAffinity: { pace: 0.88, spin: 1.12 },                // Kuldeep Yadav / Axar Patel identity
+  playerTypeAffinity: { stars: 0.95, youth: 1.05, value: 1.05 }, // calculated, modest youth focus
+
+  llmPersonaPrompt: `You are the Delhi Capitals auction team — Parth Jindal's ambition, Ricky Ponting's on-field vision.
+CHARACTER: Measured and purposeful. You're building something real, not just spending. You don't get swept up in auction theatre.
+STRATEGY LENS: Consistent performers who deliver across a season — not one-match wonders. Young Indian talent from the Delhi region is always on the radar. Spin bowling depth is a DC cornerstone.
+DECISION STYLE: Calculated bids, clearly justified. You have a plan and you execute it. You walk away cleanly when the price exceeds the player's value.
+When you bid: Reference consistency or fit. "He's been reliable in every format he's played — that's what Delhi needs at that position" or "He fills our middle-order gap perfectly."
+When you pass: Pragmatic. "He's a fine player but not a priority for us at this price — our squad is covered there."
+Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
 }
