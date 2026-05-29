@@ -34,6 +34,14 @@ export function AllSquadsScreen() {
   const isUserTeam = selected === gameState.userFranchise
   const badgeColors = TEAM_BADGE_COLORS[selected]
 
+  // Sort team selector by purse remaining desc (richest teams first)
+  const sortedTeamIds = [...ALL_TEAM_IDS].sort((a, b) =>
+    (gameState.teamStates[b]?.currentPurse ?? 0) - (gameState.teamStates[a]?.currentPurse ?? 0)
+  )
+
+  const squadSizeColor = (n: number) =>
+    n >= 22 ? 'text-green-400' : n >= 18 ? 'text-ipl-gold' : 'text-red-400'
+
   return (
     <div className="min-h-screen bg-ipl-darker flex flex-col pb-20">
       {/* Header */}
@@ -48,24 +56,31 @@ export function AllSquadsScreen() {
           <h1 className="text-white font-bold text-base">All Squads</h1>
         </div>
 
-        {/* Team selector — horizontal scroll */}
+        {/* Team selector — sorted by purse remaining */}
         <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-none">
-          {ALL_TEAM_IDS.map(id => {
+          {sortedTeamIds.map(id => {
             const isActive = selected === id
             const tc = TEAM_BADGE_COLORS[id]
+            const ts = gameState.teamStates[id]
+            const sqSize = ts?.squad.length ?? 0
             return (
               <button
                 key={id}
                 onClick={() => setSelected(id)}
                 className={[
-                  'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
+                  'shrink-0 flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
                   isActive
                     ? `bg-gradient-to-r ${tc.from} ${tc.to} ${tc.text} border-transparent shadow-md`
                     : 'bg-ipl-card border-ipl-border text-gray-400 hover:border-ipl-border/80',
                 ].join(' ')}
               >
-                {id}
-                {id === gameState.userFranchise && <span className="text-[10px]">★</span>}
+                <span className="flex items-center gap-1">
+                  {id}
+                  {id === gameState.userFranchise && <span className="text-[10px]">★</span>}
+                </span>
+                <span className={`text-[10px] font-semibold ${isActive ? 'text-white/70' : squadSizeColor(sqSize)}`}>
+                  {sqSize}p
+                </span>
               </button>
             )
           })}
@@ -80,7 +95,10 @@ export function AllSquadsScreen() {
                 <p className="text-white font-black text-base">{selected}</p>
                 {isUserTeam && <span className="text-ipl-gold text-xs font-bold bg-ipl-gold/10 rounded px-1.5 py-px">YOUR TEAM</span>}
               </div>
-              <p className="text-gray-500 text-xs">{teamState.squad.length} players · {teamState.overseasCount}/8 overseas</p>
+              <p className="text-gray-500 text-xs">
+                <span className={`font-bold ${squadSizeColor(teamState.squad.length)}`}>{teamState.squad.length} players</span>
+                {' · '}{teamState.overseasCount}/8 overseas
+              </p>
             </div>
             <div className="text-right">
               <p className="text-ipl-gold font-black text-sm">₹{teamState.currentPurse.toFixed(1)}Cr</p>

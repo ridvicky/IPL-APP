@@ -54,6 +54,11 @@ export default {
           '0%, 100%': { backgroundColor: 'transparent' },
           '50%':      { backgroundColor: 'rgba(39,174,96,0.15)' },
         },
+        'bid-pop': {
+          '0%':   { transform: 'scale(1.28)', color: '#f5a623' },
+          '60%':  { transform: 'scale(1.05)', color: '#f5a623' },
+          '100%': { transform: 'scale(1)',    color: 'inherit' },
+        },
       },
       animation: {
         'fade-in':       'fade-in 0.3s ease-out',
@@ -62,6 +67,7 @@ export default {
         'pulse-glow':    'pulse-glow 2s ease-in-out infinite',
         'hammer':        'hammer 1s ease-in-out infinite',
         'sold-flash':    'sold-flash 0.6s ease-in-out',
+        'bid-pop':       'bid-pop 0.3s ease-out',
       },
       boxShadow: {
         'glow-accent': '0 0 20px rgba(233,69,96,0.3)',

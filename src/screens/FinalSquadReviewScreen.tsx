@@ -152,7 +152,7 @@ function analyzeSquad(squad: SoldPlayerRecord[]): SquadAnalysis {
 
 function PlayerRow({ player }: { player: SoldPlayerRecord }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
+    <div className={`flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0 ${player.isRetained ? 'border-l-2 border-l-ipl-gold -ml-4 pl-3 pr-0 bg-ipl-gold/5' : ''}`}>
       <span className="text-lg w-6 text-center">{ROLE_ICON[player.role]}</span>
       <div className="flex-1 min-w-0">
         <p className="text-white font-semibold text-sm truncate">{player.name}</p>
@@ -620,6 +620,15 @@ export function FinalSquadReviewScreen() {
       <div className="px-4 mb-4">
         <div className="bg-ipl-card rounded-xl p-3">
           <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Role Composition</p>
+          {/* Stacked balance bar */}
+          {squad.length > 0 && (
+            <div className="flex rounded-full overflow-hidden h-2 mb-3">
+              <div style={{ width: `${(roleCounts.WK  / squad.length) * 100}%` }} className="bg-red-400" />
+              <div style={{ width: `${(roleCounts.BAT / squad.length) * 100}%` }} className="bg-yellow-400" />
+              <div style={{ width: `${(roleCounts.AR  / squad.length) * 100}%` }} className="bg-green-400" />
+              <div style={{ width: `${(roleCounts.BWL / squad.length) * 100}%` }} className="bg-blue-400" />
+            </div>
+          )}
           <div className="flex gap-2">
             {(['WK', 'BAT', 'AR', 'BWL'] as const).map(role => (
               <div key={role} className="flex-1 text-center">

@@ -32,6 +32,7 @@ export function UnsoldPlayersScreen() {
   const players = gameState.unsoldPlayers
     .filter(p => filter === 'ALL' || p.role === filter)
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => b.basePrice - a.basePrice)
 
   const total = gameState.unsoldPlayers.length
   const byRole = {
@@ -52,8 +53,8 @@ export function UnsoldPlayersScreen() {
           ←
         </button>
         <div className="flex-1">
-          <h1 className="text-white font-bold text-base leading-tight">Unsold Players</h1>
-          <p className="text-gray-500 text-xs">{total} players passed</p>
+          <h1 className="text-white font-bold text-base leading-tight">Opportunity Board</h1>
+          <p className="text-gray-500 text-xs">{total} players available · sorted by base price</p>
         </div>
       </header>
 
@@ -114,22 +115,17 @@ function UnsoldPlayerRow({ player: p }: { player: UnsoldPlayerRecord }) {
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="text-white font-semibold text-sm truncate">{p.name}</p>
-        <p className="text-gray-500 text-xs">
-          {p.country} · {p.cappedStatus === 'uncapped' ? 'Uncapped' : 'Capped'}
-          {p.isOverseas && ' · 🌍'}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-white font-semibold text-sm truncate">{p.name}</p>
+          {p.isOverseas && <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold shrink-0">OVS</span>}
+          {p.cappedStatus === 'capped' && <span className="text-[9px] px-1 py-0.5 rounded bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30 font-bold shrink-0">INT'L</span>}
+        </div>
+        <p className="text-gray-500 text-xs">{p.country}</p>
       </div>
 
       <div className="shrink-0 text-right">
-        <p className="text-gray-400 text-xs">Base</p>
-        <p className="text-gray-300 text-sm font-bold">₹{p.basePrice.toFixed(2)} Cr</p>
-      </div>
-
-      <div className="shrink-0 w-14 text-right">
-        <span className="inline-block bg-ipl-accent/10 text-ipl-accent text-xs font-bold px-2 py-0.5 rounded-full">
-          UNSOLD
-        </span>
+        <p className="text-white font-black text-sm">₹{p.basePrice.toFixed(1)}Cr</p>
+        <p className="text-gray-600 text-[10px]">base price</p>
       </div>
     </div>
   )

@@ -141,7 +141,7 @@ export function SeasonResultsScreen() {
   const navigate = useNavigate()
   const { gameState } = useGameStore()
   const [tab, setTab] = useState<Tab>('table')
-  const [reviewTeam, setReviewTeam] = useState<TeamId | null>(null)
+  const [reviewTeam, setReviewTeam] = useState<TeamId | null>(gameState?.userFranchise as TeamId ?? null)
 
   if (!gameState?.seasonResult) {
     return (
@@ -172,15 +172,17 @@ export function SeasonResultsScreen() {
     <div className="min-h-screen bg-ipl-darker pb-24">
       {/* Champion hero */}
       <div className={`bg-gradient-to-b ${winColors?.from ?? 'from-ipl-dark'} ${winColors?.to ?? 'to-ipl-darker'} px-4 pb-6 safe-top`}>
-        <div className="text-center mb-4">
-          <p className="text-white/60 text-sm uppercase tracking-widest mb-1">IPL {result.year} Champions</p>
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <span className="text-5xl">🏆</span>
-            <TeamBadge teamId={result.winner} size="xl" showRing />
-            <span className="text-5xl">🏆</span>
+        <div className="text-center mb-4 animate-fade-in">
+          <p className="text-white/50 text-xs uppercase tracking-[0.25em] mb-3">GPL {result.year} Champions</p>
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <span className="text-4xl animate-hammer">🏆</span>
+            <div className="flex flex-col items-center gap-2">
+              <TeamBadge teamId={result.winner} size="xl" showRing />
+              <p className="text-white font-black text-4xl tracking-tight">{result.winner}</p>
+            </div>
+            <span className="text-4xl animate-hammer">🏆</span>
           </div>
-          <p className="text-white font-black text-3xl">{result.winner}</p>
-          <p className="text-white/50 text-sm mt-1">Runner-up: {result.runnerUp}</p>
+          <p className="text-white/40 text-sm">Runner-up: <span className="text-white/70 font-semibold">{result.runnerUp}</span></p>
         </div>
 
         {/* User result strip */}
@@ -244,7 +246,7 @@ export function SeasonResultsScreen() {
             <AwardCard icon="🟣" title="Purple Cap" playerName={result.purpleCap.playerName} teamId={result.purpleCap.teamId} value={result.purpleCap.value} unit="wickets" />
             <AwardCard icon="⭐" title="Most Valuable Player" playerName={result.mvp.playerName} teamId={result.mvp.teamId} value={result.mvp.value} unit="impact pts" />
             <AwardCard icon="💰" title="Best Auction Buy" playerName={result.bestAuctionBuy.playerName} teamId={result.bestAuctionBuy.teamId} value={result.bestAuctionBuy.value} unit="value/cr" />
-            <AwardCard icon="💸" title="Worst Auction Buy" playerName={result.worstAuctionBuy.playerName} teamId={result.worstAuctionBuy.teamId} value={result.worstAuctionBuy.value} unit="value/cr" />
+            <AwardCard icon="📉" title="Overpaid Pick" playerName={result.worstAuctionBuy.playerName} teamId={result.worstAuctionBuy.teamId} value={result.worstAuctionBuy.value} unit="value/cr" />
           </div>
         )}
 
@@ -276,8 +278,8 @@ export function SeasonResultsScreen() {
             {reviewTeam && result.teamReviews[reviewTeam] && (
               <TeamReviewCard review={result.teamReviews[reviewTeam]!} isUser={reviewTeam === userTeam} />
             )}
-            {!reviewTeam && (
-              <p className="text-gray-600 text-sm text-center py-8">Select a franchise above to see their season review</p>
+            {!reviewTeam && result.teamReviews[userTeam] && (
+              <TeamReviewCard review={result.teamReviews[userTeam]!} isUser />
             )}
           </div>
         )}

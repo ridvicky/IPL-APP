@@ -262,7 +262,7 @@ export function NewSessionScreen() {
                     `bg-gradient-to-br ${c.from} ${c.to}`,
                     isSelected
                       ? `scale-110 shadow-lg ring-2 ${c.text}`
-                      : 'opacity-40 hover:opacity-70 scale-100',
+                      : 'opacity-55 hover:opacity-85 scale-100',
                   ].join(' ')}
                   style={isSelected ? { boxShadow: `0 0 16px rgba(255,255,255,0.2)` } : {}}
                 >
@@ -319,9 +319,12 @@ export function NewSessionScreen() {
         {loading ? (
           <LoadingSpinner label="Setting up auction..." />
         ) : (
-          <Button variant="primary" size="lg" onClick={() => { confirm(); void handleStart() }} disabled={!name.trim()} className="h-14 text-base font-black">
-            Begin Auction Setup →
-          </Button>
+          <div className="flex flex-col gap-1.5">
+            <Button variant="primary" size="lg" onClick={() => { confirm(); void handleStart() }} disabled={!name.trim()} className="h-14 text-base font-black">
+              Begin Auction Setup →
+            </Button>
+            <p className="text-gray-600 text-xs text-center">Retention window opens first · then Trade Window · then Auction</p>
+          </div>
         )}
       </main>
     </div>

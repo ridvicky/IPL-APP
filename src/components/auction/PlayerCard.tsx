@@ -117,7 +117,7 @@ export function PlayerCard({ player, currentBid, currentLeader, formContext }: P
               <div>
                 <p className="text-ipl-accent text-[10px] font-black uppercase tracking-[0.2em] mb-1">Live Bid</p>
                 <p className="text-white font-black leading-none">
-                  <span className="text-4xl">₹{currentBid!.toFixed(2)}</span>
+                  <span key={currentBid} className="text-4xl inline-block animate-bid-pop">₹{currentBid!.toFixed(2)}</span>
                   <span className="text-lg text-gray-400 font-semibold ml-1">Cr</span>
                 </p>
                 {multiple && multiple > 1 && (

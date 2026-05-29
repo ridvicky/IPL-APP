@@ -164,11 +164,65 @@ export function HomeScreen() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {sessions.map(s => <SessionCard key={s.id} session={s} onDelete={() => void removeSession(s.id)} />)}
+              {/* Most recent session → hero card */}
+              <HeroSessionCard session={sessions[0]} onDelete={() => void removeSession(sessions[0].id)} />
+              {/* Remaining sessions → compact cards */}
+              {sessions.slice(1).map(s => <SessionCard key={s.id} session={s} onDelete={() => void removeSession(s.id)} />)}
             </div>
           )}
         </div>
       </main>
+    </div>
+  )
+}
+
+function HeroSessionCard({ session: s, onDelete }: { session: SessionMeta; onDelete: () => void }) {
+  const navigate = useNavigate()
+  const colors = TEAM_BADGE_COLORS[s.userFranchise] ?? { from: 'from-gray-600', to: 'to-gray-800', text: 'text-white', ring: 'ring-gray-400' }
+
+  return (
+    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors.from} ${colors.to}`}>
+      {/* Seam decoration */}
+      <svg className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10 w-28 h-28" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="38" stroke="white" strokeWidth="4" />
+        <path d="M22 6 Q28 40 22 74" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
+        <path d="M58 6 Q52 40 58 74" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
+      </svg>
+
+      <button className="relative z-10 w-full text-left p-5" onClick={() => { tap(); navigate(`/session/${s.id}`) }}>
+        {/* Phase pill */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-60" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+          </span>
+          <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
+            {phaseLabel(s.phase)}
+          </span>
+        </div>
+
+        <p className={`font-black text-2xl ${colors.text} leading-tight`}>{s.userFranchise}</p>
+        <p className="text-white/75 text-sm font-semibold mt-0.5">{s.name}</p>
+        <p className="text-white/50 text-xs mt-0.5">GPL {s.auctionYear} · {s.auctionType}</p>
+
+        <p className="text-white/40 text-xs mt-3">Last played {new Date(s.updatedAt).toLocaleDateString()}</p>
+      </button>
+
+      {/* Actions */}
+      <div className="relative z-10 border-t border-white/15 px-5 py-3 flex items-center justify-between">
+        <button
+          onClick={() => { tap(); navigate(`/session/${s.id}`) }}
+          className="bg-white/20 hover:bg-white/30 text-white font-black text-sm px-5 py-2 rounded-xl transition-colors"
+        >
+          Continue →
+        </button>
+        <button
+          onClick={() => { warning(); onDelete() }}
+          className="text-white/40 hover:text-white/70 text-xs transition-colors"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   )
 }
