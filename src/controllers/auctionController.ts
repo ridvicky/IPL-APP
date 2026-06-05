@@ -25,7 +25,7 @@ import {
   validateSaleConfirmation,
   validateSessionState,
 } from '@/engine/ruleEngine'
-import { runBiddingPipeline, getCurrentAuctionPlayer, type LLMPersonaResult } from '@/engine/biddingEngine'
+import { runBiddingPipeline, getCurrentAuctionPlayer, getPlayerTier, type LLMPersonaResult } from '@/engine/biddingEngine'
 import { runRTMDecision, findRTMEligibleTeam } from '@/engine/rtmEngine'
 import { useGameStore } from '@/store/gameStore'
 import { getFallbackComment } from '@/llm/fallbackBank'
@@ -550,82 +550,111 @@ export function validateAndStart(_dataset: AuctionDataset): string | null {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const ACCELERATED_TOTAL = 40
-export const USER_MAX_PICKS = 5
+export const USER_MAX_PICKS_R1 = 10
+export const USER_MAX_PICKS_R2 = 5
 
 /**
- * Picks AI nominations for the accelerated auction.
- * Each team scores unsold players based on squad need + base price.
- * The top scorers across all teams fill the remaining slots.
+ * Picks AI nominations for the accelerated auction pool.
+ *
+ * Round 1: draws from unsoldPlayers; each team nominates (slotsNeeded + 4) players.
+ * Round 2: draws from originalUnsoldPool (excludes already-sold players) so teams
+ *          get a fresh look at the full unsold list, not just round 1 leftovers.
+ *
+ * Scoring weighs role-tier gap, player quality, potential, and purse affordability.
+ * Teams with squad < 20 in round 2 get a 2× urgency multiplier.
  */
 export function pickAIAcceleratedPlayers(
   dataset: AuctionDataset,
   userPickIds: string[],
+  roundNumber: number,
 ): string[] {
   const state = useGameStore.getState().gameState
   if (!state) return []
 
+  const soldIds = new Set(state.soldPlayers.map(p => p.playerId))
   const userPickSet = new Set(userPickIds)
-  const available = state.unsoldPlayers.filter(p => !userPickSet.has(p.playerId))
+
+  // Round 2 uses the original full unsold pool, excluding players already sold
+  const sourcePool = roundNumber >= 2
+    ? (state.originalUnsoldPool ?? []).filter(p => !soldIds.has(p.playerId))
+    : state.unsoldPlayers
+
+  const available = sourcePool.filter(p => !userPickSet.has(p.playerId))
   const aiSlots = ACCELERATED_TOTAL - userPickIds.length
 
   if (available.length <= aiSlots) {
     return available.map(p => p.playerId)
   }
 
-  const TARGET_AFTER_ACCEL = 20
-
-  // Score every candidate for every AI team individually
-  function scorePlayerForTeam(player: (typeof available)[number], ts: TeamState | undefined): number {
+  // Score a candidate player for a specific team using role-tier gap + quality + affordability
+  function scorePlayerForTeam(
+    player: (typeof available)[number],
+    ts: TeamState | undefined,
+    urgencyMultiplier = 1,
+  ): number {
     if (!ts || ts.squad.length >= dataset.maximumSquadSize) return 0
     if (player.isOverseas && ts.overseasCount >= dataset.overseasLimit) return 0
-    const roleCounts: Record<string, number> = { WK: 0, BAT: 0, AR: 0, BWL: 0 }
-    for (const sq of ts.squad) roleCounts[sq.role] = (roleCounts[sq.role] ?? 0) + 1
-    const roleGap = Math.max(0, 3 - (roleCounts[player.role] ?? 0))
-    const affordScore = ts.currentPurse > player.basePrice * 2 ? 1 : 0.3
-    const baseScore = Math.min(player.basePrice / 2, 1)
-    return roleGap * 2 + baseScore + affordScore
+    if (ts.currentPurse < player.basePrice) return 0
+
+    // Role-tier gap: how badly does this team need this player's tier?
+    const playerTier = getPlayerTier(player as import('@/types/player').PlayerRecord)
+    const roleTierCount = ts.squad.filter(
+      s => s.role === player.role && getPlayerTier(s as import('@/types/player').PlayerRecord) === playerTier
+    ).length
+    const tierTarget = 3 // minimum target per role-tier
+    const roleGap = Math.max(0, tierTarget - roleTierCount)
+
+    // Quality proxy: market value if known, else base price × 2
+    const qualityScore = (player.marketValue ?? player.basePrice * 2)
+
+    // Potential bonus for uncapped prospects
+    const potentialBonus = (player.potential ?? 0) * 2
+
+    // Affordability: team must comfortably afford the player
+    const affordMultiplier = ts.currentPurse > player.basePrice * 3 ? 1.0 : 0.5
+
+    return (roleGap * 15 + qualityScore + potentialBonus) * affordMultiplier * urgencyMultiplier
   }
 
-  const picked = new Set<string>()
-  const result: string[] = []
+  // Each team nominates (slotsNeeded + 4) players — proportional to how incomplete they are
+  const allNominations = new Map<string, number>() // playerId → best team score
 
-  // Phase 1 — guaranteed minimum 2 per eligible AI team
-  // Each team locks in their top 2 needed players before global competition begins
   for (const teamId of dataset.teams) {
     if (teamId === state.userFranchise) continue
     const ts = state.teamStates[teamId]
     if (!ts || ts.squad.length >= dataset.maximumSquadSize) continue
 
+    const slotsNeeded = Math.max(0, dataset.maximumSquadSize - ts.squad.length)
+    const nominations = slotsNeeded + 4
+
+    // In round 2, teams with < 20 players get urgency boost to ensure squad completion
+    const urgency = (roundNumber >= 2 && ts.squad.length < 20) ? 2 : 1
+
     const ranked = available
-      .filter(p => !picked.has(p.playerId))
-      .map(p => ({ id: p.playerId, score: scorePlayerForTeam(p, ts) }))
+      .map(p => ({ id: p.playerId, score: scorePlayerForTeam(p, ts, urgency) }))
       .filter(p => p.score > 0)
       .sort((a, b) => b.score - a.score)
-      .slice(0, Math.max(2, TARGET_AFTER_ACCEL - ts.squad.length))
+      .slice(0, nominations)
 
-    for (const { id } of ranked) {
-      if (result.length >= aiSlots) break
-      picked.add(id)
-      result.push(id)
+    for (const { id, score } of ranked) {
+      const existing = allNominations.get(id) ?? 0
+      allNominations.set(id, Math.max(existing, score))
     }
   }
 
-  // Phase 2 — fill remaining slots with globally highest-scoring players
-  const globalScores = available
-    .filter(p => !picked.has(p.playerId))
-    .map(p => {
-      let total = 0
-      for (const teamId of dataset.teams) {
-        if (teamId === state.userFranchise) continue
-        total += scorePlayerForTeam(p, state.teamStates[teamId])
-      }
-      return { id: p.playerId, score: total }
-    })
-    .sort((a, b) => b.score - a.score)
+  // Sort by best-team score and fill aiSlots
+  const result = [...allNominations.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, aiSlots)
+    .map(([id]) => id)
 
-  for (const { id } of globalScores) {
-    if (result.length >= aiSlots) break
-    result.push(id)
+  // If we still have slots (small leagues), fill from remaining available players
+  if (result.length < aiSlots) {
+    const resultSet = new Set(result)
+    for (const p of available) {
+      if (result.length >= aiSlots) break
+      if (!resultSet.has(p.playerId)) result.push(p.playerId)
+    }
   }
 
   return result

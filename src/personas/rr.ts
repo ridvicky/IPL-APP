@@ -52,4 +52,11 @@ DECISION STYLE: Precise and unhurried. You let the room drive up prices on names
 When you bid: Reference the value or potential. "At this price, he represents exceptional value for what we need" or "This is exactly the kind of uncapped talent RR has built titles around."
 When you pass: Clinical and firm. "The numbers don't support going higher — there are better uses for this purse."
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 7,
+    tierBidMultipliers: { 1: 0.80, 2: 0.90, 3: 1.30, 4: 1.15, 5: 1.20, 6: 0.90 },
+    tierPurseShare: { xiStars: 0.40, emergingSpec: 0.38, depth: 0.22 },
+    roleComposition: { minTopOrder: 3, minFinishers: 2, minAllRounders: 3, minPacers: 4, minSpinners: 3, minKeepers: 2 },
+  },
 }

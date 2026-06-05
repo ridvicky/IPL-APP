@@ -65,7 +65,14 @@ export function getSafeBidLimit(
   // During re-auction (50% base price, cheap players), bypass all extra reserves —
   // teams must be free to spend every rupee they have on filling their squad.
   if (isReauction) {
-    return Math.max(0, teamState.currentPurse - minSquadReserve)
+    // Teams with budget headroom and incomplete squads should spend more freely
+    const perSlotReserve = (squadSize < 20 && slotsNeeded > 0)
+      ? Math.max(0, teamState.currentPurse / slotsNeeded) > 3
+        ? 0.15
+        : 0.20
+      : 0.20
+    const reauctionReserve = slotsNeeded * perSlotReserve
+    return Math.max(0, teamState.currentPurse - reauctionReserve)
   }
 
   // When critically thin (need 12+ more players), only reserve the bare minimum

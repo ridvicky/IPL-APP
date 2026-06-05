@@ -754,7 +754,10 @@
       "soldTo": "PBKS",
       "finalPrice": 18,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS"
+      ]
     },
     {
       "playerId": "mitchell-starc",
@@ -1194,7 +1197,11 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "MI",
+        "CSK"
+      ]
     },
     {
       "playerId": "ben-duckett",
@@ -5260,7 +5267,11 @@
       "soldViaRTM": false,
       "age": 19,
       "potential": 8,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "KKR",
+        "MI"
+      ]
     },
     {
       "playerId": "anmolpreet-singh",
@@ -5366,7 +5377,11 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "MI",
+        "SRH"
+      ]
     },
     {
       "playerId": "mahipal-lomror",
@@ -5450,7 +5465,11 @@
       "soldViaRTM": false,
       "age": 33,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "CSK",
+        "GT"
+      ]
     },
     {
       "playerId": "ashutosh-sharma",
@@ -7017,7 +7036,11 @@
       "soldViaRTM": false,
       "age": 21,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK",
+        "MI"
+      ]
     },
     {
       "playerId": "tanush-kotian",
@@ -7767,7 +7790,11 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "PBKS",
+        "DC"
+      ]
     },
     {
       "playerId": "manoj-bhandage",
@@ -8602,7 +8629,11 @@
       "soldViaRTM": false,
       "age": 19,
       "potential": 9,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "MI",
+        "RCB"
+      ]
     },
     {
       "playerId": "manvanth-kumar-l",
@@ -10800,7 +10831,12 @@
       "soldViaRTM": false,
       "age": 14,
       "potential": 10,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "RR",
+        "MI",
+        "CSK"
+      ]
     },
     {
       "playerId": "kartik-chadha",
@@ -12243,7 +12279,10 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ]
     },
     {
       "playerId": "tripuresh-singh",

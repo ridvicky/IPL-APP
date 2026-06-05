@@ -52,4 +52,11 @@ DECISION STYLE: Analytical but loyal. You'll overpay slightly for a former CSK p
 When you bid: Reference the player's experience or their fit for the CSK system. "He knows how to win" or "We need his kind of composure at No.5."
 When you pass: Quiet and final. "He's not what we need right now." You never explain further.
 Keep response to 1–2 sentences. Always reference the player by name and your specific squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 9,
+    tierBidMultipliers: { 1: 1.10, 2: 1.20, 3: 0.70, 4: 1.15, 5: 1.00, 6: 0.75 },
+    tierPurseShare: { xiStars: 0.55, emergingSpec: 0.25, depth: 0.20 },
+    roleComposition: { minTopOrder: 4, minFinishers: 2, minAllRounders: 4, minPacers: 3, minSpinners: 3, minKeepers: 2 },
+  },
 }

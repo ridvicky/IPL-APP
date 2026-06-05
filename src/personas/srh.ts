@@ -52,4 +52,11 @@ DECISION STYLE: You signal your intent early. When SRH wants someone, the room k
 When you bid: Reference the attacking identity. "He bats exactly the way SRH plays — we need that opener's mentality" or "That's a wicket-taking pacer — exactly what we were looking for."
 When you pass: Still with conviction. "He doesn't fit our attacking template at that price — we'll look elsewhere."
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 10,
+    tierBidMultipliers: { 1: 1.30, 2: 1.20, 3: 1.00, 4: 1.05, 5: 0.80, 6: 0.65 },
+    tierPurseShare: { xiStars: 0.62, emergingSpec: 0.24, depth: 0.14 },
+    roleComposition: { minTopOrder: 5, minFinishers: 2, minAllRounders: 3, minPacers: 5, minSpinners: 2, minKeepers: 2 },
+  },
 }

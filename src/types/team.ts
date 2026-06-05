@@ -1,5 +1,35 @@
 import type { PlayerRole, SoldPlayerRecord } from './player'
 
+/** 6-tier player quality classification */
+export type PlayerTier6 = 1 | 2 | 3 | 4 | 5 | 6
+
+/** Per-franchise squad composition and budget strategy */
+export interface SquadTemplate {
+  /** Tier 1–3 player count needed before switching from XI-building to backup-filling mode */
+  xiQualityThreshold: number
+  /** Per-tier bid ceiling multiplier reflecting franchise aggression per player quality level */
+  tierBidMultipliers: Record<PlayerTier6, number>
+  /**
+   * Fraction of total starting purse allocated per tier group.
+   * Once a group exceeds its share, the engine tightens the ceiling on further bids.
+   * Tier groups: xiStars (T1+T2), emergingSpec (T3+T4), depth (T5+T6). Should sum ~1.0.
+   */
+  tierPurseShare: {
+    xiStars: number       // Tier 1–2: marquee + established
+    emergingSpec: number  // Tier 3–4: emerging stars + role specialists
+    depth: number         // Tier 5–6: domestic + budget fillers
+  }
+  /** Minimum role composition for a balanced squad */
+  roleComposition: {
+    minTopOrder: number      // openers + top-4 batters
+    minFinishers: number
+    minAllRounders: number
+    minPacers: number
+    minSpinners: number
+    minKeepers: number
+  }
+}
+
 export type TeamId =
   | 'CSK' | 'MI' | 'RCB' | 'KKR' | 'DC'
   | 'RR' | 'SRH' | 'PBKS' | 'GT' | 'LSG'
@@ -73,4 +103,7 @@ export interface FranchisePersona {
 
   // Player type preference — multipliers for star / youth / value archetypes
   playerTypeAffinity: { stars: number; youth: number; value: number }
+
+  // Squad composition template and per-tier bidding strategy
+  squadTemplate: SquadTemplate
 }

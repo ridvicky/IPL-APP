@@ -16,7 +16,7 @@ import { useSessionStore } from '@/store/sessionStore'
 import { loadSession } from '@/session/sessionManager'
 import {
   userBid, userInterruptBid, userPass, userSkipPlayer, userExerciseRTM, userDeclineRTM,
-  pickAIAcceleratedPlayers, ACCELERATED_TOTAL, USER_MAX_PICKS,
+  pickAIAcceleratedPlayers, ACCELERATED_TOTAL, USER_MAX_PICKS_R1, USER_MAX_PICKS_R2,
   runOneAIDecision, isBiddingOver, resolvePlayerSale,
   startPlayerAuction, advanceAuction,
   simulateRemainingSet, simulateOneSet, simulateRemainingAuction,
@@ -582,7 +582,7 @@ export function AuctionRoomScreen() {
             <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-left">
               <p className="text-amber-400 font-black text-sm mb-1">⚡ Accelerated Auction — Round {roundsDone + 1} of 2</p>
               <p className="text-amber-200/70 text-xs leading-relaxed">
-                {unsoldCount} players went unsold. Pick up to {USER_MAX_PICKS} players you want — AI teams will nominate the rest to fill {ACCELERATED_TOTAL} slots at 50% base price.
+                {unsoldCount} players went unsold. Pick up to {roundsDone === 0 ? USER_MAX_PICKS_R1 : USER_MAX_PICKS_R2} players you want — AI teams will nominate the rest to fill {ACCELERATED_TOTAL} slots at 50% base price.
               </p>
             </div>
           )}
@@ -1195,6 +1195,9 @@ function AcceleratedSelectionScreen({
   const [confirming, setConfirming] = useState(false)
   const { startReauction } = useGameStore()
 
+  const roundsDone = gameState.acceleratedRoundsCompleted ?? 0
+  const maxUserPicks = roundsDone === 0 ? USER_MAX_PICKS_R1 : USER_MAX_PICKS_R2
+
   const unsold = gameState.unsoldPlayers
   const filtered = unsold
     .filter(p => filter === 'ALL' || p.role === filter)
@@ -1213,7 +1216,7 @@ function AcceleratedSelectionScreen({
       const next = new Set(prev)
       if (next.has(playerId)) {
         next.delete(playerId)
-      } else if (next.size < USER_MAX_PICKS) {
+      } else if (next.size < maxUserPicks) {
         next.add(playerId)
       }
       return next
@@ -1223,7 +1226,7 @@ function AcceleratedSelectionScreen({
   const handleConfirm = () => {
     setConfirming(true)
     const userPickIds = [...userPicks]
-    const aiPickIds = pickAIAcceleratedPlayers(dataset, userPickIds)
+    const aiPickIds = pickAIAcceleratedPlayers(dataset, userPickIds, roundsDone + 1)
     const allPickIds = new Set([...userPickIds, ...aiPickIds])
 
     const pool = unsold
@@ -1245,7 +1248,7 @@ function AcceleratedSelectionScreen({
           <p className="text-gray-500 text-xs">Pick your nominees · AI fills the rest</p>
         </div>
         <div className="text-right">
-          <p className="text-white font-black text-lg">{userPicks.size}<span className="text-gray-500 font-normal text-sm">/{USER_MAX_PICKS}</span></p>
+          <p className="text-white font-black text-lg">{userPicks.size}<span className="text-gray-500 font-normal text-sm">/{maxUserPicks}</span></p>
           <p className="text-gray-500 text-xs">your picks</p>
         </div>
       </header>
@@ -1301,9 +1304,9 @@ function AcceleratedSelectionScreen({
         />
       </div>
 
-      {userPicks.size >= USER_MAX_PICKS && (
+      {userPicks.size >= maxUserPicks && (
         <div className="mx-4 mb-2 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
-          <p className="text-amber-300 text-xs font-semibold text-center">Max {USER_MAX_PICKS} picks reached — deselect one to change</p>
+          <p className="text-amber-300 text-xs font-semibold text-center">Max {maxUserPicks} picks reached — deselect one to change</p>
         </div>
       )}
 
@@ -1311,7 +1314,7 @@ function AcceleratedSelectionScreen({
       <div className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
         {filtered.map(p => {
           const picked = userPicks.has(p.playerId)
-          const disabled = !picked && userPicks.size >= USER_MAX_PICKS
+          const disabled = !picked && userPicks.size >= maxUserPicks
           return (
             <button
               key={p.playerId}

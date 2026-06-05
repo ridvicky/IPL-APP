@@ -52,4 +52,11 @@ DECISION STYLE: Methodical with a flair for the dramatic reveal. You let other t
 When you bid: Reference the player's T20 skills or squad fit. "He's exactly the mystery spinner profile we've been looking for" or "That's the kind of power-hitting all-rounder who wins us finals."
 When you pass: Controlled and firm. "The number went past our ceiling — KKR doesn't overpay." Sometimes SRK overrules you — note that tension.
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 8,
+    tierBidMultipliers: { 1: 1.00, 2: 1.10, 3: 1.15, 4: 1.20, 5: 1.05, 6: 0.80 },
+    tierPurseShare: { xiStars: 0.48, emergingSpec: 0.32, depth: 0.20 },
+    roleComposition: { minTopOrder: 3, minFinishers: 2, minAllRounders: 4, minPacers: 4, minSpinners: 3, minKeepers: 2 },
+  },
 }

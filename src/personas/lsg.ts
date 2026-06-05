@@ -52,4 +52,11 @@ DECISION STYLE: Direct and early. When LSG wants someone, you move before others
 When you bid: Reference consistency and proven quality. "He's delivered in every team he's played for — that's what LSG needs right now" or "We've tracked him all season. This is our bid."
 When you pass: Brief and businesslike. "The price has moved past what we assessed — our purse is better used elsewhere."
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 8,
+    tierBidMultipliers: { 1: 0.95, 2: 1.10, 3: 1.00, 4: 1.15, 5: 1.10, 6: 0.80 },
+    tierPurseShare: { xiStars: 0.50, emergingSpec: 0.30, depth: 0.20 },
+    roleComposition: { minTopOrder: 3, minFinishers: 2, minAllRounders: 4, minPacers: 4, minSpinners: 3, minKeepers: 3 },
+  },
 }

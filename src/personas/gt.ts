@@ -3,7 +3,7 @@ import type { FranchisePersona } from '@/types/team'
 export const GT_PERSONA: FranchisePersona = {
   teamId: 'GT',
   displayName: 'Gujarat Titans',
-  ownerName: 'CVC Capital / Hardik Pandya (former) / Shubman Gill (captain)',
+  ownerName: 'CVC Capital / Shubman Gill (captain)',
   auctionStyle: 'analytical',
 
   roleWeights: { BAT: 0.80, BWL: 0.90, AR: 1.0, WK: 0.75 },
@@ -52,4 +52,11 @@ DECISION STYLE: Research-driven and calm. You've done your homework. You have a 
 When you bid: Reference squad balance and fit. "He gives us an extra dimension in the death overs — that's exactly what GT's system needs" or "His potential fits our development pathway perfectly."
 When you pass: Clean and final. "The price exceeds what he's worth to our squad construction — we move on." No regret.
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 8,
+    tierBidMultipliers: { 1: 0.90, 2: 1.05, 3: 1.20, 4: 1.25, 5: 1.10, 6: 0.85 },
+    tierPurseShare: { xiStars: 0.45, emergingSpec: 0.35, depth: 0.20 },
+    roleComposition: { minTopOrder: 3, minFinishers: 2, minAllRounders: 4, minPacers: 4, minSpinners: 3, minKeepers: 2 },
+  },
 }

@@ -49,6 +49,7 @@ export interface GameState {
   reauctionIndex: number                    // current position in reauctionPool
   acceleratedPicks: string[]               // playerIds selected for the accelerated auction pool
   acceleratedRoundsCompleted: number       // how many accelerated re-auction cycles have run
+  originalUnsoldPool: UnsoldPlayerRecord[] // full unsold list captured before round 1; used as round 2 pool
   tradeHistory: TradeRecord[]
   auctionLog: string[]
   seasonSetup: SeasonSetup | null

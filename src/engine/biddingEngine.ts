@@ -14,7 +14,7 @@
 
 import type { GameState, BidState } from '@/types/game'
 import type { AuctionDataset } from '@/types/dataset'
-import type { TeamId, TeamState, FranchisePersona } from '@/types/team'
+import type { TeamId, TeamState, FranchisePersona, PlayerTier6 } from '@/types/team'
 import type { PlayerRecord } from '@/types/player'
 import { validateBid, getSafeBidLimit } from '@/engine/ruleEngine'
 import { getBidIncrement, getPlayersInSet } from '@/dataset/datasetLoader'
@@ -164,7 +164,7 @@ export function runBiddingPipeline(
   }
 
   // ── Step 4: Squad need score ──────────────────────────────────────────────
-  const needScore = computeNeedScore(persona, teamState, currentPlayer, dataset, state.currentSetIndex, state.auctionLog ?? [])
+  const needScore = computeNeedScore(persona, teamState, currentPlayer, dataset, state.currentSetIndex, state.auctionLog ?? [], state.isReauction)
 
   // ── Step 5: Emotion score ─────────────────────────────────────────────────
   const emotionScore = computeEmotionScore(persona, teamState, currentPlayer, llmResult, state.auctionLog ?? [])
@@ -187,7 +187,7 @@ export function runBiddingPipeline(
   // Hard absolute cap — enforced AFTER all multipliers so it truly holds.
   // Real IPL record is Rishabh Pant ₹27 Cr. ₹25+ Cr bids are rare (3–9 players per mega auction).
   const AUCTION_HARD_CAP = 28
-  const rawMaxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer, bidState) * emotionalMultiplier
+  const rawMaxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer, bidState, teamState, dataset.maximumSquadSize) * emotionalMultiplier
   const maxBid = Math.min(rawMaxBid, safeBidLimit, AUCTION_HARD_CAP)
 
   // ── Step 7: Bid or pass ───────────────────────────────────────────────────
@@ -246,7 +246,7 @@ export function runAllOpponentDecisions(
 // Player classification helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getPlayerTier(player: PlayerRecord): 'prime' | 'reliable' | 'depth' {
+export function getPlayerTier(player: PlayerRecord): 'prime' | 'reliable' | 'depth' {
   const mv = player.marketValue ?? 0
   if (player.cappedStatus === 'capped') {
     if (mv >= 8 || player.basePrice >= 2)   return 'prime'
@@ -257,6 +257,43 @@ function getPlayerTier(player: PlayerRecord): 'prime' | 'reliable' | 'depth' {
   if (pot >= 8 || player.prospectTier === 'elite')     return 'prime'
   if (pot >= 6 || player.prospectTier === 'promising') return 'reliable'
   return 'depth'
+}
+
+/**
+ * 6-tier player quality classification used for squad-building phase logic and bid multipliers.
+ * Tier 1 = Marquee star → Tier 6 = Budget filler.
+ */
+export function getPlayerTier6(player: PlayerRecord): PlayerTier6 {
+  const mv   = player.marketValue ?? 0
+  const base = player.basePrice
+  const pot  = player.potential ?? 0
+
+  if (player.cappedStatus === 'uncapped') {
+    if (player.prospectTier === 'elite' || pot >= 8) return 3   // Emerging Star
+    if (pot >= 6 || player.prospectTier === 'promising')  return 4 // Role Specialist / promising domestic
+    if (pot >= 3 || base >= 0.3)                          return 5 // Domestic Backup
+    return 6                                                        // Budget Filler
+  }
+  // Capped players — classified primarily by market value, with base price as fallback
+  if (mv >= 14 || base >= 3)    return 1  // Marquee / Superstar
+  if (mv >= 5  || base >= 1.5)  return 2  // Established First XI
+  if (mv >= 1.5 || base >= 0.5) return 4  // Role Specialist
+  if (base >= 0.2)              return 5  // Domestic / Budget Capped
+  return 6                                // Budget Filler
+}
+
+/**
+ * Determines whether a team is still building their quality XI (Tier 1–3)
+ * or has met the threshold and should shift focus to backup/depth players.
+ */
+function getSquadPhase(
+  teamState: TeamState,
+  persona: FranchisePersona,
+): 'xi_building' | 'backup_filling' {
+  const qualityCount = teamState.squad.filter(p => getPlayerTier6(p as PlayerRecord) <= 3).length
+  return qualityCount >= persona.squadTemplate.xiQualityThreshold
+    ? 'backup_filling'
+    : 'xi_building'
 }
 
 function getARArchetype(player: PlayerRecord): string | null {
@@ -552,6 +589,31 @@ function computeStaticInterest(
     }
   }
 
+  // ── Real-world franchise interest bonus ───────────────────────────────────
+  // Interested teams bid more aggressively, scaled by player quality.
+  // When currently losing the bid, interested teams escalate further.
+  // Elite stars create bidding wars; fringe picks get only a nudge.
+  if (player.interestedTeams?.includes(persona.teamId)) {
+    const pot = player.potential ?? 0
+    const mv  = player.marketValue ?? 0
+    const baseBonus = (player.prospectTier === 'elite' || pot >= 8 || mv >= 10) ? 25
+                    : pot >= 6 || mv >= 4                                        ? 12
+                    :                                                               6
+    const isLosingRace = bidState?.currentLeader != null
+                      && bidState.currentLeader !== persona.teamId
+    score += baseBonus + (isLosingRace ? Math.round(baseBonus * 0.4) : 0)
+  }
+
+  // Non-interested teams fold faster when 2+ interested teams are fighting over a star
+  if (!player.interestedTeams?.includes(persona.teamId)
+      && (player.interestedTeams?.length ?? 0) >= 2) {
+    const pot = player.potential ?? 0
+    const mv  = player.marketValue ?? 0
+    if (player.prospectTier === 'elite' || pot >= 8 || mv >= 10) {
+      score -= 10  // Don't compete in a star war you didn't plan for
+    }
+  }
+
   // ── Uncapped player potential ──────────────────────────────────────────────
   if (player.cappedStatus === 'uncapped' && player.potential != null && player.age != null) {
     const potential = player.potential
@@ -586,6 +648,7 @@ function computeNeedScore(
   dataset: AuctionDataset,
   currentSetIndex = 0,
   auctionLog: string[] = [],
+  isReauction = false,
 ): number {
   const squad = teamState.squad
   const totalSlots = dataset.maximumSquadSize
@@ -670,6 +733,22 @@ function computeNeedScore(
     }
   }
 
+  // ── Squad-phase modifier: XI-building vs backup-filling ──────────────────────
+  // Teams prioritise quality (Tier 1–3) while their XI is incomplete.
+  // Once the XI quality threshold is met, they shift to depth players.
+  const tier6 = getPlayerTier6(player)
+  const squadPhase = getSquadPhase(teamState, persona)
+
+  if (squadPhase === 'xi_building') {
+    if (tier6 >= 5) needScore *= 0.55  // Depress filler interest while XI is still being built
+    // Tier 1–3: unchanged — exactly what's needed right now
+  } else {
+    // backup_filling
+    if (tier6 <= 2) needScore *= 0.70              // Already have enough XI-quality stars
+    if (tier6 >= 5) needScore *= 1.20              // Actively want depth players
+    if (player.cappedStatus === 'uncapped') needScore *= 1.15  // Budget uncapped = ideal backup
+  }
+
   // Urgency rises as squad fills
   const fillRatio = squad.length / totalSlots
   needScore *= (1 + fillRatio * 0.25)
@@ -684,8 +763,8 @@ function computeNeedScore(
   if (teamState.currentPurse < 15) needScore *= 0.85
   if (teamState.currentPurse < 8)  needScore *= 0.70
 
-  // Late-auction desperation
-  if (currentSetIndex >= 12 && squad.length < 23) {
+  // Late-auction desperation — also fires in reauction so teams actively fill slots
+  if ((currentSetIndex >= 12 || isReauction) && squad.length < 23) {
     needScore *= 1.0 + (23 - squad.length) * 0.07
   }
 
@@ -743,6 +822,15 @@ function computeEmotionScore(
   if (player.previousTeam === persona.teamId) score += 25
   if (player.rtmEligibleFor === persona.teamId) score += 20
 
+  // Real-world franchise interest — emotionally driven to win this player
+  if (player.interestedTeams?.includes(persona.teamId)) {
+    const pot = player.potential ?? 0
+    const mv  = player.marketValue ?? 0
+    score += (player.prospectTier === 'elite' || pot >= 8 || mv >= 10) ? 18
+           : pot >= 6 || mv >= 4                                        ? 10
+           :                                                               4
+  }
+
   // Auction style modifiers
   if (persona.auctionStyle === 'aggressive') score *= 1.15
   if (persona.auctionStyle === 'emotional') score *= 1.25
@@ -793,6 +881,8 @@ function computeMaxBid(
   marketValue?: number | null,
   currentPlayer?: PlayerRecord | null,
   bidState?: BidState | null,
+  teamState?: TeamState | null,
+  maxSquadSize?: number,
 ): number {
   // Absolute hard ceiling — only Rishabh Pant (₹27 Cr) has ever come close
   const ABSOLUTE_CAP = 28
@@ -863,6 +953,59 @@ function computeMaxBid(
                        : potential >= 4 ? 2
                        :                  realisticCap
     realisticCap = Math.max(realisticCap, potentialCap * persona.potentialWeight)
+  }
+
+  // Interested teams stretch their ceiling for players that actually merit it
+  if (currentPlayer?.interestedTeams?.includes(persona.teamId)) {
+    const pot = currentPlayer.potential ?? 0
+    const interestMult = (currentPlayer.prospectTier === 'elite' || pot >= 8) ? 1.30
+                       : pot >= 6                                              ? 1.10
+                       :                                                         1.00
+    realisticCap *= interestMult
+  }
+
+  // ── Per-tier bid multiplier from squad template ───────────────────────────────
+  if (currentPlayer) {
+    const t6 = getPlayerTier6(currentPlayer)
+    const tierMult = persona.squadTemplate?.tierBidMultipliers?.[t6] ?? 1.0
+    realisticCap *= tierMult
+  }
+
+  // ── Purse budget guard: tighten ceiling when a tier group is over-budget ─────
+  if (currentPlayer && teamState && maxSquadSize) {
+    const template = persona.squadTemplate
+    if (template) {
+      const startingPurse = (dataset as AuctionDataset & { startingPurse?: Record<string, number> })
+        .startingPurse?.[persona.teamId] ?? 120
+      const t6 = getPlayerTier6(currentPlayer)
+
+      const starSpent = teamState.squad
+        .filter(p => getPlayerTier6(p as PlayerRecord) <= 2)
+        .reduce((sum, p) => sum + p.soldPrice, 0)
+      const starBudget = startingPurse * template.tierPurseShare.xiStars
+
+      const emergingSpent = teamState.squad
+        .filter(p => { const t = getPlayerTier6(p as PlayerRecord); return t === 3 || t === 4 })
+        .reduce((sum, p) => sum + p.soldPrice, 0)
+      const emergingBudget = startingPurse * template.tierPurseShare.emergingSpec
+
+      if (t6 <= 2 && starSpent > starBudget * 1.1) {
+        realisticCap *= 0.75  // Overspent on stars — tighten ceiling
+      } else if ((t6 === 3 || t6 === 4) && emergingSpent > emergingBudget * 1.1) {
+        realisticCap *= 0.85  // Overspent on mid-tier — moderate tightening
+      }
+    }
+  }
+
+  // ── Purse-per-slot modifier: teams with headroom can spend more; cash-strapped conserve ──
+  if (teamState && maxSquadSize) {
+    const slotsLeft = Math.max(1, maxSquadSize - teamState.squad.length)
+    const pursePerSlot = teamState.currentPurse / slotsLeft
+    if (pursePerSlot > 4) {
+      realisticCap *= Math.min(1.15, 1 + (pursePerSlot - 4) * 0.02)
+    } else if (pursePerSlot < 1.5) {
+      realisticCap *= 0.80
+    }
   }
 
   const desireFraction = blendedScore / 100

@@ -81,6 +81,7 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     // Back-fill fields added after initial release so old saves don't crash
     if (!state.acceleratedPicks) state.acceleratedPicks = []
     if (state.acceleratedRoundsCompleted === undefined) state.acceleratedRoundsCompleted = 0
+    if (!state.originalUnsoldPool) state.originalUnsoldPool = []
     // If killed mid-bid, reset to set-preview so the player gets a clean restart
     // rather than resuming a half-finished bid round with no running timers
     if (state.phase === 'bidding') {
@@ -301,9 +302,19 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
   },
 
   startAcceleratedSelection: () => {
-    set(s => s.gameState
-      ? { gameState: { ...s.gameState, phase: 'accelerated-selection', acceleratedPicks: [] } }
-      : {})
+    set(s => {
+      if (!s.gameState) return {}
+      const isFirstRound = (s.gameState.acceleratedRoundsCompleted ?? 0) === 0
+      return {
+        gameState: {
+          ...s.gameState,
+          phase: 'accelerated-selection',
+          acceleratedPicks: [],
+          // Capture the original unsold pool once, before round 1 modifies it
+          originalUnsoldPool: isFirstRound ? [...s.gameState.unsoldPlayers] : s.gameState.originalUnsoldPool,
+        },
+      }
+    })
     void get().saveNow()
   },
 

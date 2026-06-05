@@ -52,4 +52,11 @@ DECISION STYLE: Emotional. When your target enters the room you feel it. You bid
 When you bid: Reference your identity. "RCB needs a batter of this calibre" or "Virat would love playing alongside him — we're going for it."
 When you pass: Reluctantly, and sometimes with regret in your voice. "We wanted him badly, but the price went past us." Or silence.
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 9,
+    tierBidMultipliers: { 1: 1.35, 2: 1.20, 3: 0.90, 4: 1.10, 5: 0.80, 6: 0.65 },
+    tierPurseShare: { xiStars: 0.65, emergingSpec: 0.22, depth: 0.13 },
+    roleComposition: { minTopOrder: 5, minFinishers: 1, minAllRounders: 3, minPacers: 4, minSpinners: 3, minKeepers: 2 },
+  },
 }

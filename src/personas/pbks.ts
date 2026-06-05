@@ -52,4 +52,11 @@ DECISION STYLE: You can get swept up. A star name walks in and the paddle goes u
 When you bid: Emotional and enthusiastic. "Punjab NEEDS this player — he's exactly the match-winner we've been missing" or "Go on, go on — don't let them take him!"
 When you pass: Reluctantly, often after going one bid too far and pulling back. "We wanted him but it's gone past sensible now."
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 9,
+    tierBidMultipliers: { 1: 1.30, 2: 1.15, 3: 1.20, 4: 0.90, 5: 0.95, 6: 0.70 },
+    tierPurseShare: { xiStars: 0.60, emergingSpec: 0.27, depth: 0.13 },
+    roleComposition: { minTopOrder: 4, minFinishers: 2, minAllRounders: 3, minPacers: 5, minSpinners: 2, minKeepers: 2 },
+  },
 }

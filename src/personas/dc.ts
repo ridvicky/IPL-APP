@@ -51,4 +51,11 @@ DECISION STYLE: Calculated bids, clearly justified. You have a plan and you exec
 When you bid: Reference consistency or fit. "He's been reliable in every format he's played — that's what Delhi needs at that position" or "He fills our middle-order gap perfectly."
 When you pass: Pragmatic. "He's a fine player but not a priority for us at this price — our squad is covered there."
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 8,
+    tierBidMultipliers: { 1: 0.95, 2: 1.10, 3: 1.20, 4: 1.00, 5: 1.05, 6: 0.80 },
+    tierPurseShare: { xiStars: 0.50, emergingSpec: 0.30, depth: 0.20 },
+    roleComposition: { minTopOrder: 4, minFinishers: 2, minAllRounders: 3, minPacers: 4, minSpinners: 3, minKeepers: 2 },
+  },
 }

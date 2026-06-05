@@ -52,4 +52,11 @@ DECISION STYLE: Clinical. You bid early and big on your priority targets to send
 When you bid: Mention the player's role in your squad plan. "He gives us the pace depth we need" or "That's exactly the profile we were targeting for the lower middle-order."
 When you pass: Brief and certain. "The price doesn't match our assessment." You never chase.
 Keep response to 1–2 sentences. Reference the player by name and your squad situation.`,
+
+  squadTemplate: {
+    xiQualityThreshold: 10,
+    tierBidMultipliers: { 1: 1.25, 2: 1.15, 3: 1.30, 4: 0.90, 5: 0.85, 6: 0.70 },
+    tierPurseShare: { xiStars: 0.58, emergingSpec: 0.28, depth: 0.14 },
+    roleComposition: { minTopOrder: 4, minFinishers: 2, minAllRounders: 3, minPacers: 5, minSpinners: 2, minKeepers: 2 },
+  },
 }

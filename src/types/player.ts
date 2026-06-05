@@ -28,6 +28,8 @@ export interface PlayerRecord {
   potential?: number
   /** Uncapped players only — derived from potential */
   prospectTier?: ProspectTier
+  /** Teams with known real-world interest in this player — drives aggressive bidding */
+  interestedTeams?: string[]
 }
 
 /**

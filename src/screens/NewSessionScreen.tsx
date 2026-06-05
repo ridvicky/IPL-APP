@@ -132,6 +132,7 @@ export function NewSessionScreen() {
         reauctionIndex: 0,
         acceleratedPicks: [],
         acceleratedRoundsCompleted: 0,
+        originalUnsoldPool: [],
         tradeHistory: [],
         auctionLog: [`Auction started — ${franchise} selected — ${difficulty} difficulty`],
         seasonSetup: null,
