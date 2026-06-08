@@ -56,6 +56,7 @@ interface GameStoreState {
   // Season
   setSeasonSetup: (setup: import('@/types/season').SeasonSetup) => void
   setSeasonResult: (result: import('@/types/season').SeasonResult) => void
+  updateSeasonField: <K extends keyof import('@/types/game').GameState>(key: K, value: import('@/types/game').GameState[K]) => void
 
   // Retention editing — called from RetentionSetupScreen before auction starts
   applyRetentionEdits: (teamStates: Record<TeamId, TeamState>, releasedPlayers: import('@/types/player').PlayerRecord[]) => void
@@ -384,6 +385,11 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     set(s => s.gameState ? {
       gameState: { ...s.gameState, seasonResult: result, phase: 'season-complete' },
     } : {})
+    void get().saveNow()
+  },
+
+  updateSeasonField: (key, value) => {
+    set(s => s.gameState ? { gameState: { ...s.gameState, [key]: value } } : {})
     void get().saveNow()
   },
 

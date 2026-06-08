@@ -1,5 +1,103 @@
 import type { TeamId } from './team'
 
+// ── Season simulator new types ──────────────────────────────────────────────
+
+export type TeamPhilosophy =
+  | 'power-hitters'
+  | 'pace-attack'
+  | 'spin-web'
+  | 'experience-first'
+  | 'youth-revolution'
+  | 'balanced'
+
+export type PlayerForm = 'hot' | 'normal' | 'cold' | 'injured'
+
+export type PitchType = 'batting-paradise' | 'pace-friendly' | 'spin-friendly' | 'balanced'
+
+export type BattingStrategy = 'aggressive' | 'anchor-attack' | 'power-surge' | 'flexible'
+
+export type BowlingPlan = 'pace-attack' | 'spin-web' | 'mixed' | 'defensive'
+
+export interface PlayerSeasonStats {
+  matches: number
+  runs: number
+  balls: number
+  wickets: number
+  catches: number
+  fifties: number
+  hundreds: number
+  fourWicketHauls: number
+}
+
+export interface MatchFixture {
+  matchIndex: number          // 0-based
+  homeTeam: TeamId
+  awayTeam: TeamId
+  venue: string
+  pitchType: PitchType
+  result?: MatchResult
+}
+
+export interface MatchResult {
+  winner: TeamId
+  loser: TeamId
+  winnerScore: number
+  loserScore: number
+  winnerWickets: number
+  loserWickets: number
+  margin: string              // e.g. "24 runs" or "5 wickets"
+  playerOfMatch: string       // player name
+  commentary?: string         // LLM generated
+}
+
+export interface StandingsRow {
+  teamId: TeamId
+  played: number
+  won: number
+  lost: number
+  noResult: number
+  points: number
+  nrr: number
+  last5: ('W' | 'L' | 'N')[]
+  qualifiedForPlayoffs?: boolean
+}
+
+export interface PlayerMatchPerformance {
+  playerId: string
+  runs?: number
+  balls?: number
+  fours?: number
+  sixes?: number
+  wickets?: number
+  oversBowled?: number
+  runsConceded?: number
+  catches?: number
+  dismissal?: string
+}
+
+export interface InningsScore {
+  team: TeamId
+  runs: number
+  wickets: number
+  overs: number
+  performances: PlayerMatchPerformance[]
+}
+
+export interface LiveMatchState {
+  fixtureIndex: number
+  battingStrategy: BattingStrategy
+  bowlingPlan: BowlingPlan
+  selectedXI: string[]        // playerIds
+  captainId: string
+  viceCaptainId: string
+  impactPlayerUsed: boolean
+  innings1?: InningsScore
+  innings2?: InningsScore
+  phase: 'pre-match' | 'innings1' | 'innings-break' | 'innings2' | 'result'
+}
+
+// ── Existing types below ────────────────────────────────────────────────────
+
 export type TeamInstruction =
   | 'aggressive-batting'
   | 'anchor-batting'

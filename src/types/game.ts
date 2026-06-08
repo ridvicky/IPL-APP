@@ -1,7 +1,7 @@
 import type { TeamId, TeamState } from './team'
-import type { PlayerRecord, SoldPlayerRecord, UnsoldPlayerRecord, BidEntry } from './player'
+import type { PlayerRecord, PlayerSeasonState, SoldPlayerRecord, UnsoldPlayerRecord, BidEntry } from './player'
 import type { TradeRecord } from './trade'
-import type { SeasonSetup, SeasonResult } from './season'
+import type { SeasonSetup, SeasonResult, MatchFixture, StandingsRow, TeamPhilosophy, LiveMatchState } from './season'
 
 export type AuctionPhase =
   | 'setup'
@@ -15,9 +15,20 @@ export type AuctionPhase =
   | 'set-complete'
   | 'auction-complete'
   | 'accelerated-selection'
+  // ── Season phases ──────────────────────────────────────────────
+  | 'preseason-strategy'
+  | 'preseason-training'
+  | 'season-hub'
+  | 'pre-match'
+  | 'match-sim'
+  | 'innings-break'
+  | 'post-match'
+  | 'training'
+  | 'playoff'
+  | 'season-complete'
+  // legacy (kept for saved session compatibility)
   | 'season-setup'
   | 'season-simulation'
-  | 'season-complete'
 
 /** Live bid state for the player currently being auctioned */
 export interface BidState {
@@ -54,4 +65,13 @@ export interface GameState {
   auctionLog: string[]
   seasonSetup: SeasonSetup | null
   seasonResult: SeasonResult | null
+
+  // ── Season simulator fields ─────────────────────────────────────
+  teamPhilosophy?: TeamPhilosophy
+  seasonSchedule?: MatchFixture[]
+  currentMatchIndex?: number
+  pointsTable?: StandingsRow[]
+  teamMorale?: number
+  currentMatchState?: LiveMatchState
+  playerSeasonStates?: Record<string, PlayerSeasonState>  // playerId → season state
 }

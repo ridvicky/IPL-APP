@@ -47,7 +47,7 @@ export function LoginScreen() {
           </div>
 
           <p className="text-gray-400 text-sm font-semibold tracking-[0.3em] uppercase mt-2">
-            Auction Simulator
+            Season Simulator
           </p>
 
           {/* Franchise color strip */}

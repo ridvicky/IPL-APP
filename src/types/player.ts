@@ -34,6 +34,24 @@ export interface PlayerRecord {
   boughtPrice?: number | null
 }
 
+/** Season-runtime state layered on top of a SoldPlayerRecord during active season */
+export interface PlayerSeasonState {
+  playerId: string
+  form: 'hot' | 'normal' | 'cold' | 'injured'
+  fitnessLevel: number          // 0–100; drops per match, recovers with Fitness Camp
+  matchesInjured: number        // matches remaining to miss; 0 = available
+  seasonStats: {
+    matches: number
+    runs: number
+    balls: number
+    wickets: number
+    catches: number
+    fifties: number
+    hundreds: number
+    fourWicketHauls: number
+  }
+}
+
 /**
  * Recent form context fetched by LLM at auction time.
  * Not stored in dataset — fetched once per player per session and cached in memory.

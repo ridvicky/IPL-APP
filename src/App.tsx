@@ -13,6 +13,13 @@ import { FinalSquadReviewScreen } from '@screens/FinalSquadReviewScreen'
 import { TradeWindowScreen } from '@screens/TradeWindowScreen'
 import { SeasonSetupScreen } from '@screens/SeasonSetupScreen'
 import { SeasonResultsScreen } from '@screens/SeasonResultsScreen'
+import { PreseasonStrategyScreen } from '@screens/PreseasonStrategyScreen'
+import { TrainingScreen } from '@screens/TrainingScreen'
+import { SeasonHubScreen } from '@screens/SeasonHubScreen'
+import { PreMatchScreen } from '@screens/PreMatchScreen'
+import { MatchSimScreen } from '@screens/MatchSimScreen'
+import { PostMatchScreen } from '@screens/PostMatchScreen'
+import { PlayoffScreen } from '@screens/PlayoffScreen'
 import { LoadingSpinner } from '@components/ui/LoadingSpinner'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -46,6 +53,14 @@ export default function App() {
         <Route path="/trade-window" element={<RequireAuth><TradeWindowScreen /></RequireAuth>} />
         <Route path="/season-setup" element={<RequireAuth><SeasonSetupScreen /></RequireAuth>} />
         <Route path="/season-results" element={<RequireAuth><SeasonResultsScreen /></RequireAuth>} />
+        {/* Season simulator routes */}
+        <Route path="/preseason-strategy" element={<RequireAuth><PreseasonStrategyScreen /></RequireAuth>} />
+        <Route path="/training" element={<RequireAuth><TrainingScreen /></RequireAuth>} />
+        <Route path="/season-hub" element={<RequireAuth><SeasonHubScreen /></RequireAuth>} />
+        <Route path="/pre-match" element={<RequireAuth><PreMatchScreen /></RequireAuth>} />
+        <Route path="/match-sim" element={<RequireAuth><MatchSimScreen /></RequireAuth>} />
+        <Route path="/post-match" element={<RequireAuth><PostMatchScreen /></RequireAuth>} />
+        <Route path="/playoff" element={<RequireAuth><PlayoffScreen /></RequireAuth>} />
         {/* Legacy paths kept for backward compat with menu links */}
         <Route path="/unsold-players" element={<Navigate to="/unsold" replace />} />
         <Route path="/auction-history" element={<Navigate to="/history" replace />} />
