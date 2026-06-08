@@ -59,9 +59,9 @@ export function TeamPaddles({ teamStates, bidState, userTeam, maximumSquadSize, 
             className={`relative flex-shrink-0 flex flex-col items-center rounded-2xl border transition-all duration-300
               px-3 py-2 min-w-[68px]
               ${isLeading
-                ? `${c.bg} ${c.border} shadow-lg ${c.glow} scale-105`
+                ? `${c.bg} ${c.border} shadow-2xl ${c.glow} scale-110 -translate-y-1`
                 : isDead
-                ? 'bg-gray-900/40 border-gray-800/60 opacity-40 scale-95'
+                ? 'bg-gray-900/40 border-gray-800/60 opacity-35 scale-90 translate-y-1'
                 : isFull
                 ? 'bg-amber-900/20 border-amber-700/40 opacity-60 scale-95'
                 : `${c.bg} border-white/10`
@@ -72,7 +72,7 @@ export function TeamPaddles({ teamStates, bidState, userTeam, maximumSquadSize, 
             {/* Status dot */}
             <div className="absolute top-1.5 right-1.5">
               {isLeading && (
-                <span className={`w-2 h-2 rounded-full ${c.dot} animate-pulse block`} />
+                <span className={`w-2.5 h-2.5 rounded-full ${c.dot} animate-pulse-glow block`} />
               )}
               {status === 'active' && !isFull && !isLowPurse && (
                 <span className="w-2 h-2 rounded-full bg-green-400 block" />

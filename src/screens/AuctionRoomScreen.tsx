@@ -39,6 +39,12 @@ const STAGE_SUB  = ['', 'Any advance?', 'Last chance to bid!', '']
 
 // ─── Mobile Owner Reactions Feed ─────────────────────────────────────────────
 
+const TEAM_HEX: Record<string, string> = {
+  CSK: '#f5a623', MI: '#005da0', RCB: '#c8102e', KKR: '#3a225d',
+  DC: '#1a5276',  RR: '#ea1a8e', SRH: '#f26522', PBKS: '#d71921',
+  GT: '#1d3461',  LSG: '#1abc9c',
+}
+
 const TEAM_CHIP_COLORS: Record<string, string> = {
   CSK: 'text-yellow-300 bg-yellow-400/10 border-yellow-500/30',
   MI:  'text-blue-300 bg-blue-400/10 border-blue-500/30',
@@ -52,78 +58,642 @@ const TEAM_CHIP_COLORS: Record<string, string> = {
   LSG: 'text-teal-300 bg-teal-400/10 border-teal-500/30',
 }
 
-// Owner thought lines — formula-based per-team voice, no LLM needed for inline display
-const OWNER_NAMES: Record<string, string> = {
-  CSK: 'Fleming (CSK)', MI: 'Jayawardene (MI)', RCB: 'Kohli / Flower (RCB)',
-  KKR: 'Pandit (KKR)', DC: 'Ponting (DC)', RR: 'Sangakkara (RR)',
-  SRH: 'Vettori (SRH)', PBKS: 'Zinta (PBKS)', GT: 'Nehra (GT)', LSG: 'Langer (LSG)',
+
+type OwnerSituation = 'bidding' | 'aggressive' | 'thinking' | 'passing' | 'not_my_type' | 'outbid' | 'won'
+
+const OWNER_LINES: Record<string, Record<OwnerSituation, string[]>> = {
+  CSK: {
+    bidding: [
+      "Thala's kind of player. Calm under pressure.",
+      "Yellove this one. He fits our system.",
+      "Chennai doesn't do panic buys. This is strategy.",
+      "Dhoni would back this call. So do we.",
+      "Every great CSK squad has a player like him.",
+      "Experience isn't cheap. But it wins you trophies.",
+      "The fans back home already know his name.",
+      "We've tracked him all season. This is our bid.",
+      "He keeps his head when it matters. CSK trait.",
+      "This is the Chennai way — measured, smart, decisive.",
+      "Whistle Podu territory. Let's get it done.",
+      "He's got the temperament we build squads around.",
+    ],
+    aggressive: [
+      "Don't test CSK. We finish what we start.",
+      "Five finals. We know how to win auctions too.",
+      "Chennai doesn't lose players it targets. Keep going.",
+      "We'll go to the wall for him. Simple as that.",
+      "Other teams can sit down — this one's ours.",
+      "Raise it. CSK doesn't flinch at a number.",
+      "Thala approved. We're not stopping here.",
+      "This is non-negotiable. Keep bidding.",
+    ],
+    thinking: [
+      "Hmm. Let the room breathe a bit…",
+      "We're doing the maths. Give us a second.",
+      "Fleming's on the phone. Hold tight.",
+      "Patience is a CSK superpower. We're watching.",
+      "Interesting. Let's see who blinks first.",
+      "Not yet. Let them show us how desperate they are.",
+      "We have time. CSK always has time.",
+    ],
+    passing: [
+      "Not our gap to fill today. Let them have it.",
+      "Doesn't fit the yellow army. Simple.",
+      "We'll pass. There's smarter money to spend.",
+      "CSK builds slow and right. This isn't right.",
+      "Let someone else overpay. We'll be fine.",
+      "We have that covered. Move on.",
+    ],
+    not_my_type: [
+      "Good player. Just not a CSK player.",
+      "He'd struggle in our system, honestly.",
+      "Not the profile Dhoni builds around.",
+      "Chennai needs temperament first. Talent second.",
+      "We're not chasing hype. Definitely not this one.",
+      "Wrong fit. No hard feelings.",
+    ],
+    outbid: [
+      "Good luck. They'll need it at that price.",
+      "Overpaid. We'll be proven right in May.",
+      "Not at that number. No regrets.",
+      "Chennai moves on. Always does.",
+      "They wanted him more. Fine. We have a plan.",
+      "We've lost battles before. Never wars.",
+    ],
+    won: [
+      "Whistle Podu! Welcome to the yellow family!",
+      "Thala's going to love working with him!",
+      "Chennai just got better. Significantly.",
+      "Another piece of the CSK puzzle. Locked in.",
+      "Yellove wins again. See you at Chepauk!",
+    ],
+  },
+
+  MI: {
+    bidding: [
+      "Mumbai identifies talent three years before anyone else does.",
+      "Five titles. You think we don't know what works?",
+      "This is exactly the profile we targeted in pre-auction.",
+      "Impact every single game — that's the MI standard.",
+      "He passes the Wankhede test. We want him.",
+      "Rohit's already sent a message. We're going for this.",
+      "The Paltan needs match-winners. He qualifies.",
+      "MI doesn't gamble. This is calculated aggression.",
+      "When we want someone, we get them. Always.",
+      "Blue and gold looks good on him. Let's make it official.",
+      "System player. High IQ. MI through and through.",
+      "We've done homework on this one since last season.",
+    ],
+    aggressive: [
+      "Mumbai doesn't flinch at a number. Raise it.",
+      "Five titles don't come from being shy in auctions.",
+      "This is a must-have. Absolutely non-negotiable.",
+      "Paltan needs him. We're not leaving without him.",
+      "MI plays to win every single year. Fund it.",
+      "Keep going. We're not done until it's ours.",
+      "Other teams can't afford to match us. We know that.",
+    ],
+    thinking: [
+      "Jayawardene's running the numbers. One second.",
+      "Interesting valuation. Let it develop.",
+      "We're patient. The Paltan is always patient.",
+      "MI doesn't rush bids. We move at our pace.",
+      "Let the room talk first. Then we'll respond.",
+      "Watching carefully. Very carefully.",
+    ],
+    passing: [
+      "Not our gap. Someone else's problem.",
+      "Mumbai passes. Bigger priorities today.",
+      "Numbers don't add up for the Paltan.",
+      "We have options. Don't need this one.",
+      "MI moves on. No drama.",
+    ],
+    not_my_type: [
+      "Not a Wankhede crowd pleaser, honestly.",
+      "Doesn't fit our batting order structure.",
+      "MI builds different. This player's different in the wrong way.",
+      "Not the archetype we win titles with.",
+      "Rohit wouldn't vibe with this selection.",
+    ],
+    outbid: [
+      "They'll regret it. Mark those words.",
+      "Too rich. MI keeps the war chest for what matters.",
+      "We play the long game. Always have.",
+      "Good luck to them. They'll need a miracle at that price.",
+      "Mumbai recovers. That's what five-time champions do.",
+    ],
+    won: [
+      "Mumbai Paltan gets stronger! Let's go!",
+      "Blue and gold — couldn't be a better fit!",
+      "Welcome to the most successful franchise in IPL history!",
+      "Wankhede is going to go absolutely berserk for this one.",
+      "MI builds dynasties. One signing at a time.",
+    ],
+  },
+
+  RCB: {
+    bidding: [
+      "RCB needs this. The fans deserve this.",
+      "Ee sala cup namde — and he's part of the plan.",
+      "Bangalore bets big. Always. It's in our DNA.",
+      "This is the calibre of player we've been missing.",
+      "Faf would love this lad in the dressing room.",
+      "Royal Challengers don't do average signings.",
+      "The red army back home is screaming for this player.",
+      "We go all-in every year. This bid's no different.",
+      "History changes with bold decisions. Let's be bold.",
+      "Bangalore + this player = dangerous. Very dangerous.",
+      "Every RCB era needs its defining signings. This is one.",
+      "Du Plessis is already excited. We're going.",
+    ],
+    aggressive: [
+      "We're not letting Bangalore down AGAIN. Raise it!",
+      "RCB is all-in. No ceiling when the Cup is on the line.",
+      "No hesitation! Bangalore plays for glory!",
+      "This is our year and he's going to be a massive part of it!",
+      "We've been this close too many times. Go harder!",
+      "The red army doesn't accept second place. Neither do we.",
+    ],
+    thinking: [
+      "The heart says bid. The head is… also saying bid.",
+      "Hmm. Let me convince myself this is smart. … done. Bidding.",
+      "We're calculating. RCB calculates sometimes.",
+      "Mike Hesson is somewhere right now looking very concerned.",
+      "The purse, the fit, the dream… all pointing the same way.",
+      "Virat would want him. That's usually enough for us.",
+    ],
+    passing: [
+      "Bigger targets today. We pass.",
+      "Not the RCB profile this time around.",
+      "Bangalore has bigger fish to fry.",
+      "We'll sit this one out. Strategically.",
+      "Our cup dreams lie with a different player.",
+    ],
+    not_my_type: [
+      "Ee sala? Not with him, honestly.",
+      "Not what Bangalore's batting order needs.",
+      "We need big-game players. This isn't that.",
+      "RCB doesn't do conservative selections.",
+      "Wrong energy for the red army.",
+    ],
+    outbid: [
+      "Story of our lives. We move and we believe.",
+      "Someone always outbids RCB. It's tradition apparently.",
+      "Fine. More purse for the player we ACTUALLY want.",
+      "Ee sala cup namde — just not with him. We'll find our guy.",
+      "Not even bitter. The Cup hunt continues.",
+      "Their auction, their overpay. We're fine.",
+    ],
+    won: [
+      "EE SALA CUP NAMDE! He's OURS! Red army rise!",
+      "BANGALORE! Your Royal Challengers just got DANGEROUS!",
+      "The RCB faithful are going absolutely wild right now!",
+      "Faf, Virat, Kohli — they'll love playing alongside him!",
+      "One step closer. One bold signing at a time.",
+    ],
+  },
+
+  KKR: {
+    bidding: [
+      "Korbo Lorbo Jeetbo — we start with winning this bid.",
+      "Eden Gardens is calling this player's name already.",
+      "KKR identifies value others can't see. That's the edge.",
+      "Shreyas built this culture. He'd love this addition.",
+      "Purple and gold looks great on match-winners.",
+      "Knight Riders don't build collections — we build squads.",
+      "Two titles. We know exactly what winning looks like.",
+      "The mystery of KKR is in signings like this.",
+      "Narine would appreciate having him around.",
+      "Chandrakant Pandit's already planning his role.",
+      "Eden roars for quality. This qualifies.",
+      "KKR does its homework. The data says yes.",
+    ],
+    aggressive: [
+      "KKR doesn't leave the auction room empty-handed.",
+      "Korbo Lorbo Jeetbo — and we start RIGHT NOW.",
+      "Two-time champions know how to finish bids.",
+      "Purple is committed. Completely committed.",
+      "Keep going. Eden deserves nothing less.",
+      "We want him and we're making that very clear.",
+    ],
+    thinking: [
+      "Interesting. Let's see where this takes us.",
+      "Pandit's crunching the lineup fit. Give us a moment.",
+      "The KKR analytics team is earning their salaries right now.",
+      "Strategic patience. That's all this is.",
+      "We watch before we pounce. That's how KKR hunts.",
+    ],
+    passing: [
+      "Not the KKR template. We exit gracefully.",
+      "Eden Gardens has other priorities today.",
+      "KKR passes — strategically, always strategically.",
+      "This profile doesn't build dynasties. We know what does.",
+      "We move on. The right player is coming.",
+    ],
+    not_my_type: [
+      "Doesn't fit the Eden Gardens vibe at all.",
+      "KKR needs mystery and impact. This is neither.",
+      "Wrong kind of dangerous for purple and gold.",
+      "Not the archetypal Knight Rider. Hard pass.",
+      "Pandit's shaking his head from the box.",
+    ],
+    outbid: [
+      "They wanted him more. Respect that, actually.",
+      "Our strategy remains intact. Untouched.",
+      "KKR doesn't chase. We plan three moves ahead.",
+      "Fine. The real target's coming up.",
+      "Winning the auction means nothing. Winning matches does.",
+    ],
+    won: [
+      "KORBO LORBO JEETBO! He's a KNIGHT RIDER!",
+      "Eden Gardens is going to absolutely lose it tonight!",
+      "Purple and gold just got a whole lot scarier!",
+      "Pandit's already planning the batting order around him!",
+      "Champions keep building. This is how it's done.",
+    ],
+  },
+
+  DC: {
+    bidding: [
+      "Delhi plays bold. This is a bold bid.",
+      "Ponting's instinct said yes. That's usually right.",
+      "Capitals don't do safe — we do smart.",
+      "This player fits our attacking game plan perfectly.",
+      "The data team flagged him months ago. Time to act.",
+      "Delhi's future is being built right now. Brick by brick.",
+      "Young, hungry, Delhi-ready. What more do you want?",
+      "Consistent in pressure — exactly the Delhi Capitals profile.",
+      "He fills the exact gap we identified pre-auction.",
+      "The capital city demands quality. He delivers it.",
+      "Axar would love this combination. Let's go.",
+      "DC doesn't second-guess when the profile is right.",
+    ],
+    aggressive: [
+      "Delhi is going to the WALL on this one.",
+      "Capitals commit when they believe. We believe completely.",
+      "No ceiling today. He's a Delhi Capitals player.",
+      "Ponting's on his feet. That means we keep going.",
+      "DC doesn't apologise for wanting the best. Keep raising.",
+    ],
+    thinking: [
+      "Ponting's watching. That's usually meaningful.",
+      "Delhi thinks before Delhi bids. Still thinking.",
+      "We're deliberate. Not hesitant — deliberate.",
+      "Our analytics are saying three different things. Sorting it.",
+      "Interesting price point. Let's see.",
+    ],
+    passing: [
+      "Not the Delhi priority today. We move.",
+      "DC has smarter uses for this budget.",
+      "Capitals concede this one. Strategically.",
+      "Our squad gaps lie in a different direction.",
+      "Next. Delhi keeps moving forward.",
+    ],
+    not_my_type: [
+      "Not the Delhi blueprint. Hard pass.",
+      "Doesn't match what Ponting looks for in a player.",
+      "DC builds with purpose. This doesn't serve the purpose.",
+      "Too one-dimensional for what we need.",
+      "The Capitals are building something specific. This isn't it.",
+    ],
+    outbid: [
+      "Outbid but never outthought. That's Delhi.",
+      "They paid over the odds. We'll be fine.",
+      "Ponting's already moved on. So should we.",
+      "DC finds answers. Different ones if needed.",
+      "Next player. Delhi stays focused.",
+    ],
+    won: [
+      "Delhi Capitals get STRONGER! That's how you build!",
+      "The capital city is celebrating tonight!",
+      "Ponting gave the nod — that means everything here!",
+      "DC adds another quality piece to the puzzle!",
+      "Bold, smart, and now OURS. Delhi winning the auction!",
+    ],
+  },
+
+  RR: {
+    bidding: [
+      "Rajasthan sees value where others see mediocrity.",
+      "Moneyball is alive and thriving in Jaipur.",
+      "The analytics said bid. Sangakkara agrees. We go.",
+      "Undervalued by the market. Perfectly valued by us.",
+      "RR doesn't chase names. We chase impact.",
+      "Pink army identifies talent early. This is early.",
+      "Sanju already knows what this player brings.",
+      "Value isn't always obvious. That's why we win.",
+      "The data doesn't lie. This is a buy.",
+      "Jaipur builds smart. This is a smart bid.",
+      "Smart over flashy — that's the Royals way.",
+      "We saw this coming three months ago. Finally time.",
+    ],
+    aggressive: [
+      "When RR sees value, Rajasthan goes ALL in.",
+      "The pink army is committed. Completely committed.",
+      "Our analysts say go. We trust our analysts.",
+      "Value identified — we protect it at any price.",
+      "Sangakkara's up from his seat. That means something.",
+      "RR doesn't let value walk out the door.",
+    ],
+    thinking: [
+      "Is the premium justified? Running the numbers…",
+      "Hmm. The value curve is shifting. Watching.",
+      "Sangakkara looks calm. He's never actually calm.",
+      "Moneyball has a formula. Checking it now.",
+      "Let the room move a little more. Then we'll judge.",
+    ],
+    passing: [
+      "The value isn't there anymore. We pass.",
+      "RR discipline — when it's gone, it's gone.",
+      "Rajasthan plays the long game. This isn't it.",
+      "Our analysts said no. We listen to our analysts.",
+      "Better value is definitely coming. We trust that.",
+    ],
+    not_my_type: [
+      "Doesn't fit the RR value matrix. Simple.",
+      "Rajasthan doesn't buy hype. This is all hype.",
+      "Not the profile that wins you trophies here.",
+      "Wrong player for the Jaipur formula.",
+      "Our moneyball model is shaking its head.",
+    ],
+    outbid: [
+      "They overpaid. The formula survives. We're good.",
+      "RR discipline preserved. Sangakkara would agree.",
+      "The numbers didn't justify it. Correct call.",
+      "Good. More purse for the actual value picks.",
+      "Jaipur moves on — calculated, as always.",
+    ],
+    won: [
+      "VALUE IDENTIFIED. VALUE CAPTURED. Pink army rises!",
+      "Rajasthan WINS this battle of wits! Sanju's smiling!",
+      "The moneyball formula strikes again! Classic RR!",
+      "Jaipur! Your Royals just signed EXACTLY who they needed!",
+      "Smart over flashy. Every. Single. Time.",
+    ],
+  },
+
+  SRH: {
+    bidding: [
+      "Sunrisers want pace, aggression, and IMPACT. He's it.",
+      "Orange Army doesn't wait — we attack from the jump.",
+      "Hyderabad has a vision. He fits it perfectly.",
+      "Kavya said go. We go.",
+      "SRH wants match-winners who change games in six balls.",
+      "He attacks from ball one. That's Sunrisers cricket.",
+      "The orange doesn't stand for caution. We bid.",
+      "Hyderabad's been building something dangerous. He adds to it.",
+      "Pat Cummins would love this teammate. Let's get it done.",
+      "SRH knows fast bowling. We know this man.",
+      "The sunrise is brightest when we sign players like this.",
+      "Vettori's already mapping the XI around him.",
+    ],
+    aggressive: [
+      "SUNRISERS ATTACK. Always. Non-negotiable.",
+      "Orange Army wants blood — and this player. Raise it.",
+      "We go hard or we go home. We're going HARD.",
+      "Hyderabad commits completely. No retreat from this.",
+      "SRH takes what it targets. We target him.",
+      "Kavya's standing up. That's the signal. GO.",
+    ],
+    thinking: [
+      "Vettori's calculating fit versus price. Give us a moment.",
+      "Orange Army watches. And calculates. And watches more.",
+      "We want him. Price is the question. Working on it.",
+      "SRH is in. Just deciding HOW in we are.",
+      "Let it breathe. We'll know our moment.",
+    ],
+    passing: [
+      "Doesn't fit the SRH attack blueprint.",
+      "Orange Army has better targets today.",
+      "Not what Hyderabad's looking for this auction.",
+      "We concede this one. Bigger fish ahead.",
+      "SRH passes — the dawn rises elsewhere.",
+    ],
+    not_my_type: [
+      "SRH needs destroyers. This is a consolidator.",
+      "Doesn't have that Sunrisers aggression we need.",
+      "Wrong energy for the orange army.",
+      "He's good. Just not Hyderabad-good.",
+      "Vettori's already looking away. That's our answer.",
+    ],
+    outbid: [
+      "They can have him at THAT price. Absolute insanity.",
+      "SRH keeps the plan. Keeps the purse. Keeps the patience.",
+      "Orange Army adapts. We always find the pace we need.",
+      "No drama. Hyderabad moves forward — as always.",
+      "We'll find our fast bowler. This wasn't him.",
+    ],
+    won: [
+      "RISE, SUNRISERS! He's OURS! Orange army go!",
+      "Hyderabad is going to be absolutely ELECTRIC this season!",
+      "Pat Cummins has a new teammate — and he's going to LOVE him!",
+      "The orange army grows STRONGER! Watch out, everyone!",
+      "SRH just got more dangerous. Significantly more dangerous.",
+    ],
+  },
+
+  PBKS: {
+    bidding: [
+      "Punjab NEEDS this. Full stop.",
+      "Preity's up in the box — that means we're serious.",
+      "Lions of Punjab don't miss quality when they see it.",
+      "Shubman would love this combination. We're going for it.",
+      "PBKS has the purse and absolutely the intention.",
+      "This is the player that changes everything for Punjab.",
+      "Red army, red mist — we want this player badly.",
+      "Kings don't settle. Not today, not ever.",
+      "He's exactly the impact player Mohali screams for.",
+      "Punjab has been patient long enough. This is the one.",
+      "That profile — THAT is what wins you a title.",
+      "Sher Punjab has spotted its prey. We pounce.",
+    ],
+    aggressive: [
+      "PUNJAB IS GOING TO THE WALL ON THIS ONE!",
+      "Kings don't flinch. We KEEP RAISING.",
+      "PBKS has the purse — we're going to use every last rupee!",
+      "Lions of PUNJAB ROAR! He's OURS! Keep going!",
+      "Preity's screaming. That means NO ceiling today!",
+      "Don't you DARE let someone else take him!",
+    ],
+    thinking: [
+      "We want him. Question is how much we want him.",
+      "Preity's got that look. Working out if this is the moment.",
+      "Punjab evaluates fast. Very fast. Almost done.",
+      "The fit is undeniable. The price is a conversation.",
+      "Lions hunt when ready. We're almost ready.",
+    ],
+    passing: [
+      "Not the Punjab Kings priority today. Reluctantly.",
+      "PBKS passes — bigger targets to save for.",
+      "Lions conserve for the right prey.",
+      "Our squad needs something else more urgently.",
+      "Not our moment. Our moment's coming though.",
+    ],
+    not_my_type: [
+      "Mohali crowd won't go crazy for this one. We pass.",
+      "Not a Punjab Kings player. We know our players.",
+      "Wrong kind of impact for what PBKS needs.",
+      "He'd be great elsewhere. Not here though.",
+      "Not the match-winner Punjab's been waiting for.",
+    ],
+    outbid: [
+      "They paid over the odds. Punjab's war chest stays healthy.",
+      "No regrets — the lions know what they're saving for.",
+      "PBKS moves on. Calculated, not defeated.",
+      "We keep the purse for the player we ACTUALLY want.",
+      "The auction is long. Punjab is PATIENT.",
+    ],
+    won: [
+      "SHER PUNJAB! HE'S OURS! Kings CLAIM another one!",
+      "Mohali is going to go ABSOLUTELY MENTAL for this player!",
+      "Punjab Kings just got the match-winner they've been dreaming of!",
+      "Preity's ecstatic and honestly? So is everyone in Punjab!",
+      "This. Is. The. PBKS. ERA. Right here!",
+    ],
+  },
+
+  GT: {
+    bidding: [
+      "Gujarat Titans builds on merit. He has it.",
+      "Nehra's already mapped out his role in the XI.",
+      "Squad balance over star power — this delivers both.",
+      "Titans identify character. He has that in abundance.",
+      "Two titles came from getting calls like this right.",
+      "Ahmedabad wants winners, not just talent. He qualifies.",
+      "GT doesn't panic-buy. This is the opposite of that.",
+      "The numbers, the fit, the character — all line up.",
+      "Shubman's input on this was clear. We trust him.",
+      "Methodical is our brand. This is a methodical bid.",
+      "Titans don't lose players they've identified. Going.",
+      "Gill already texted Nehra. We know what that means.",
+    ],
+    aggressive: [
+      "Titans don't lose players they target. We go.",
+      "Gujarat commits when it believes. We believe fully.",
+      "Two titles don't come from backing down. Keep bidding.",
+      "GT goes for the jugular when the moment arrives.",
+      "Ahmedabad has spoken. He wears Titans blue.",
+      "This is when champions separate themselves. We go.",
+    ],
+    thinking: [
+      "Nehra's calculating exactly what role he fills. Methodically.",
+      "Titans assess. We never rush. Never.",
+      "The data team's still running the squad-balance numbers.",
+      "Patience built two titles for us. It's working.",
+      "Let's see where this lands. Then we'll move.",
+    ],
+    passing: [
+      "Doesn't fit the Titans system. Respectfully.",
+      "GT has better allocation targets this auction.",
+      "Ahmedabad builds differently. This isn't the build.",
+      "Not the GT formula. We pass with confidence.",
+      "Titans exit — strategically, always strategically.",
+    ],
+    not_my_type: [
+      "Won't win you IPL titles. GT knows what does.",
+      "Not the character archetype we build around.",
+      "Nehra's already looking at the next player.",
+      "GT doesn't buy names. We buy championship DNA.",
+      "Wrong fit for Ahmedabad's model. No debate.",
+    ],
+    outbid: [
+      "Let them have it. Our plan adapts flawlessly.",
+      "GT has contingencies. This is just the plan activating.",
+      "Titans lose this battle — the war plan remains intact.",
+      "Ahmedabad stays calm. We're always calm.",
+      "Two titles came from getting this part right too.",
+    ],
+    won: [
+      "JAI GUJARAT! Another Titan RISES! The machine grows!",
+      "Ahmedabad got exactly what it came for today!",
+      "The Titans system just got a major upgrade!",
+      "Championship mentality meets championship signing. That's GT.",
+      "Nehra is VERY happy. That's when you know it's right.",
+    ],
+  },
+
+  LSG: {
+    bidding: [
+      "Lucknow Super Giants targets the overlooked. This is that.",
+      "Goenka said go. KL Rahul agrees. Good enough for us.",
+      "LSG doesn't build on ego. We build on impact.",
+      "Super Giants identifies value before the room wakes up.",
+      "Lucknow is young, hungry, ambitious — like him.",
+      "The data team pinged this one months ago. Time to act.",
+      "We want consistency and he's delivered it every season.",
+      "KL Rahul knows quality. He knows this is quality.",
+      "Lucknow has the purse and the hunger. Let's go.",
+      "LSG process identified him. The process doesn't lie.",
+      "Super Giants build without ego and with absolute clarity.",
+      "He's the player who makes everyone around him better.",
+    ],
+    aggressive: [
+      "Super Giants don't back down when they've found their man.",
+      "Lucknow is ALL-IN. Right now. No hesitation.",
+      "LSG found its player — we're not leaving without him.",
+      "The Super Giants have spoken. Keep raising it.",
+      "KL Rahul wants him that badly. That's all we need to know.",
+      "Goenka's committed. That means WE'RE committed.",
+    ],
+    thinking: [
+      "KL Rahul is very quiet right now. That's interesting.",
+      "LSG monitors everything before moving. Still monitoring.",
+      "Super Giants weighs every single rupee. Almost done.",
+      "Lucknow is deliberate. Not hesitant — deliberate.",
+      "We enter when the moment is precisely right. Almost there.",
+    ],
+    passing: [
+      "Not the LSG profile this time. We move on.",
+      "Lucknow Super Giants passes — strategically.",
+      "Our squad gap is in a different position.",
+      "Super Giants has other plans for this money.",
+      "Eyes forward. LSG always looks forward.",
+    ],
+    not_my_type: [
+      "Doesn't match the Lucknow system at all.",
+      "KL Rahul wouldn't build around this profile.",
+      "Not what the Super Giants are constructing.",
+      "Too inconsistent for what LSG demands.",
+      "Goenka's already moved his attention elsewhere.",
+    ],
+    outbid: [
+      "Too expensive. But the discipline was the right call.",
+      "LSG keeps its cool. Always. That's the Super Giants way.",
+      "We adapt and find the answer elsewhere. We always do.",
+      "Lucknow is patient. The auction still has chapters left.",
+      "Our process survives. The process always survives.",
+    ],
+    won: [
+      "LUCKNOW ROARS! Super Giants add the missing piece!",
+      "KL Rahul's got a new teammate and he is DELIGHTED!",
+      "LSG just made a statement! Super Giants are HERE!",
+      "Goenka wanted this. The fans wanted this. DONE.",
+      "The Super Giants rise HIGHER! What a signing!",
+    ],
+  },
 }
 
-const OWNER_BID_LINES: Record<string, string[]> = {
-  CSK:  ['We know what we need from this player.', 'He fits the CSK system — calm heads win.', 'Experience you can count on. Worth every rupee.'],
-  MI:   ['This is exactly the profile we targeted.', 'Impact player — the Paltan needs him.', 'MI goes big when it matters. This is that moment.'],
-  RCB:  ['RCB needs a batter of this calibre. We\'re going for it.', 'Ee sala cup namde — he\'s part of the plan.', 'Virat would love playing alongside him.'],
-  KKR:  ['That\'s the all-round profile Kolkata wins with.', 'KKR has found their guy. The data said so.', 'Mystery and power — KKR\'s identity right there.'],
-  DC:   ['Consistent, reliable — exactly what Delhi needs.', 'He fills our gap perfectly. Calculated bid.', 'Delhi\'s building for the future. He fits.'],
-  RR:   ['Exceptional value at this price — RR\'s kind of buy.', 'The numbers said bid. We bid.', 'Undervalued by the market. Not by us.'],
-  SRH:  ['He attacks from ball one — that\'s SRH cricket.', 'Sunrisers need that aggression at the top.', 'Kavya wants this player. So do we.'],
-  PBKS: ['Punjab NEEDS this match-winner!', 'Go on — don\'t let them take him!', 'This is the player that changes everything for us.'],
-  GT:   ['Does he make us better as a unit? Yes. We bid.', 'Squad balance, not star power. He fits GT.', 'Methodical choice — Nehra\'s already mapped the role.'],
-  LSG:  ['Proven performer — LSG doesn\'t gamble.', 'We\'ve tracked him all season. This is our bid.', 'Goenka wants consistency. This player delivers it.'],
+function pick(arr: string[]): string {
+  return arr[Math.floor(Math.random() * arr.length)]
 }
 
-function getOwnerThought(teamId: string, _bid: number, _state: GameState): string | null {
-  const lines = OWNER_BID_LINES[teamId]
-  if (!lines) return null
-  return lines[Math.floor(Math.random() * lines.length)]
+function getOwnerThought(
+  teamId: string,
+  bid: number,
+  _state: GameState,
+  situation: OwnerSituation = 'bidding',
+): string | null {
+  const bank = OWNER_LINES[teamId]
+  if (!bank) return null
+  const pool = bank[situation]
+  if (!pool?.length) return null
+  // Suppress very cheap bids for thinking/passing — too noisy
+  if (bid < 3 && (situation === 'thinking' || situation === 'bidding')) return null
+  return pick(pool)
 }
 
 
-function MobileReactionsFeed({ log }: { log: string[] }) {
-  const [open, setOpen] = useState(true)
-
-  const entries = log
-    .filter(e => /^\[[A-Z]+\]/.test(e) && !e.includes('SOLD:') && !e.includes('UNSOLD:') && !e.includes('---'))
-    .slice(-5)
-    .reverse()
-
-  if (entries.length === 0) return null
-
-  return (
-    <div className="rounded-2xl overflow-hidden border border-white/8 bg-black/30">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-gray-400 text-xs font-semibold uppercase tracking-widest">Owner Reactions</span>
-        </div>
-        <span className="text-gray-600 text-xs">{open ? '▲' : '▼'} {entries.length} recent</span>
-      </button>
-      {open && (
-        <div className="divide-y divide-white/5">
-          {entries.map((entry, i) => {
-            const m = entry.match(/^\[([A-Z]+)\]\s*(.+)$/)
-            if (!m) return null
-            const [, teamId, comment] = m
-            const chip = TEAM_CHIP_COLORS[teamId] ?? 'text-gray-300 bg-gray-500/10 border-gray-500/30'
-            return (
-              <div key={i} className={`flex items-start gap-3 px-4 py-3 ${i === 0 ? 'bg-white/4' : ''}`}>
-                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border shrink-0 mt-0.5 ${chip}`}>
-                  {teamId}
-                </span>
-                <p className={`text-sm leading-snug flex-1 ${i === 0 ? 'text-gray-200' : 'text-gray-500'}`}>
-                  {comment}
-                </p>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
+// Dugout feed is now managed via state in AuctionRoomScreen — no standalone component needed
 
 export function AuctionRoomScreen() {
   const navigate = useNavigate()
@@ -144,8 +714,7 @@ export function AuctionRoomScreen() {
   const [paused, setPaused] = useState(false)
   const [simulating, setSimulating] = useState(false)
   const [simProgress, setSimProgress] = useState(0)
-  const [ownerThought, setOwnerThought] = useState<{ teamId: TeamId; comment: string; ts: number } | null>(null)
-  const ownerThoughtTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [dugoutFeed, setDugoutFeed] = useState<{ teamId: TeamId; comment: string; ts: number }[]>([])
 
   const aiLoopRef = useRef(false)
   const simStopRef = useRef(false)
@@ -225,6 +794,7 @@ export function AuctionRoomScreen() {
     if (!player || player.playerId === lastPlayerIdRef.current) return
     if (gameState.phase !== 'bidding') return
     lastPlayerIdRef.current = player.playerId
+    setDugoutFeed([])  // reset dugout for each new player
     void fetchAuctioneerComment('intro', player).then(c => { if (c) showComment(c) })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.phase, gameState?.currentPlayerIndex, gameState?.isReauction, gameState?.reauctionIndex])
@@ -241,27 +811,50 @@ export function AuctionRoomScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.phase])
 
-  // ── Owner thought bubble — fires on notable AI bids ──────────────────────
-  const lastBidLeaderRef = useRef<string | null>(null)
+  // ── Owner thought bubble — fires on notable AI bids with situation awareness ──
+  const lastBidKeyRef = useRef<string | null>(null)
+  const lastLeaderRef  = useRef<string | null>(null)
   useEffect(() => {
     if (!gameState || gameState.phase !== 'bidding') return
     const bs = gameState.currentBidState
     if (!bs || !bs.currentLeader) return
     const leader = bs.currentLeader as TeamId
-    const bid = bs.currentBid
-    // Only trigger for AI teams (not the user) on meaningful bids
-    if (leader === gameState.userFranchise) { lastBidLeaderRef.current = leader; return }
-    // Avoid re-triggering for the same leader at the same price
-    const key = `${leader}-${bid}`
-    if (lastBidLeaderRef.current === key) return
-    lastBidLeaderRef.current = key
-    // Only show for bids ≥ ₹5 Cr — otherwise too noisy
-    if (bid < 5) return
-    const thought = getOwnerThought(leader, bid, gameState)
-    if (!thought) return
-    if (ownerThoughtTimerRef.current) clearTimeout(ownerThoughtTimerRef.current)
-    setOwnerThought({ teamId: leader, comment: thought, ts: Date.now() })
-    ownerThoughtTimerRef.current = setTimeout(() => setOwnerThought(null), 5000)
+    const bid    = bs.currentBid
+    const key    = `${leader}-${bid}`
+    if (lastBidKeyRef.current === key) return
+    const prevLeader = lastLeaderRef.current
+    lastBidKeyRef.current = key
+    lastLeaderRef.current = leader
+
+    // Pick situation: outbid team reacts, leader comments
+    const showForTeam = (teamId: TeamId, situation: OwnerSituation) => {
+      if (teamId === gameState.userFranchise) return  // never show for user
+      const thought = getOwnerThought(teamId, bid, gameState, situation)
+      if (!thought) return
+      const entry = { teamId, comment: thought, ts: Date.now() }
+      setDugoutFeed(prev => [entry, ...prev].slice(0, 4))  // keep last 4, newest on top
+    }
+
+    if (bid < 1.5) return  // below ₹1.5 Cr — too noisy
+
+    // Outbid reaction: previous leader just lost the lead
+    if (prevLeader && prevLeader !== leader && prevLeader !== gameState.userFranchise) {
+      if (Math.random() < 0.55) {  // 55% chance — not every overtake needs a comment
+        showForTeam(prevLeader as TeamId, 'outbid')
+        return
+      }
+    }
+
+    // New leader comment — pick situation based on bid size vs base price
+    if (leader === gameState.userFranchise) return
+    const cp = gameState.currentBidState
+    const bidsCount = cp?.bids?.length ?? 0
+    const situation: OwnerSituation =
+      bid >= 15                ? 'aggressive'
+      : bid >= 8 && bidsCount <= 2 ? 'thinking'
+      : bid >= 5               ? 'bidding'
+      :                          'thinking'
+    showForTeam(leader, situation)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.currentBidState?.currentLeader, gameState?.currentBidState?.currentBid])
 
@@ -720,16 +1313,25 @@ export function AuctionRoomScreen() {
              style={{ background: 'rgba(0,0,0,0.88)' }}>
           {/* Gavel animation area */}
           <div className="mb-8 text-center">
-            <div className={`text-7xl mb-4 transition-all duration-500 ${callingStage === 3 ? 'scale-125' : 'scale-100'}`}>
+            <div className={`text-7xl mb-4 transition-all duration-500 ${callingStage === 3 ? 'animate-hammer scale-125' : 'scale-100'}`}>
               🔨
             </div>
-            <p className={`font-black tracking-widest transition-all duration-300 ${
-              callingStage === 3 ? 'text-5xl text-ipl-gold' :
-              callingStage === 2 ? 'text-4xl text-yellow-300' :
-              'text-3xl text-white'
+            <div className={`px-6 py-2 rounded-xl mb-2 transition-all duration-300 ${
+              callingStage === 3
+                ? 'bg-ipl-gold/20 border border-ipl-gold/50'
+                : 'bg-white/5 border border-white/10'
             }`}>
-              {STAGE_TEXT[callingStage]}
-            </p>
+              <p
+                key={callingStage}
+                className={`font-black tracking-widest text-center transition-all duration-300 ${
+                  callingStage === 3 ? 'text-5xl text-ipl-gold animate-bid-pop' :
+                  callingStage === 2 ? 'text-4xl text-yellow-300' :
+                  'text-3xl text-white'
+                }`}
+              >
+                {STAGE_TEXT[callingStage]}
+              </p>
+            </div>
             {STAGE_SUB[callingStage] && (
               <p className="text-gray-400 text-lg mt-2">{STAGE_SUB[callingStage]}</p>
             )}
@@ -749,9 +1351,16 @@ export function AuctionRoomScreen() {
           {/* Stage dots */}
           <div className="flex gap-3 mb-8">
             {[1, 2, 3].map(s => (
-              <div key={s} className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                callingStage >= s ? 'bg-ipl-gold scale-125' : 'bg-gray-700'
-              }`} />
+              <div key={s} className={`flex items-center gap-3 transition-all duration-500 ${callingStage >= s ? '' : 'opacity-30'}`}>
+                <div className={`rounded-full transition-all duration-300 ${
+                  callingStage >= s
+                    ? `w-4 h-4 bg-ipl-gold ${callingStage === s ? 'animate-pulse-glow' : ''}`
+                    : 'w-3 h-3 bg-gray-700'
+                }`} />
+                {s < 3 && (
+                  <div className={`h-px w-8 transition-colors duration-700 ${callingStage > s ? 'bg-ipl-gold' : 'bg-gray-700'}`} />
+                )}
+              </div>
             ))}
           </div>
 
@@ -875,13 +1484,18 @@ export function AuctionRoomScreen() {
         <div className="flex items-center gap-2 min-w-0">
           <TeamBadge teamId={userTeam} size="sm" />
           <div className="min-w-0">
-            <p className="text-white font-bold text-xs leading-tight truncate">
-              {gameState.isReauction ? '🔄 Re-auction' : setName}
-            </p>
-            <p className="text-gray-400 text-[10px] leading-tight">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-ipl-accent/80 px-1.5 py-0.5 bg-ipl-accent/10 rounded">
+                {gameState.isReauction ? 'RE-AUCTION' : 'SET'}
+              </span>
+              <p className="text-white font-black text-xs leading-tight truncate">
+                {gameState.isReauction ? 'Unsold Pool' : setName}
+              </p>
+            </div>
+            <p className="text-gray-500 text-[10px] leading-tight font-mono">
               {gameState.isReauction
-                ? `${gameState.reauctionIndex + 1}/${gameState.reauctionPool.length} · 50% base`
-                : `Set ${gameState.currentSetIndex + 1}/${dataset.auctionSets.length} · Player ${gameState.currentPlayerIndex + 1}/${playersInSet.length}`
+                ? `LOT ${gameState.reauctionIndex + 1} of ${gameState.reauctionPool.length} · 50% base`
+                : `LOT ${gameState.currentPlayerIndex + 1}/${playersInSet.length} · ${dataset.auctionSets.length - gameState.currentSetIndex - 1} sets left`
               }
             </p>
           </div>
@@ -920,8 +1534,11 @@ export function AuctionRoomScreen() {
               >{s}×</button>
             ))}
           </div>
-          <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1.5">
-            <span className="text-ipl-gold text-xs font-bold">₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr</span>
+          <div className="flex flex-col items-center bg-white/5 rounded-lg px-2.5 py-1">
+            <span className="text-[8px] text-gray-600 font-black uppercase tracking-wider leading-none">PURSE</span>
+            <span className="text-ipl-gold text-xs font-black font-mono leading-none mt-0.5">
+              ₹{gameState.teamStates[userTeam]?.currentPurse.toFixed(1)}Cr
+            </span>
           </div>
           {/* Skip Rest of Set */}
           {gameState.phase === 'bidding' && dataset && (
@@ -953,9 +1570,16 @@ export function AuctionRoomScreen() {
         </div>
       </header>
 
-      {/* Progress bar */}
-      <div className="h-0.5 bg-white/5 flex-shrink-0">
-        <div className="h-full bg-ipl-accent/70 transition-all duration-700" style={{ width: `${progressPct}%` }} />
+      {/* Dual-layer progress: gold = set-level, accent = player within auction */}
+      <div className="relative h-[3px] bg-white/5 flex-shrink-0 overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 bg-ipl-gold/35 transition-all duration-1000"
+          style={{ width: `${(gameState.currentSetIndex / dataset.auctionSets.length) * 100}%` }}
+        />
+        <div
+          className="absolute inset-y-0 left-0 bg-ipl-accent/80 transition-all duration-700"
+          style={{ width: `${(gameState.currentSetIndex / dataset.auctionSets.length) * 100 + progressPct / dataset.auctionSets.length}%` }}
+        />
       </div>
 
       {/* ── Main grid ────────────────────────────────────────────────────────── */}
@@ -976,27 +1600,100 @@ export function AuctionRoomScreen() {
               />
             </div>
 
-            {/* ── Auction Dynamics Panel — commentary + owner thoughts + room feed ── */}
-            <div className="bg-black/50 border border-white/12 rounded-2xl overflow-hidden">
+            {/* ── Auction Dynamics Panel — two-zone commentary ── */}
+            <div className="flex flex-col gap-2">
+              {/* Auctioneer zone — broadcast lower-third */}
               {auctioneeerLine && (
-                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8 bg-ipl-gold/8">
-                  <span className="text-base shrink-0">🎙️</span>
-                  <p className="text-ipl-gold text-sm font-semibold italic leading-snug">{auctioneeerLine}</p>
+                <div className="relative overflow-hidden rounded-xl border border-ipl-gold/25 bg-ipl-gold/6 border-l-4 border-l-ipl-gold px-4 py-3 animate-fade-in">
+                  <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-ipl-gold/60 via-ipl-gold/20 to-transparent" />
+                  <div className="flex items-start gap-2.5">
+                    <span className="text-sm shrink-0 mt-0.5">🎙️</span>
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-ipl-gold/50 mb-0.5">AUCTIONEER</p>
+                      <p className="text-ipl-gold text-sm font-semibold italic leading-snug">{auctioneeerLine}</p>
+                    </div>
+                  </div>
                 </div>
               )}
-              {ownerThought && (
-                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8">
-                  <TeamBadge teamId={ownerThought.teamId} size="sm" />
-                  <p className="text-gray-200 text-sm leading-snug">
-                    <span className="font-semibold mr-1">{OWNER_NAMES[ownerThought.teamId] ?? ownerThought.teamId}:</span>
-                    <span className="italic opacity-90">"{ownerThought.comment}"</span>
-                  </p>
+              {/* Franchise dugout — rolling feed of banter from the auction room */}
+              {dugoutFeed.length > 0 && (
+                <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-black/50">
+                  {/* Header bar */}
+                  <div className="flex items-center gap-2 px-4 py-2 border-b border-white/8 bg-white/3">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-400">Franchise Dugout</span>
+                    <span className="ml-auto text-[9px] text-gray-600 font-bold">{dugoutFeed.length} live</span>
+                  </div>
+                  {/* Feed entries */}
+                  <div className="divide-y divide-white/5">
+                    {dugoutFeed.map((entry, i) => {
+                      const chip = TEAM_CHIP_COLORS[entry.teamId] ?? 'text-gray-300 bg-gray-500/10 border-gray-500/30'
+                      return (
+                        <div
+                          key={entry.ts}
+                          className={`flex items-start gap-3 px-4 py-3 transition-all animate-fade-in ${i === 0 ? 'bg-white/5' : ''}`}
+                        >
+                          <span className={`text-[11px] font-black px-2 py-0.5 rounded-lg border shrink-0 mt-0.5 ${chip}`}>
+                            {entry.teamId}
+                          </span>
+                          <p className={`text-sm leading-snug flex-1 ${i === 0 ? 'text-gray-100 font-medium' : 'text-gray-500'}`}>
+                            <span className="not-italic">"</span>
+                            <span className="italic">{entry.comment}</span>
+                            <span className="not-italic">"</span>
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
-              <div className="px-1 py-1">
-                <MobileReactionsFeed log={gameState.auctionLog ?? []} />
-              </div>
             </div>
+
+            {/* ── Live Bid Board ── */}
+            {bidState && (bidState.currentBid ?? 0) > 0 && currentPlayer && (
+              <div className="relative overflow-hidden rounded-2xl border border-ipl-accent/40 bg-ipl-card animate-fade-in">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-ipl-accent rounded-l-2xl" />
+                {bidState.currentLeader && (
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: `linear-gradient(90deg, ${TEAM_HEX[bidState.currentLeader] ?? '#e94560'}22 0%, transparent 55%)` }}
+                  />
+                )}
+                <div className="pl-4 pr-5 py-3.5 flex items-center justify-between gap-4">
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                    {bidState.currentLeader
+                      ? <TeamBadge teamId={bidState.currentLeader as TeamId} size="md" />
+                      : <div className="w-10 h-10 rounded-full bg-ipl-border animate-pulse" />
+                    }
+                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">LEADING</span>
+                  </div>
+                  <div className="flex-1 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-ipl-accent mb-0.5">CURRENT BID</p>
+                    <p
+                      key={bidState.currentBid}
+                      className="font-black font-mono leading-none text-white animate-bid-pop"
+                      style={{ fontSize: '2.25rem' }}
+                    >
+                      ₹{bidState.currentBid.toFixed(2)}<span className="text-lg text-gray-400 font-semibold ml-1">Cr</span>
+                    </p>
+                    {currentPlayer.basePrice > 0 && (bidState.currentBid ?? 0) > 0 && (
+                      <p className="text-ipl-accent/60 text-[10px] font-semibold mt-0.5">
+                        {Math.round(bidState.currentBid / currentPlayer.basePrice)}× base price
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-0.5 items-end flex-shrink-0 min-w-[72px]">
+                    {[...bidState.bids].reverse().slice(1, 4).map((b, idx) => (
+                      <div key={`${b.teamId}-${b.timestamp}`} className="flex items-center gap-1.5"
+                           style={{ opacity: 1 - (idx + 1) * 0.28 }}>
+                        <span className="text-[9px] font-black text-gray-400">{b.teamId}</span>
+                        <span className="text-[10px] font-mono text-gray-600">₹{b.amount.toFixed(1)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Player spotlight */}
             {currentPlayer ? (
@@ -1005,6 +1702,8 @@ export function AuctionRoomScreen() {
                 currentBid={bidState?.currentBid}
                 currentLeader={bidState?.currentLeader}
                 formContext={getFormContext(currentPlayer.playerId)}
+                lotNumber={gameState.isReauction ? gameState.reauctionIndex + 1 : gameState.currentPlayerIndex + 1}
+                isActive={gameState.phase === 'bidding'}
               />
             ) : (
               <div className="bg-white/5 rounded-2xl flex items-center justify-center py-16">
@@ -1198,7 +1897,16 @@ function AcceleratedSelectionScreen({
   const roundsDone = gameState.acceleratedRoundsCompleted ?? 0
   const maxUserPicks = roundsDone === 0 ? USER_MAX_PICKS_R1 : USER_MAX_PICKS_R2
 
-  const unsold = gameState.unsoldPlayers
+  // Round 2+: show the full original unsold pool minus already-sold players,
+  // so users can pick from everyone who went unsold in the main auction — not just
+  // the small subset that survived round 1's re-auction.
+  const soldIds = new Set(
+    Object.values(gameState.teamStates).flatMap(ts => ts.squad.map(p => p.playerId))
+  )
+  const unsold = roundsDone >= 1
+    ? (gameState.originalUnsoldPool ?? gameState.unsoldPlayers).filter(p => !soldIds.has(p.playerId))
+    : gameState.unsoldPlayers
+
   const filtered = unsold
     .filter(p => filter === 'ALL' || p.role === filter)
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))

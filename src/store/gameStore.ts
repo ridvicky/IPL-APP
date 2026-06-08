@@ -82,6 +82,12 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     if (!state.acceleratedPicks) state.acceleratedPicks = []
     if (state.acceleratedRoundsCompleted === undefined) state.acceleratedRoundsCompleted = 0
     if (!state.originalUnsoldPool) state.originalUnsoldPool = []
+    // Back-fill new TeamState fields (Change 10) for old saves
+    for (const ts of Object.values(state.teamStates ?? {})) {
+      const t = ts as unknown as Record<string, unknown>
+      if (t.reservationBalance === undefined) t.reservationBalance = 0
+      if (t.planDisruptedCountdown === undefined) t.planDisruptedCountdown = 0
+    }
     // If killed mid-bid, reset to set-preview so the player gets a clean restart
     // rather than resuming a half-finished bid round with no running timers
     if (state.phase === 'bidding') {
@@ -249,13 +255,24 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
     set(s => {
       if (!s.gameState) return {}
 
+      // Decrement planDisruptedCountdown for all teams on every player advance
+      const updatedTeamStates = Object.fromEntries(
+        Object.entries(s.gameState.teamStates).map(([tid, ts]) => [
+          tid,
+          {
+            ...ts,
+            planDisruptedCountdown: Math.max(0, (ts.planDisruptedCountdown ?? 0) - 1),
+          },
+        ])
+      ) as typeof s.gameState.teamStates
+
       // Re-auction path
       if (s.gameState.isReauction) {
         const nextIdx = s.gameState.reauctionIndex + 1
         if (nextIdx >= (s.gameState.reauctionPool?.length ?? 0)) {
-          return { gameState: { ...s.gameState, phase: 'auction-complete', currentBidState: null, isReauction: false } }
+          return { gameState: { ...s.gameState, teamStates: updatedTeamStates, phase: 'auction-complete', currentBidState: null, isReauction: false } }
         }
-        return { gameState: { ...s.gameState, reauctionIndex: nextIdx, phase: 'set-preview', currentBidState: null } }
+        return { gameState: { ...s.gameState, teamStates: updatedTeamStates, reauctionIndex: nextIdx, phase: 'set-preview', currentBidState: null } }
       }
 
       const { currentSetIndex, currentPlayerIndex } = s.gameState
@@ -274,13 +291,14 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
       const isLastSet   = currentSetIndex >= dataset.auctionSets.length - 1
 
       if (isLastInSet && isLastSet) {
-        return { gameState: { ...s.gameState, phase: 'auction-complete', currentBidState: null } }
+        return { gameState: { ...s.gameState, teamStates: updatedTeamStates, phase: 'auction-complete', currentBidState: null } }
       }
 
       if (isLastInSet) {
         return {
           gameState: {
             ...s.gameState,
+            teamStates: updatedTeamStates,
             currentSetIndex: currentSetIndex + 1,
             currentPlayerIndex: 0,
             phase: 'set-complete',
@@ -292,6 +310,7 @@ export const useGameStore = create<GameStoreState>()(persist((set, get) => ({
       return {
         gameState: {
           ...s.gameState,
+          teamStates: updatedTeamStates,
           currentPlayerIndex: currentPlayerIndex + 1,
           phase: 'set-preview',
           currentBidState: null,

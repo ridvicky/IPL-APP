@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
+import gplLogo from '@/assets/gpl_logo.svg'
 
 export function LoginScreen() {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -20,7 +21,7 @@ export function LoginScreen() {
       ? await signIn(email, password)
       : await signUp(email, password)
     setLoading(false)
-    if (err) setError(err)
+    if (err) setError(typeof err === 'string' && err.length > 0 ? err : 'Something went wrong. Please try again.')
     else navigate('/')
   }
 
@@ -35,35 +36,24 @@ export function LoginScreen() {
 
         {/* Logo */}
         <div className="relative z-10 text-center mb-10 animate-fade-in">
-          {/* Cricket ball SVG */}
-          <div className="w-20 h-20 mx-auto mb-5 relative">
-            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="40" r="38" fill="url(#ballGrad)" />
-              <path d="M40 4 C40 4 18 20 18 40 C18 60 40 76 40 76" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none"/>
-              <path d="M40 4 C40 4 62 20 62 40 C62 60 40 76 40 76" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none"/>
-              <path d="M4 40 L76 40" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-              {/* Seam lines */}
-              <path d="M24 16 Q30 28 26 40 Q22 52 28 64" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-              <path d="M56 16 Q50 28 54 40 Q58 52 52 64" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-              <defs>
-                <linearGradient id="ballGrad" x1="0" y1="0" x2="80" y2="80">
-                  <stop offset="0%" stopColor="#e94560"/>
-                  <stop offset="100%" stopColor="#8b1a2e"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          {/* GPL Logo */}
+          <div className="relative mx-auto mb-4 w-fit">
+            <div className="absolute inset-0 rounded-full bg-ipl-gold/20 blur-2xl scale-150 pointer-events-none" />
+            <img
+              src={gplLogo}
+              alt="GPL Auction"
+              className="relative w-44 h-auto drop-shadow-[0_0_32px_rgba(201,162,39,0.5)]"
+            />
           </div>
 
-          <h1 className="text-5xl font-black text-white tracking-tight leading-none">
-            IPL
-          </h1>
-          <p className="text-ipl-gold font-bold text-xl tracking-widest mt-1">AUCTION</p>
-          <p className="text-gray-500 text-sm mt-1 tracking-wider">SIMULATOR</p>
+          <p className="text-gray-400 text-sm font-semibold tracking-[0.3em] uppercase mt-2">
+            Auction Simulator
+          </p>
 
-          {/* Team dots decoration */}
-          <div className="flex justify-center gap-1.5 mt-4">
+          {/* Franchise color strip */}
+          <div className="flex justify-center gap-1 mt-4">
             {['bg-yellow-400','bg-blue-500','bg-red-500','bg-purple-500','bg-sky-400','bg-pink-400','bg-orange-400','bg-rose-500','bg-cyan-500','bg-teal-400'].map((c, i) => (
-              <span key={i} className={`w-2 h-2 rounded-full ${c} opacity-70`} />
+              <span key={i} className={`w-5 h-[3px] rounded-full ${c} opacity-60`} />
             ))}
           </div>
         </div>

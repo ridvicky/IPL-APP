@@ -430,7 +430,138 @@ React as the real owner. ownerComment: 1–2 vivid in-character sentences. count
   ]
 }
 
-// ─── Squad Analysis prompt ────────────────────────────────────────────────────
+// ─── Deep Squad Analysis types & prompt ──────────────────────────────────────
+
+export interface AIDeepSquadReport {
+  squadOverallScore: number
+  leadershipScore: number
+  experienceScore: number
+  youthPotentialScore: number
+  bestXI: {
+    name: string
+    role: string
+    battingOrder: number
+    reason: string
+    backup: string | null
+    backupReason: string | null
+  }[]
+  squadCompleteness: string
+  squadHoles: {
+    role: string
+    severity: 'critical' | 'moderate' | 'minor'
+    comment: string
+  }[]
+  breakoutStars: { name: string; reason: string }[]
+  xFactors: { name: string; reason: string }[]
+  starPlayersToBuildAround: { name: string; reason: string }[]
+  top4Chances: {
+    teamId: string
+    chance: 'Very High' | 'High' | 'Medium' | 'Low' | 'Very Low'
+    reasoning: string
+  }[]
+  verdictTitle: string
+  verdictComments: string
+}
+
+export interface DeepSquadAnalysisContext {
+  teamId: string
+  auctionYear: number
+  squad: {
+    name: string
+    role: string
+    country: string
+    soldPrice: number
+    isOverseas: boolean
+    cappedStatus: string
+    isRetained: boolean
+    boughtPrice?: number | null
+    potential?: number
+    prospectTier?: string
+    previousTeam?: string | null
+    interestedTeams?: string[]
+    age?: number
+  }[]
+  allTeams: {
+    teamId: string
+    playerCount: number
+    spent: number
+    purseLeft: number
+  }[]
+}
+
+export function buildDeepSquadAnalysisMessages(ctx: DeepSquadAnalysisContext): ChatMessage[] {
+  const squadText = ctx.squad
+    .map((p, i) => {
+      const parts = [
+        `${i + 1}. ${p.name} [${p.role}]`,
+        p.isOverseas ? `(Overseas/${p.country})` : '(Indian)',
+        p.cappedStatus === 'capped' ? 'Capped' : 'Uncapped',
+        `Paid:₹${p.soldPrice.toFixed(1)}Cr`,
+        p.boughtPrice != null ? `RealIPL:₹${p.boughtPrice.toFixed(1)}Cr` : null,
+        p.isRetained ? '[Retained]' : null,
+        p.previousTeam ? `[Ex-${p.previousTeam}]` : null,
+        p.potential != null ? `Potential:${p.potential}/10` : null,
+        p.prospectTier ? `[${p.prospectTier}]` : null,
+        p.age != null ? `Age:${p.age}` : null,
+        p.interestedTeams && p.interestedTeams.length > 0
+          ? `InterestedBy:${p.interestedTeams.join(',')}` : null,
+      ].filter(Boolean)
+      return parts.join(' ')
+    })
+    .join('\n')
+
+  const allTeamsText = ctx.allTeams
+    .map(t => `${t.teamId}: ${t.playerCount} players, spent ₹${t.spent.toFixed(0)}Cr, purse left ₹${t.purseLeft.toFixed(0)}Cr`)
+    .join('\n')
+
+  const schema = `{
+  "squadOverallScore": number,
+  "leadershipScore": number,
+  "experienceScore": number,
+  "youthPotentialScore": number,
+  "bestXI": [{"name":string,"role":string,"battingOrder":number,"reason":string,"backup":string|null,"backupReason":string|null}],
+  "squadCompleteness": string,
+  "squadHoles": [{"role":string,"severity":"critical"|"moderate"|"minor","comment":string}],
+  "breakoutStars": [{"name":string,"reason":string}],
+  "xFactors": [{"name":string,"reason":string}],
+  "starPlayersToBuildAround": [{"name":string,"reason":string}],
+  "top4Chances": [{"teamId":string,"chance":"Very High"|"High"|"Medium"|"Low"|"Very Low","reasoning":string}],
+  "verdictTitle": string,
+  "verdictComments": string
+}`
+
+  return [
+    {
+      role: 'system',
+      content: `You are a bold, opinionated IPL cricket analyst with deep knowledge of T20 cricket, player roles, and franchise strategy. Given a team's squad built at the GPL ${ctx.auctionYear} auction, produce a detailed, specific report card. Be direct and personal — reference actual player names, prices paid, and auction decisions. Never be generic. Scores (0–100): 60=average IPL squad, 80+=championship contender, 40-=weak. Respond ONLY with valid JSON matching this exact schema:\n${schema}\nNo markdown, no explanation outside the JSON.`,
+    },
+    {
+      role: 'user',
+      content: `Analyze the ${ctx.teamId} squad from GPL ${ctx.auctionYear}.
+
+SQUAD (${ctx.squad.length} players):
+${squadText}
+
+ALL FRANCHISES IN THIS AUCTION (for top4Chances):
+${allTeamsText}
+
+Rules:
+- bestXI: exactly 11 players, max 4 overseas in XI, battingOrder 1–11 (openers first, finishers last)
+- backup: name a real player from this squad NOT in bestXI who covers the same role, or null
+- squadHoles: only flag genuine gaps — don't flag roles that are well covered
+- breakoutStars: max 3, focus on uncapped/young players with realistic breakout potential this season
+- xFactors: max 2, players who can single-handedly change a match
+- starPlayersToBuildAround: max 3 franchise pillars the team is built around
+- top4Chances: include ALL franchises listed above including ${ctx.teamId} — rank realistically based on squad depth, spending, and player quality. Use the purse/spend data as signals of squad investment
+- verdictTitle: 2–4 bold words (e.g. "Dark Horse Alert", "Championship Blueprint", "Work In Progress")
+- verdictComments: 3–4 sentences — end with the single biggest risk OR opportunity for this squad
+
+Return JSON only.`,
+    },
+  ]
+}
+
+// ─── Squad Analysis prompt (Phase 1 — structural, all teams) ─────────────────
 
 export interface SquadAnalysisContext {
   teamId: string
@@ -443,15 +574,30 @@ export interface SquadAnalysisContext {
     isOverseas: boolean
     cappedStatus: string
     isRetained: boolean
+    boughtPrice?: number | null
+    potential?: number
+    prospectTier?: string
+    previousTeam?: string | null
   }[]
   allSquads: Record<string, { name: string; role: string; soldPrice: number }[]>
 }
 
 export function buildSquadAnalysisMessages(ctx: SquadAnalysisContext): ChatMessage[] {
   const squadText = ctx.squad
-    .map((p, i) =>
-      `${i + 1}. ${p.name} [${p.role}] ${p.isOverseas ? '(Overseas)' : '(Indian)'} ${p.cappedStatus === 'capped' ? 'Capped' : 'Uncapped'} ₹${p.soldPrice.toFixed(1)}Cr${p.isRetained ? ' [Retained]' : ''}`
-    )
+    .map((p, i) => {
+      const parts = [
+        `${i + 1}. ${p.name} [${p.role}]`,
+        p.isOverseas ? '(Overseas)' : '(Indian)',
+        p.cappedStatus === 'capped' ? 'Capped' : 'Uncapped',
+        `Paid:₹${p.soldPrice.toFixed(1)}Cr`,
+        p.boughtPrice != null ? `RealIPL:₹${p.boughtPrice.toFixed(1)}Cr` : null,
+        p.isRetained ? '[Retained]' : null,
+        p.previousTeam ? `[Ex-${p.previousTeam}]` : null,
+        p.potential != null ? `Potential:${p.potential}/10` : null,
+        p.prospectTier ? `[${p.prospectTier}]` : null,
+      ].filter(Boolean)
+      return parts.join(' ')
+    })
     .join('\n')
 
   const leagueText = Object.entries(ctx.allSquads)
@@ -462,11 +608,11 @@ export function buildSquadAnalysisMessages(ctx: SquadAnalysisContext): ChatMessa
   return [
     {
       role: 'system',
-      content: `You are a sharp IPL cricket analyst. Evaluate squads built in the GPL ${ctx.auctionYear} auction. Be direct and specific. Pick the best XI for T20 cricket. Respond ONLY with valid JSON matching this exact schema: { "bestXI": [{"name":string,"role":string,"reason":string}], "twelfthMan": {"name":string,"role":string,"reason":string}|null, "strengths": string[], "weaknesses": string[], "roleGaps": string[], "analystNote": string }. Exactly 11 players in bestXI. Max 4 items each in strengths/weaknesses. roleGaps contains role codes (BAT/BWL/AR/WK) that are thin or missing. Each reason is one short sentence. analystNote is 2–3 sentences.`,
+      content: `You are a sharp IPL cricket analyst. Evaluate squads built in the GPL ${ctx.auctionYear} auction. Be direct and specific. Pick the best XI for T20 cricket. Respond ONLY with valid JSON matching this exact schema: { "bestXI": [{"name":string,"role":string,"reason":string}], "bestXIBattingOrder": string[], "twelfthMan": {"name":string,"role":string,"reason":string}|null, "strengths": string[], "weaknesses": string[], "roleGaps": string[], "starPlayer": {"name":string,"reason":string,"tag":string}, "potentialStars": [{"name":string,"potential":number,"reason":string}], "squadScore": number, "squadScoreReason": string, "analystNote": string }. Rules: exactly 11 players in bestXI. bestXIBattingOrder contains the same 11 names reordered for a T20 batting lineup (openers first, finishers last) — must be the same names. Max 4 items each in strengths/weaknesses. roleGaps: role codes only (BAT/BWL/AR/WK). starPlayer: THE marquee signing of this auction (must be in squad); tag is a 1–2 word label e.g. "Match-Winner", "Death Bowler", "Spin Wizard". potentialStars: max 3, only players with a Potential: rating listed in the squad — if none exist return []. squadScore: 0–100 integer (60=average IPL squad, 80+=championship contender, 40-=thin squad). squadScoreReason: 1 sentence. Each reason field is one short sentence. analystNote is 2–3 sentences.`,
     },
     {
       role: 'user',
-      content: `Analyze the ${ctx.teamId} squad from GPL ${ctx.auctionYear}:\n\n${squadText}\n\nIPL rules: max 4 overseas players in the playing XI, 11 players total.\n\nLeague context (other teams for comparison):\n${leagueText}\n\nPick the best XI, name a 12th man, list strengths, weaknesses, any role gaps, and give an overall analyst verdict.`,
+      content: `Analyze the ${ctx.teamId} squad from GPL ${ctx.auctionYear}:\n\n${squadText}\n\nIPL rules: max 4 overseas players in the playing XI, 11 players total.\n\nLeague context (other teams for comparison):\n${leagueText}\n\nPick the best XI and reorder them in batting order for bestXIBattingOrder. Name a 12th man, list strengths, weaknesses, role gaps, pick the star player, flag potential stars (only players with a Potential: rating above), give a squad score, and an overall analyst verdict. potentialStars must only name players from the squad that have a Potential: rating listed above.`,
     },
   ]
 }

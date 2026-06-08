@@ -680,7 +680,11 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 15.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 15.75
     },
     {
       "playerId": "shreyas-iyer",
@@ -698,7 +702,12 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 26.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC",
+        "PBKS"
+      ],
+      "boughtPrice": 26.75
     },
     {
       "playerId": "rishabh-pant",
@@ -716,7 +725,13 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 27,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC",
+        "SRH",
+        "LSG"
+      ],
+      "boughtPrice": 27
     },
     {
       "playerId": "kagiso-rabada",
@@ -735,7 +750,11 @@
       "soldTo": "GT",
       "finalPrice": 10.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 10.75
     },
     {
       "playerId": "arshdeep-singh",
@@ -757,7 +776,8 @@
       "bowlingType": "pace",
       "interestedTeams": [
         "PBKS"
-      ]
+      ],
+      "boughtPrice": 18
     },
     {
       "playerId": "mitchell-starc",
@@ -776,7 +796,12 @@
       "soldTo": "DC",
       "finalPrice": 11.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK",
+        "DC"
+      ],
+      "boughtPrice": 11.75
     },
     {
       "playerId": "yuzvendra-chahal",
@@ -795,7 +820,11 @@
       "soldTo": "PBKS",
       "finalPrice": 18,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 18
     },
     {
       "playerId": "liam-livingstone",
@@ -813,7 +842,11 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 8.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 8.75
     },
     {
       "playerId": "david-miller",
@@ -831,7 +864,11 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 7.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 7.5
     },
     {
       "playerId": "kl-rahul",
@@ -849,7 +886,11 @@
       "auctionStatus": "sold",
       "soldTo": "DC",
       "finalPrice": 14,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 14
     },
     {
       "playerId": "mohammad-shami",
@@ -868,7 +909,11 @@
       "soldTo": "SRH",
       "finalPrice": 10,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 10
     },
     {
       "playerId": "mohammad-siraj",
@@ -887,7 +932,11 @@
       "soldTo": "GT",
       "finalPrice": 12.25,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 12.25
     },
     {
       "playerId": "devdutt-padikkal",
@@ -905,7 +954,11 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "rahul-tripathi",
@@ -923,7 +976,11 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 3.4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 3.4
     },
     {
       "playerId": "mayank-agarawal",
@@ -959,7 +1016,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 1.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "prithvi-shaw",
@@ -996,7 +1057,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "harry-brook",
@@ -1014,7 +1079,11 @@
       "auctionStatus": "sold",
       "soldTo": "DC",
       "finalPrice": 6.25,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 6.25
     },
     {
       "playerId": "devon-conway",
@@ -1032,7 +1101,11 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 6.25,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 6.25
     },
     {
       "playerId": "jake-fraser-mcgurk",
@@ -1050,7 +1123,11 @@
       "auctionStatus": "sold",
       "soldTo": "DC",
       "finalPrice": 9,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 9
     },
     {
       "playerId": "aiden-markram",
@@ -1068,7 +1145,11 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "david-warner",
@@ -1105,7 +1186,11 @@
       "auctionStatus": "sold",
       "soldTo": "DC",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "glenn-phillips",
@@ -1123,7 +1208,11 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "rovman-powell",
@@ -1141,7 +1230,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 1.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "kane-williamson",
@@ -1197,11 +1290,7 @@
       "auctionStatus": "unsold",
       "soldTo": null,
       "finalPrice": null,
-      "soldViaRTM": false,
-      "interestedTeams": [
-        "MI",
-        "CSK"
-      ]
+      "soldViaRTM": false
     },
     {
       "playerId": "ben-duckett",
@@ -1257,7 +1346,12 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 2.6,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "MI",
+        "GT"
+      ],
+      "boughtPrice": 2.6
     },
     {
       "playerId": "ashton-turner",
@@ -1329,7 +1423,11 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "mark-chapman",
@@ -1589,7 +1687,11 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 9.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 9.75
     },
     {
       "playerId": "venkatesh-iyer",
@@ -1607,7 +1709,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 23.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 23.75
     },
     {
       "playerId": "harshal-patel",
@@ -1625,7 +1731,11 @@
       "auctionStatus": "sold",
       "soldTo": "SRH",
       "finalPrice": 8,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 8
     },
     {
       "playerId": "krunal-pandya",
@@ -1643,7 +1753,12 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 5.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RR",
+        "RCB"
+      ],
+      "boughtPrice": 5.75
     },
     {
       "playerId": "nitish-rana",
@@ -1661,7 +1776,13 @@
       "auctionStatus": "sold",
       "soldTo": "RR",
       "finalPrice": 4.2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK",
+        "RCB",
+        "RR"
+      ],
+      "boughtPrice": 4.2
     },
     {
       "playerId": "washington-sundar",
@@ -1679,7 +1800,12 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 3.2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG",
+        "GT"
+      ],
+      "boughtPrice": 3.2
     },
     {
       "playerId": "shardul-thakur",
@@ -1716,7 +1842,12 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 2.4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "LSG"
+      ],
+      "boughtPrice": 2.4
     },
     {
       "playerId": "deepak-hooda",
@@ -1734,7 +1865,12 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 1.7,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "CSK"
+      ],
+      "boughtPrice": 1.7
     },
     {
       "playerId": "r-sai-kishore",
@@ -1752,7 +1888,13 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "PBKS",
+        "GT"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "krishnappa-gowtham",
@@ -1788,7 +1930,11 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "sarfaraz-khan",
@@ -1825,7 +1971,11 @@
       "auctionStatus": "sold",
       "soldTo": "LSG",
       "finalPrice": 3.4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 3.4
     },
     {
       "playerId": "glenn-maxwell",
@@ -1843,7 +1993,11 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 4.2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 4.2
     },
     {
       "playerId": "rachin-ravindra",
@@ -1861,7 +2015,11 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 4
     },
     {
       "playerId": "marcus-stoinis",
@@ -1879,7 +2037,11 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 11,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 11
     },
     {
       "playerId": "sam-curran",
@@ -1897,7 +2059,12 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 2.4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "LSG",
+        "CSK"
+      ],
+      "boughtPrice": 2.4
     },
     {
       "playerId": "marco-jansen",
@@ -1915,7 +2082,13 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 7,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "MI",
+        "GT",
+        "PBKS"
+      ],
+      "boughtPrice": 7
     },
     {
       "playerId": "daryl-mitchell",
@@ -1952,7 +2125,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "tim-david",
@@ -1970,7 +2147,12 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 3,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "RCB"
+      ],
+      "boughtPrice": 3
     },
     {
       "playerId": "will-jacks",
@@ -1988,7 +2170,12 @@
       "auctionStatus": "sold",
       "soldTo": "MI",
       "finalPrice": 5.25,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "PBKS",
+        "MI"
+      ],
+      "boughtPrice": 5.25
     },
     {
       "playerId": "azmatullah-omarzai",
@@ -2006,7 +2193,12 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 2.4,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK",
+        "PBKS"
+      ],
+      "boughtPrice": 2.4
     },
     {
       "playerId": "romario-shepherd",
@@ -2024,7 +2216,11 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 1.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "gus-atkinson",
@@ -2137,7 +2333,11 @@
       "auctionStatus": "sold",
       "soldTo": "MI",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "sean-abbott",
@@ -2173,7 +2373,13 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 2.6,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "PBKS",
+        "RCB"
+      ],
+      "boughtPrice": 2.6
     },
     {
       "playerId": "brydon-carse",
@@ -2191,7 +2397,11 @@
       "auctionStatus": "sold",
       "soldTo": "SRH",
       "finalPrice": 1,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 1
     },
     {
       "playerId": "aaron-hardie",
@@ -2209,7 +2419,11 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 1.25,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 1.25
     },
     {
       "playerId": "kyle-mayers",
@@ -2246,7 +2460,11 @@
       "auctionStatus": "sold",
       "soldTo": "SRH",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "matthew-short",
@@ -2374,7 +2592,11 @@
       "auctionStatus": "sold",
       "soldTo": "CSK",
       "finalPrice": 1.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "dunith-wellalage",
@@ -2465,7 +2687,11 @@
       "auctionStatus": "sold",
       "soldTo": "GT",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "jimmy-neesham",
@@ -2938,7 +3164,11 @@
       "auctionStatus": "sold",
       "soldTo": "SRH",
       "finalPrice": 11.25,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 11.25
     },
     {
       "playerId": "jitesh-sharma",
@@ -2956,7 +3186,11 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 11,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 11
     },
     {
       "playerId": "ks-bharat",
@@ -3012,7 +3246,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 3.6,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 3.6
     },
     {
       "playerId": "rahmanullah-gurbaz",
@@ -3030,7 +3268,11 @@
       "auctionStatus": "sold",
       "soldTo": "KKR",
       "finalPrice": 2,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "phil-salt",
@@ -3048,7 +3290,11 @@
       "auctionStatus": "sold",
       "soldTo": "RCB",
       "finalPrice": 11.5,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 11.5
     },
     {
       "playerId": "alex-carey",
@@ -3085,7 +3331,11 @@
       "auctionStatus": "sold",
       "soldTo": "DC",
       "finalPrice": 0.75,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "shai-hope",
@@ -3122,7 +3372,12 @@
       "auctionStatus": "sold",
       "soldTo": "PBKS",
       "finalPrice": 2.6,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "SRH",
+        "PBKS"
+      ],
+      "boughtPrice": 2.6
     },
     {
       "playerId": "ryan-rickelton",
@@ -3140,7 +3395,11 @@
       "auctionStatus": "sold",
       "soldTo": "MI",
       "finalPrice": 1,
-      "soldViaRTM": false
+      "soldViaRTM": false,
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 1
     },
     {
       "playerId": "tom-banton",
@@ -3416,7 +3675,11 @@
       "soldTo": "CSK",
       "finalPrice": 4.8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 4.8
     },
     {
       "playerId": "avesh-khan",
@@ -3435,7 +3698,11 @@
       "soldTo": "LSG",
       "finalPrice": 9.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 9.75
     },
     {
       "playerId": "prasidh-krishna",
@@ -3454,7 +3721,11 @@
       "soldTo": "GT",
       "finalPrice": 9.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 9.5
     },
     {
       "playerId": "t-natarajan",
@@ -3473,7 +3744,11 @@
       "soldTo": "DC",
       "finalPrice": 10.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 10.75
     },
     {
       "playerId": "deepak-chahar",
@@ -3492,7 +3767,13 @@
       "soldTo": "MI",
       "finalPrice": 9.25,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS",
+        "CSK",
+        "MI"
+      ],
+      "boughtPrice": 9.25
     },
     {
       "playerId": "akash-deep",
@@ -3511,7 +3792,13 @@
       "soldTo": "LSG",
       "finalPrice": 8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK",
+        "PBKS",
+        "LSG"
+      ],
+      "boughtPrice": 8
     },
     {
       "playerId": "tushar-deshpande",
@@ -3530,7 +3817,12 @@
       "soldTo": "RR",
       "finalPrice": 6.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK",
+        "RR"
+      ],
+      "boughtPrice": 6.5
     },
     {
       "playerId": "bhuvneshwar-kumar",
@@ -3549,7 +3841,13 @@
       "soldTo": "RCB",
       "finalPrice": 10.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "MI",
+        "LSG",
+        "RCB"
+      ],
+      "boughtPrice": 10.75
     },
     {
       "playerId": "mukesh-kumar",
@@ -3568,7 +3866,13 @@
       "soldTo": "DC",
       "finalPrice": 8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK",
+        "PBKS",
+        "DC"
+      ],
+      "boughtPrice": 8
     },
     {
       "playerId": "umran-malik",
@@ -3587,7 +3891,11 @@
       "soldTo": "KKR",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "ishant-sharma",
@@ -3606,7 +3914,11 @@
       "soldTo": "GT",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "jaydev-unadkat",
@@ -3625,7 +3937,11 @@
       "soldTo": "SRH",
       "finalPrice": 1,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 1
     },
     {
       "playerId": "umesh-yadav",
@@ -3664,7 +3980,12 @@
       "soldTo": "PBKS",
       "finalPrice": 0.8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "CSK",
+        "PBKS"
+      ],
+      "boughtPrice": 0.8
     },
     {
       "playerId": "shivam-mavi",
@@ -3761,7 +4082,11 @@
       "soldTo": "MI",
       "finalPrice": 12.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 12.5
     },
     {
       "playerId": "josh-hazlewood",
@@ -3780,7 +4105,11 @@
       "soldTo": "RCB",
       "finalPrice": 12.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 12.5
     },
     {
       "playerId": "anrich-nortje",
@@ -3799,7 +4128,11 @@
       "soldTo": "KKR",
       "finalPrice": 6.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 6.5
     },
     {
       "playerId": "gerald-coetzee",
@@ -3818,7 +4151,12 @@
       "soldTo": "GT",
       "finalPrice": 2.4,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS",
+        "GT"
+      ],
+      "boughtPrice": 2.4
     },
     {
       "playerId": "lockie-ferguson",
@@ -3837,7 +4175,11 @@
       "soldTo": "PBKS",
       "finalPrice": 2,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "nandre-burger",
@@ -3875,7 +4217,12 @@
       "soldTo": "KKR",
       "finalPrice": 2.8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS",
+        "KKR"
+      ],
+      "boughtPrice": 2.8
     },
     {
       "playerId": "mustafizur-rahman",
@@ -3914,7 +4261,13 @@
       "soldTo": "RCB",
       "finalPrice": 1.6,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "SRH",
+        "RR",
+        "RCB"
+      ],
+      "boughtPrice": 1.6
     },
     {
       "playerId": "naveen-ul-haq",
@@ -3953,7 +4306,11 @@
       "soldTo": "RR",
       "finalPrice": 2,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "richard-gleeson",
@@ -4030,7 +4387,12 @@
       "soldTo": "RR",
       "finalPrice": 1.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "RCB",
+        "RR"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "reece-topley",
@@ -4049,7 +4411,11 @@
       "soldTo": "MI",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "lizaad-williams",
@@ -4068,7 +4434,11 @@
       "soldTo": "MI",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "luke-wood",
@@ -4126,7 +4496,11 @@
       "soldTo": "DC",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "nathan-ellis",
@@ -4145,7 +4519,12 @@
       "soldTo": "CSK",
       "finalPrice": 2,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS",
+        "CSK"
+      ],
+      "boughtPrice": 2
     },
     {
       "playerId": "shamar-joseph",
@@ -4164,7 +4543,12 @@
       "soldTo": "LSG",
       "finalPrice": 0.75,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "MI",
+        "LSG"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "josh-little",
@@ -4241,7 +4625,11 @@
       "soldTo": "PBKS",
       "finalPrice": 0.8,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 0.8
     },
     {
       "playerId": "dilshan-madushanka",
@@ -4299,7 +4687,11 @@
       "soldTo": "RCB",
       "finalPrice": 1,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 1
     },
     {
       "playerId": "william-o-rourke",
@@ -4840,7 +5232,11 @@
       "soldTo": "RR",
       "finalPrice": 12.5,
       "soldViaRTM": false,
-      "bowlingType": "pace"
+      "bowlingType": "pace",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 12.5
     },
     {
       "playerId": "rahul-chahar",
@@ -4859,7 +5255,11 @@
       "soldTo": "SRH",
       "finalPrice": 3.2,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 3.2
     },
     {
       "playerId": "noor-ahmad",
@@ -4878,7 +5278,11 @@
       "soldTo": "CSK",
       "finalPrice": 10,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 10
     },
     {
       "playerId": "wanindu-hasaranga",
@@ -4897,7 +5301,11 @@
       "soldTo": "RR",
       "finalPrice": 5.25,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 5.25
     },
     {
       "playerId": "waqar-salamkheil",
@@ -4935,7 +5343,11 @@
       "soldTo": "RR",
       "finalPrice": 4.4,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 4.4
     },
     {
       "playerId": "adam-zampa",
@@ -4954,7 +5366,11 @@
       "soldTo": "SRH",
       "finalPrice": 2.4,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 2.4
     },
     {
       "playerId": "allah-ghazanfar",
@@ -4973,7 +5389,13 @@
       "soldTo": "MI",
       "finalPrice": 4.8,
       "soldViaRTM": false,
-      "bowlingType": "spin"
+      "bowlingType": "spin",
+      "interestedTeams": [
+        "KKR",
+        "RCB",
+        "MI"
+      ],
+      "boughtPrice": 4.8
     },
     {
       "playerId": "akeal-hosein",
@@ -5225,7 +5647,11 @@
       "soldViaRTM": false,
       "age": 27,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 3.2
     },
     {
       "playerId": "karun-nair",
@@ -5246,7 +5672,11 @@
       "soldViaRTM": false,
       "age": 32,
       "potential": 3,
-      "prospectTier": "filler"
+      "prospectTier": "filler",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.5
     },
     {
       "playerId": "angkrish-raghuvanshi",
@@ -5269,9 +5699,9 @@
       "potential": 8,
       "prospectTier": "elite",
       "interestedTeams": [
-        "KKR",
-        "MI"
-      ]
+        "KKR"
+      ],
+      "boughtPrice": 3
     },
     {
       "playerId": "anmolpreet-singh",
@@ -5314,7 +5744,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "nehal-wadhera",
@@ -5335,7 +5769,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 4.2
     },
     {
       "playerId": "harpreet-brar",
@@ -5356,7 +5794,13 @@
       "soldViaRTM": false,
       "age": 29,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "LSG",
+        "MI",
+        "PBKS"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "naman-dhir",
@@ -5379,9 +5823,9 @@
       "potential": 6,
       "prospectTier": "promising",
       "interestedTeams": [
-        "MI",
-        "SRH"
-      ]
+        "MI"
+      ],
+      "boughtPrice": 5.25
     },
     {
       "playerId": "mahipal-lomror",
@@ -5402,7 +5846,12 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "RR",
+        "GT"
+      ],
+      "boughtPrice": 1.7
     },
     {
       "playerId": "sameer-rizvi",
@@ -5423,7 +5872,11 @@
       "soldViaRTM": false,
       "age": 19,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.95
     },
     {
       "playerId": "abdul-samad",
@@ -5444,7 +5897,13 @@
       "soldViaRTM": false,
       "age": 23,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "RCB",
+        "PBKS",
+        "LSG"
+      ],
+      "boughtPrice": 4.2
     },
     {
       "playerId": "vijay-shankar",
@@ -5467,9 +5926,10 @@
       "potential": 4,
       "prospectTier": "domestic",
       "interestedTeams": [
-        "CSK",
-        "GT"
-      ]
+        "GT",
+        "CSK"
+      ],
+      "boughtPrice": 1.2
     },
     {
       "playerId": "ashutosh-sharma",
@@ -5490,7 +5950,14 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "RCB",
+        "RR",
+        "PBKS",
+        "DC"
+      ],
+      "boughtPrice": 3.8
     },
     {
       "playerId": "nishant-sindhu",
@@ -5511,7 +5978,11 @@
       "soldViaRTM": false,
       "age": 22,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "utkarsh-singh",
@@ -5554,7 +6025,10 @@
       "marketValue": 0.3,
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "LSG"
+      ]
     },
     {
       "playerId": "kumar-kushagra",
@@ -5575,7 +6049,13 @@
       "soldViaRTM": false,
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK",
+        "PBKS",
+        "GT"
+      ],
+      "boughtPrice": 0.65
     },
     {
       "playerId": "robin-minz",
@@ -5596,7 +6076,12 @@
       "soldViaRTM": false,
       "age": 21,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK",
+        "MI"
+      ],
+      "boughtPrice": 0.65
     },
     {
       "playerId": "anuj-rawat",
@@ -5617,7 +6102,11 @@
       "soldViaRTM": false,
       "age": 23,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "luvnith-sisodia",
@@ -5638,7 +6127,11 @@
       "soldViaRTM": false,
       "age": 20,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "vishnu-vinod",
@@ -5659,7 +6152,13 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "KKR",
+        "MI",
+        "PBKS"
+      ],
+      "boughtPrice": 0.95
     },
     {
       "playerId": "upendra-singh-yadav",
@@ -5702,7 +6201,13 @@
       "bowlingType": "pace",
       "age": 26,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RR",
+        "DC",
+        "KKR"
+      ],
+      "boughtPrice": 1.8
     },
     {
       "playerId": "rasikh-dar",
@@ -5724,7 +6229,12 @@
       "bowlingType": "pace",
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "SRH",
+        "RCB"
+      ],
+      "boughtPrice": 6
     },
     {
       "playerId": "akash-madhwal",
@@ -5746,7 +6256,12 @@
       "bowlingType": "pace",
       "age": 27,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "PBKS",
+        "RR"
+      ],
+      "boughtPrice": 1.2
     },
     {
       "playerId": "mohit-sharma",
@@ -5768,7 +6283,12 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "GT",
+        "DC"
+      ],
+      "boughtPrice": 2.2
     },
     {
       "playerId": "simarjeet-singh",
@@ -5790,7 +6310,12 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "CSK",
+        "SRH"
+      ],
+      "boughtPrice": 1.5
     },
     {
       "playerId": "yash-thakur",
@@ -5812,7 +6337,12 @@
       "bowlingType": "pace",
       "age": 26,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "GT",
+        "PBKS"
+      ],
+      "boughtPrice": 1.6
     },
     {
       "playerId": "kartik-tyagi",
@@ -5856,7 +6386,13 @@
       "bowlingType": "pace",
       "age": 26,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "SRH",
+        "GT",
+        "PBKS"
+      ],
+      "boughtPrice": 1.8
     },
     {
       "playerId": "piyush-chawla",
@@ -5901,7 +6437,11 @@
       "bowlingType": "spin",
       "age": 30,
       "potential": 3,
-      "prospectTier": "filler"
+      "prospectTier": "filler",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "mayank-markande",
@@ -5923,7 +6463,11 @@
       "bowlingType": "spin",
       "age": 27,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "KKR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "suyash-sharma",
@@ -5945,7 +6489,13 @@
       "bowlingType": "spin",
       "age": 22,
       "potential": 8,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "DC",
+        "MI",
+        "RCB"
+      ],
+      "boughtPrice": 2.6
     },
     {
       "playerId": "karn-sharma",
@@ -5967,7 +6517,11 @@
       "bowlingType": "spin",
       "age": 35,
       "potential": 2,
-      "prospectTier": "filler"
+      "prospectTier": "filler",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.5
     },
     {
       "playerId": "kumar-kartikeya-singh",
@@ -5989,7 +6543,11 @@
       "bowlingType": "spin",
       "age": 26,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "manav-suthar",
@@ -6011,7 +6569,11 @@
       "bowlingType": "spin",
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "ricky-bhui",
@@ -6053,7 +6615,11 @@
       "soldViaRTM": false,
       "age": 19,
       "potential": 8,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "aarya-desai",
@@ -6095,7 +6661,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RCB",
+        "RR"
+      ],
+      "boughtPrice": 0.8
     },
     {
       "playerId": "madhav-kaushik",
@@ -6158,7 +6729,11 @@
       "soldViaRTM": false,
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "himmat-singh",
@@ -6179,7 +6754,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "mayank-dagar",
@@ -6221,7 +6800,14 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "DC",
+        "LSG",
+        "MI",
+        "CSK"
+      ],
+      "boughtPrice": 3.4
     },
     {
       "playerId": "mohd-arshad-khan",
@@ -6242,7 +6828,13 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC",
+        "PBKS",
+        "GT"
+      ],
+      "boughtPrice": 1.3
     },
     {
       "playerId": "darshan-nalkande",
@@ -6263,7 +6855,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "suyash-prabhudessai",
@@ -6305,7 +6901,12 @@
       "soldViaRTM": false,
       "age": 24,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "DC",
+        "KKR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "swapnil-singh",
@@ -6326,7 +6927,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC",
+        "RCB"
+      ],
+      "boughtPrice": 0.5
     },
     {
       "playerId": "sanvir-singh",
@@ -6389,7 +6995,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "SRH",
+        "CSK"
+      ],
+      "boughtPrice": 0.55
     },
     {
       "playerId": "saurav-chauhan",
@@ -6474,7 +7085,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "br-sharath",
@@ -6517,7 +7132,13 @@
       "bowlingType": "pace",
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK",
+        "PBKS",
+        "GT"
+      ],
+      "boughtPrice": 1.3
     },
     {
       "playerId": "mukesh-choudhary",
@@ -6539,7 +7160,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "sakib-hussain",
@@ -6650,7 +7275,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 5,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "zeeshan-ansari",
@@ -6672,7 +7301,12 @@
       "bowlingType": "spin",
       "age": 22,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "DC",
+        "SRH"
+      ],
+      "boughtPrice": 0.4
     },
     {
       "playerId": "prince-choudhary",
@@ -6738,7 +7372,13 @@
       "bowlingType": "spin",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "SRH",
+        "DC",
+        "LSG"
+      ],
+      "boughtPrice": 0.75
     },
     {
       "playerId": "digvesh-singh",
@@ -6760,7 +7400,11 @@
       "bowlingType": "pace",
       "age": 21,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "prashant-solanki",
@@ -6825,7 +7469,11 @@
       "soldViaRTM": false,
       "age": 36,
       "potential": 2,
-      "prospectTier": "filler"
+      "prospectTier": "filler",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "priyam-garg",
@@ -6867,7 +7515,11 @@
       "soldViaRTM": false,
       "age": 20,
       "potential": 7,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "smaran-ravichandran",
@@ -6930,7 +7582,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "avneesh-sudha",
@@ -6993,7 +7649,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI",
+        "RR"
+      ],
+      "boughtPrice": 0.35
     },
     {
       "playerId": "rishi-dhawan",
@@ -7038,9 +7699,9 @@
       "potential": 7,
       "prospectTier": "promising",
       "interestedTeams": [
-        "CSK",
-        "MI"
-      ]
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "tanush-kotian",
@@ -7082,7 +7743,11 @@
       "soldViaRTM": false,
       "age": 19,
       "potential": 8,
-      "prospectTier": "elite"
+      "prospectTier": "elite",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "shams-mulani",
@@ -7336,7 +8001,11 @@
       "bowlingType": "spin",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "ishan-porel",
@@ -7402,7 +8071,8 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "boughtPrice": 0.3
     },
     {
       "playerId": "gurjapneet-singh",
@@ -7424,7 +8094,13 @@
       "bowlingType": "pace",
       "age": 23,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "LSG",
+        "GT",
+        "CSK"
+      ],
+      "boughtPrice": 2.2
     },
     {
       "playerId": "basil-thampi",
@@ -7792,9 +8468,12 @@
       "potential": 7,
       "prospectTier": "promising",
       "interestedTeams": [
-        "PBKS",
-        "DC"
-      ]
+        "DC",
+        "MI",
+        "RCB",
+        "PBKS"
+      ],
+      "boughtPrice": 3.8
     },
     {
       "playerId": "manoj-bhandage",
@@ -7815,7 +8494,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "pravin-dubey",
@@ -7836,7 +8519,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "ajay-mandal",
@@ -7857,7 +8544,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "prerak-mankad",
@@ -7899,7 +8590,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI",
+        "DC"
+      ],
+      "boughtPrice": 0.5
     },
     {
       "playerId": "vicky-ostwal",
@@ -8046,7 +8742,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "michael-pepper",
@@ -8375,7 +9075,11 @@
       "bowlingType": "spin",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "himanshu-singh-mca",
@@ -8502,7 +9206,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "SRH"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "sumeet-verma",
@@ -8587,7 +9295,11 @@
       "soldViaRTM": false,
       "age": 21,
       "potential": 6,
-      "prospectTier": "promising"
+      "prospectTier": "promising",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "emanjot-chahal",
@@ -8631,9 +9343,9 @@
       "potential": 9,
       "prospectTier": "elite",
       "interestedTeams": [
-        "MI",
-        "RCB"
-      ]
+        "PBKS"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "manvanth-kumar-l",
@@ -8654,7 +9366,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "mayank-rawat",
@@ -8696,7 +9412,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "hritik-shokeen",
@@ -8843,7 +9563,8 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "boughtPrice": 0.3
     },
     {
       "playerId": "tejasvi-singh",
@@ -8951,7 +9672,11 @@
       "bowlingType": "spin",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "GT"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "ankit-singh-rajpoot",
@@ -9039,7 +9764,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "kunal-singh-chibb",
@@ -9403,7 +10132,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "LSG"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "aman-khan",
@@ -9466,7 +10199,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "hardik-raj",
@@ -9809,7 +10546,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RCB"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "pyla-avinash",
@@ -9830,7 +10571,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "PBKS"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "kiran-chormale",
@@ -10019,7 +10764,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "CSK"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "raj-limbani",
@@ -10235,7 +10984,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "yeddala-reddy",
@@ -10320,7 +11073,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "atharva-kale",
@@ -10683,7 +11440,11 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RR"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "mujtaba-yousuf",
@@ -10833,10 +11594,10 @@
       "potential": 10,
       "prospectTier": "elite",
       "interestedTeams": [
-        "RR",
-        "MI",
-        "CSK"
-      ]
+        "DC",
+        "RR"
+      ],
+      "boughtPrice": 1.1
     },
     {
       "playerId": "kartik-chadha",
@@ -11371,7 +12132,12 @@
       "bowlingType": "pace",
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "RR",
+        "SRH"
+      ],
+      "boughtPrice": 1.2
     },
     {
       "playerId": "samarth-nagraj",
@@ -11964,7 +12730,11 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "DC"
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "ravi-yadav",
@@ -12132,7 +12902,12 @@
       "soldViaRTM": false,
       "age": 25,
       "potential": 4,
-      "prospectTier": "domestic"
+      "prospectTier": "domestic",
+      "interestedTeams": [
+        "MI",
+        "DC"
+      ],
+      "boughtPrice": 0.4
     },
     {
       "playerId": "kamal-tripathi",
@@ -12282,7 +13057,8 @@
       "prospectTier": "domestic",
       "interestedTeams": [
         "MI"
-      ]
+      ],
+      "boughtPrice": 0.3
     },
     {
       "playerId": "tripuresh-singh",

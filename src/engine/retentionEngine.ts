@@ -70,6 +70,8 @@ export function applyHistoricalRetentions(dataset: AuctionDataset): RetentionRes
       rtmSlotsAvailable: record.rtmSlotsAvailable,
       rtmSlotsUsed: 0,
       overseasCount,
+      reservationBalance: 0,
+      planDisruptedCountdown: 0,
     }
   }
 
@@ -119,6 +121,8 @@ export function applyCustomRetentions(
       rtmSlotsAvailable: config.rtmSlotsAvailable,
       rtmSlotsUsed: 0,
       overseasCount,
+      reservationBalance: 0,
+      planDisruptedCountdown: 0,
     }
   }
 
@@ -160,5 +164,7 @@ function makeEmptyTeamState(startingPurse: number): TeamState {
     rtmSlotsAvailable: 0,
     rtmSlotsUsed: 0,
     overseasCount: 0,
+    reservationBalance: 0,
+    planDisruptedCountdown: 0,
   }
 }

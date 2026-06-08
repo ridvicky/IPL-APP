@@ -45,6 +45,7 @@ export function getSafeBidLimit(
   currentSetName?: string,
   currentSetIndex?: number,
   isReauction?: boolean,
+  pendingReservation?: number,
 ): number {
   const minSquadReserve = getMinReservedPurse(teamState, dataset)
 
@@ -90,7 +91,17 @@ export function getSafeBidLimit(
     : 0
 
   const totalReserved = Math.max(minSquadReserve, effectiveMarqueeReserve, effectiveEarlyReserve, stageReserve)
-  return Math.max(0, teamState.currentPurse - totalReserved)
+
+  // Change 10A: adjust effective purse by reservationBalance and pendingReservation
+  const reservationBalance = teamState.reservationBalance ?? 0
+  const reservation = pendingReservation ?? 0
+  // Balance effect: deficit tightens (≤ 20% of purse), surplus loosens (≤ 15% of purse)
+  const balanceEffect = Math.max(
+    -(teamState.currentPurse * 0.20),
+    Math.min(teamState.currentPurse * 0.15, reservationBalance),
+  )
+  const effectivePurse = teamState.currentPurse + balanceEffect - reservation
+  return Math.max(0, effectivePurse - totalReserved)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

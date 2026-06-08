@@ -30,6 +30,8 @@ export interface PlayerRecord {
   prospectTier?: ProspectTier
   /** Teams with known real-world interest in this player — drives aggressive bidding */
   interestedTeams?: string[]
+  /** Real IPL 2025 auction sold price (Cr) — used as realism anchor for bid ceilings */
+  boughtPrice?: number | null
 }
 
 /**

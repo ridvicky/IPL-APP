@@ -150,6 +150,8 @@ function computeTeamStateFromEdits(
     rtmSlotsAvailable: originalRecord?.rtmSlotsAvailable ?? 0,
     rtmSlotsUsed: 0,
     overseasCount: retained.filter(e => e.isOverseas).length,
+    reservationBalance: 0,
+    planDisruptedCountdown: 0,
   }
 }
 

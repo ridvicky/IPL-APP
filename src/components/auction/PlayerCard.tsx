@@ -5,6 +5,8 @@ interface PlayerCardProps {
   currentBid?: number | undefined
   currentLeader?: string | null | undefined
   formContext?: PlayerFormContext | null
+  lotNumber?: number
+  isActive?: boolean
 }
 
 const roleGradient: Record<string, string> = {
@@ -39,7 +41,7 @@ const FLAG: Record<string, string> = {
   Netherlands: '🇳🇱', USA: '🇺🇸',
 }
 
-export function PlayerCard({ player, currentBid, currentLeader, formContext }: PlayerCardProps) {
+export function PlayerCard({ player, currentBid, currentLeader, formContext, lotNumber, isActive }: PlayerCardProps) {
   const hasActiveBid = currentBid !== undefined && currentBid > 0
   const gradient = roleGradient[player.role] ?? roleGradient.BAT
   const stripe   = roleStripe[player.role]   ?? roleStripe.BAT
@@ -60,10 +62,23 @@ export function PlayerCard({ player, currentBid, currentLeader, formContext }: P
       {/* Role wash */}
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient} pointer-events-none`} />
 
+      {/* Active shimmer — top-edge pulse line when bidding is live */}
+      {isActive && (
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse pointer-events-none" />
+      )}
+
       {/* Top stripe */}
       <div className={`h-1.5 w-full bg-gradient-to-r ${stripe}`} />
 
       <div className="relative px-5 pt-4 pb-5">
+
+        {/* LOT badge — top right */}
+        {lotNumber !== undefined && (
+          <div className="absolute top-0 right-5 flex items-center gap-1 bg-black/50 border border-white/10 rounded-b-lg px-2 py-1">
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500">LOT</span>
+            <span className="text-ipl-gold font-black font-mono text-xs leading-none">#{lotNumber}</span>
+          </div>
+        )}
 
         {/* Role pill + status row */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -133,9 +148,9 @@ export function PlayerCard({ player, currentBid, currentLeader, formContext }: P
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl bg-black/25 border border-white/6 px-5 py-4 flex items-end justify-between">
+          <div className="rounded-2xl bg-black/25 border border-ipl-gold/20 px-5 py-4 flex items-end justify-between" style={{ borderStyle: 'dashed' }}>
             <div>
-              <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Base Price</p>
+              <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] mb-1">STARTING BID</p>
               <p className="text-ipl-gold font-black leading-none">
                 <span className="text-4xl">₹{player.basePrice.toFixed(2)}</span>
                 <span className="text-lg text-gray-500 font-semibold ml-1">Cr</span>

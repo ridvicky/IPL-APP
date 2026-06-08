@@ -347,6 +347,62 @@ export function resolvePlayerSale(dataset: AuctionDataset): void {
 // Internal helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Change 10B/C: Resolve pending reservations for all teams when a player is sold or goes unsold.
+ * Updates reservationBalance and fires plan disruption for losing Tier 1 interested teams.
+ */
+function resolveReservations(
+  player: SoldPlayerRecord | { playerId: string; name: string; interestedTeams?: string[]; auctionSet: string },
+  outcome: 'won' | 'lost' | 'unsold',
+  winningTeam: TeamId | null,
+  reservedCost: number,
+  actualCost: number,
+): void {
+  const state = useGameStore.getState().gameState
+  if (!state) return
+
+  const interestedTeams = (player.interestedTeams ?? []) as TeamId[]
+  if (interestedTeams.length === 0) return
+
+  const updatedTeamStates = { ...state.teamStates }
+
+  for (const teamId of interestedTeams) {
+    const ts = updatedTeamStates[teamId]
+    if (!ts) continue
+
+    let balanceDelta = 0
+    let disruptCountdown = ts.planDisruptedCountdown ?? 0
+
+    if (outcome === 'won' && winningTeam === teamId) {
+      // Won their target — P&L on the reservation
+      balanceDelta = reservedCost - actualCost
+    } else if (outcome === 'lost' && winningTeam !== teamId) {
+      // Lost Tier 1 target to another team — full reservation release + disruption
+      balanceDelta = reservedCost
+      disruptCountdown = 3  // plan disruption window of 3 players
+    } else if (outcome === 'unsold') {
+      // Partial release — target may return in reauction
+      balanceDelta = reservedCost * 0.5
+    }
+
+    // Cap balance: deficit ≤ 20% of purse, surplus ≤ 15% of purse
+    const newBalance = Math.max(
+      -(ts.currentPurse * 0.20),
+      Math.min(ts.currentPurse * 0.15, (ts.reservationBalance ?? 0) + balanceDelta),
+    )
+
+    updatedTeamStates[teamId] = {
+      ...ts,
+      reservationBalance: newBalance,
+      planDisruptedCountdown: disruptCountdown,
+    }
+  }
+
+  useGameStore.setState(s => ({
+    gameState: s.gameState ? { ...s.gameState, teamStates: updatedTeamStates } : s.gameState,
+  }))
+}
+
 function confirmSale(dataset: AuctionDataset, winningTeam: TeamId, salePrice: number): void {
   const state = useGameStore.getState().gameState
   if (!state) return
@@ -369,6 +425,10 @@ function confirmSale(dataset: AuctionDataset, winningTeam: TeamId, salePrice: nu
   recordSoldPlayer(soldRecord)
   applyPurchase(winningTeam, soldRecord)
   clearPersonaCache(currentPlayer.playerId)
+
+  // Change 10B: resolve reservation P&L for all interested teams
+  const reservedCost = ((currentPlayer.boughtPrice ?? currentPlayer.marketValue ?? currentPlayer.basePrice * 2) * 0.85)
+  resolveReservations(soldRecord, 'won', winningTeam, reservedCost, salePrice)
 
   const comment = getFallbackComment(winningTeam, 'sold_win')
   appendLog(`[${winningTeam}] SOLD: ${currentPlayer.name} for ₹${salePrice.toFixed(2)} Cr — ${comment}`)
@@ -393,6 +453,11 @@ function markPlayerUnsold(dataset: AuctionDataset): void {
 
   clearPersonaCache(currentPlayer.playerId)
   useGameStore.getState().recordUnsoldPlayer(unsoldRecord)
+
+  // Change 10B: partial reservation release for unsold players
+  const reservedCostUnsold = ((currentPlayer.boughtPrice ?? currentPlayer.marketValue ?? currentPlayer.basePrice * 2) * 0.85)
+  resolveReservations(currentPlayer, 'unsold', null, reservedCostUnsold, 0)
+
   useGameStore.getState().appendLog(`UNSOLD: ${currentPlayer.name}`)
   useGameStore.getState().setPhase('unsold-confirmed')
 }

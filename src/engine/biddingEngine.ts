@@ -65,6 +65,7 @@ export function runBiddingPipeline(
   teamId: TeamId,
   currentPlayer: PlayerRecord,
   llmResult: LLMPersonaResult | null = null,
+  cachedHasPendingTier1Target?: boolean,
 ): BidDecision {
   const persona = getPersona(teamId)
   const teamState = state.teamStates[teamId]
@@ -73,6 +74,9 @@ export function runBiddingPipeline(
   const squadSize = teamState.squad.length
   const maxSquad = dataset.maximumSquadSize   // 25
   const slotsRemaining = maxSquad - squadSize
+
+  // Change 7: dynamic starting purse from dataset (after retentions)
+  const startingPurse = (dataset.startingPurse as Record<string, number> | undefined)?.[teamId] ?? 120
 
   // ── Re-auction hard override: squad < 19 → force bid, bypass reserve checks ──
   // Teams MUST reach minimum 19 players. The normal reserve check (slotsNeeded × ₹0.20)
@@ -108,35 +112,46 @@ export function runBiddingPipeline(
   const staticInterest = computeStaticInterest(persona, teamState, currentPlayer, dataset, state.currentSetIndex, bidState)
 
   // Squad-thin floor: scales against max squad size (25), not a hard-coded 20.
-  // Starts earlier (set 8+) and becomes very aggressive when the squad is critically thin.
-  // A team with 10 players in set 25 should be bidding on almost everything it can afford.
   let squadFloor = 0
   if (slotsRemaining >= 15) {
-    squadFloor = slotsRemaining * 2.5          // critically thin — up to +37 at 15 slots short
+    squadFloor = slotsRemaining * 2.5
   } else if (slotsRemaining >= 10 && state.currentSetIndex >= 8) {
-    squadFloor = slotsRemaining * 2.0          // very thin
+    squadFloor = slotsRemaining * 2.0
   } else if (slotsRemaining >= 5 && state.currentSetIndex >= 12) {
-    squadFloor = slotsRemaining * 1.5          // thin — original behaviour
+    squadFloor = slotsRemaining * 1.5
   }
 
-  // Re-auction minimum safety net: one slot short of the 19-player floor — heavy nudge
-  // Forces interest high enough to almost always pass the passThreshold via normal pipeline
   if (state.isReauction && squadSize === REAUCTION_MIN_SQUAD - 1) {
     squadFloor += 40
   }
 
-  const effectiveInterest = staticInterest + squadFloor
+  // Change 1A: preliminary need bleed — simple role gap ratio, bleeds into effectiveInterest
+  const roleCounts1 = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+  for (const p of teamState.squad) {
+    if (p.role in roleCounts1) roleCounts1[p.role as keyof typeof roleCounts1]++
+  }
+  const tierTargets1 = persona.squadTierTargets[currentPlayer.role as keyof typeof persona.squadTierTargets]
+  const totalRoleTarget = tierTargets1 ? tierTargets1.prime + tierTargets1.reliable + tierTargets1.depth : 4
+  const roleCount1 = roleCounts1[currentPlayer.role as keyof typeof roleCounts1] ?? 0
+  const roleGap1 = Math.max(0, totalRoleTarget - roleCount1)
+  const prelimNeed = (roleGap1 / Math.max(totalRoleTarget, 1)) * 60
+  const needBleed = Math.min(prelimNeed * 0.15, 12)
 
-  // Pass threshold drops progressively through the auction and with squad thinness.
-  // A thin squad late in the auction should almost never pass on an affordable player.
-  let passThreshold = state.currentSetIndex >= 25 ? 22
-                    : state.currentSetIndex >= 20 ? 28
-                    : state.currentSetIndex >= 15 ? 33
-                    :                               40
-  if (slotsRemaining >= 15) passThreshold -= 12   // critically thin — desperate mode
-  else if (slotsRemaining >= 10) passThreshold -= 6
+  let effectiveInterest = staticInterest + squadFloor + needBleed
 
-  // Wire auctionStyle into pass threshold — selective teams bid less often, aggressive teams more
+  // Change 2: Pass threshold — squad fill % as primary axis, set index as secondary
+  const fillPct = squadSize / maxSquad
+  let passThreshold = fillPct < 0.40 ? 25
+                    : fillPct < 0.60 ? 32
+                    : fillPct < 0.80 ? 38
+                    :                  46
+
+  const lateUrgency = (state.currentSetIndex >= 20 && fillPct < 0.60) ? -5
+                    : (state.currentSetIndex >= 15 && fillPct < 0.50) ? -3
+                    : 0
+  passThreshold += lateUrgency
+
+  // Wire auctionStyle into pass threshold
   const styleModifier = persona.auctionStyle === 'calculated' ?  +5
                       : persona.auctionStyle === 'analytical' ?  +4
                       : persona.auctionStyle === 'moneyball'  ?  +3
@@ -145,9 +160,42 @@ export function runBiddingPipeline(
                       : 0
   passThreshold += styleModifier
 
-  if (effectiveInterest < passThreshold) {
+  // Change 8A: Purse velocity — raise passThreshold when team is spending too fast
+  const recentSpend   = teamState.squad.slice(-5).reduce((s, p) => s + p.soldPrice, 0)
+  const expectedSpend = (startingPurse / maxSquad) * 5
+  let velocityFatigue = 0
+  if (recentSpend > expectedSpend * 1.8) velocityFatigue = 8
+
+  // Change 10 disruption: plan disruption reduces passThreshold by 5
+  const isPlanDisrupted = (teamState.planDisruptedCountdown ?? 0) > 0
+  const disruptionThresholdDelta = isPlanDisrupted ? -5 : 0
+
+  // Stacking cap: combined fatigue on passThreshold ≤ +15
+  const totalFatigue = Math.min(velocityFatigue, 15)
+  passThreshold += totalFatigue + disruptionThresholdDelta
+
+  // ── INTEREST OVERRIDE: interestedTeams is the primary signal ────────────────
+  // If a franchise is in interestedTeams, they ALWAYS enter the room (squad/purse
+  // permitting) and bid near the historical price. This is the ground truth of
+  // real auction behaviour — teams target specific players regardless of set order.
+  const isInterestedTeam = (currentPlayer.interestedTeams ?? []).includes(teamId)
+  if (isInterestedTeam) {
+    effectiveInterest += 50  // ensures entry past any passThreshold
+  }
+
+  // Opportunity bid: even non-interested teams snipe when going very cheap
+  const currentBidForSnipe = bidState.currentBid ?? 0
+  if (!isInterestedTeam && currentPlayer.boughtPrice && currentPlayer.boughtPrice > 4) {
+    const pricePct = currentBidForSnipe / currentPlayer.boughtPrice
+    if (pricePct < 0.50) effectiveInterest += 16   // obvious bargain for anyone
+  }
+
+  // Change 1B: Role crisis emergency entry — 0 players of a role after set 15
+  const hasZeroOfRole = roleCount1 === 0 && state.currentSetIndex >= 15
+  if (effectiveInterest < passThreshold && !hasZeroOfRole) {
     return pass(teamId, staticInterest, 'Insufficient franchise interest')
   }
+  // If role crisis, we enter the room but computeMaxBid will cap at 1.5× base
 
   // ── Step 2: Rule Engine hard gate ─────────────────────────────────────────
   const nextBid = getNextBidAmount(dataset, bidState, currentPlayer.basePrice)
@@ -156,9 +204,29 @@ export function runBiddingPipeline(
     return pass(teamId, 0, `Rule Engine blocked: ${ruleCheck.reason}`)
   }
 
-  // ── Step 3: Safe bid limit ────────────────────────────────────────────────
+  // ── Step 3: Safe bid limit (with Change 10A pending reservation) ─────────────
   const currentSetName = dataset.auctionSets[state.currentSetIndex] ?? ''
-  const safeBidLimit = getSafeBidLimit(teamState, dataset, currentSetName, state.currentSetIndex, state.isReauction)
+  // Compute pending reservation: sum of top-2 reserved targets in future sets
+  const allSetsList = dataset.auctionSets as string[]
+  const soldSet = new Set(
+    Object.values(state.teamStates).flatMap(ts => ts.squad.map(p => p.playerId))
+  )
+  const pendingTargets = (dataset.players as import('@/types/player').PlayerRecord[])
+    .filter(p =>
+      (p.interestedTeams ?? []).includes(teamId) &&
+      allSetsList.indexOf(p.auctionSet) > state.currentSetIndex &&
+      !soldSet.has(p.playerId)
+    )
+    .sort((a, b) => getPlayerTier6(a) - getPlayerTier6(b))
+    .slice(0, 2)
+  const pendingReservation = Math.min(
+    pendingTargets.reduce((sum, p) => {
+      const rc = (p.boughtPrice ?? p.marketValue ?? p.basePrice * 2) * 0.85
+      return sum + rc
+    }, 0),
+    teamState.currentPurse * 0.35,
+  )
+  const safeBidLimit = getSafeBidLimit(teamState, dataset, currentSetName, state.currentSetIndex, state.isReauction, pendingReservation)
   if (safeBidLimit <= 0 || nextBid > safeBidLimit) {
     return pass(teamId, staticInterest, 'Insufficient safe purse to bid')
   }
@@ -187,8 +255,28 @@ export function runBiddingPipeline(
   // Hard absolute cap — enforced AFTER all multipliers so it truly holds.
   // Real IPL record is Rishabh Pant ₹27 Cr. ₹25+ Cr bids are rare (3–9 players per mega auction).
   const AUCTION_HARD_CAP = 28
-  const rawMaxBid = computeMaxBid(blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult, currentPlayer.marketValue, currentPlayer, bidState, teamState, dataset.maximumSquadSize) * emotionalMultiplier
-  const maxBid = Math.min(rawMaxBid, safeBidLimit, AUCTION_HARD_CAP)
+  // Change 10D: use pre-computed cache when available (set by runAllOpponentDecisions);
+  // fall back to inline search only when pipeline is called directly (e.g. user team path).
+  const hasPendingTier1Target = cachedHasPendingTier1Target ?? (() => {
+    const soldIds = new Set(
+      Object.values(state.teamStates).flatMap(ts => ts.squad.map(p => p.playerId))
+    )
+    const sets = dataset.auctionSets as string[]
+    return (dataset.players as import('@/types/player').PlayerRecord[]).some(p =>
+      (p.interestedTeams ?? []).includes(teamId) &&
+      sets.indexOf(p.auctionSet) > state.currentSetIndex &&
+      !soldIds.has(p.playerId)
+    )
+  })()
+
+  const rawMaxBid = computeMaxBid(
+    blendedScore, currentPlayer.basePrice, safeBidLimit, persona, llmResult,
+    startingPurse, currentPlayer.marketValue, currentPlayer, bidState, teamState,
+    dataset.maximumSquadSize, state.currentSetIndex, hasPendingTier1Target, isPlanDisrupted,
+  ) * emotionalMultiplier
+  // Change 1B: role crisis entry caps maxBid at 1.5× base — they enter but don't overpay
+  const crisisCap = hasZeroOfRole ? currentPlayer.basePrice * 1.5 : Infinity
+  const maxBid = Math.min(rawMaxBid, safeBidLimit, AUCTION_HARD_CAP, crisisCap)
 
   // ── Step 7: Bid or pass ───────────────────────────────────────────────────
   if (nextBid > maxBid) {
@@ -230,11 +318,26 @@ export function runAllOpponentDecisions(
       bidState.currentLeader !== id,
   )
 
+  // Pre-compute sold player set and future-set membership once — shared across all teams.
+  // Avoids iterating all 575 players × 10 teams on every bid round.
+  const soldPlayerIds = new Set(
+    Object.values(state.teamStates).flatMap(ts => ts.squad.map(p => p.playerId))
+  )
+  const allSetsList = dataset.auctionSets as string[]
+  const futurePlayers = (dataset.players as import('@/types/player').PlayerRecord[]).filter(
+    p => allSetsList.indexOf(p.auctionSet) > state.currentSetIndex && !soldPlayerIds.has(p.playerId)
+  )
+  // Cache: teamId → true if that team has ≥1 pending Tier 1 interestedTeams target in a future set
+  const pendingTier1Cache = new Map<TeamId, boolean>()
+  for (const teamId of eligibleTeams) {
+    pendingTier1Cache.set(teamId, futurePlayers.some(p => (p.interestedTeams ?? []).includes(teamId)))
+  }
+
   // Shuffle for realistic bid ordering
   const shuffled = [...eligibleTeams].sort(() => Math.random() - 0.5)
 
   return shuffled.map(teamId =>
-    runBiddingPipeline(state, dataset, teamId, currentPlayer, llmResults.get(teamId) ?? null),
+    runBiddingPipeline(state, dataset, teamId, currentPlayer, llmResults.get(teamId) ?? null, pendingTier1Cache.get(teamId)),
   )
 }
 
@@ -572,20 +675,27 @@ function computeStaticInterest(
     score -= Math.min(overQuota * 12, 48)
   }
 
-  // ── Uncapped quota nudge ───────────────────────────────────────────────────
-  // Teams aim for 2 minimum and ~5 typically. This is a nudge, not a mandate —
-  // team affinity, player potential, and player worth still do most of the filtering.
-  // A low-potential wrong-fit player won't clear the threshold; a good-fit prospect will.
-  if (player.cappedStatus === 'uncapped' && currentSetIndex >= 16) {
-    const uncappedInSquad = squad.filter(p => (p as PlayerRecord).cappedStatus === 'uncapped').length
-    if (uncappedInSquad < 2) {
-      score += 12
-    } else if (uncappedInSquad < 5) {
-      score += 10
-    } else if (uncappedInSquad < 8) {
-      score += 8
-    } else if (uncappedInSquad < 11) {
-      score += 8
+  // ── Change 5: Uncapped quota — role-aware gap scoring ────────────────────────
+  // Instead of a flat count, check if THIS role lacks uncapped cover. GT with high
+  // potentialWeight gets a strong nudge; CSK with low potentialWeight barely notices.
+  if (player.cappedStatus === 'uncapped' && currentSetIndex >= 14) {
+    const uncappedByRole = { BAT: 0, BWL: 0, AR: 0, WK: 0 }
+    for (const p of squad) {
+      const pr = p as PlayerRecord
+      if (pr.cappedStatus === 'uncapped' && pr.role in uncappedByRole) {
+        uncappedByRole[pr.role as keyof typeof uncappedByRole]++
+      }
+    }
+    const roleUncapped = uncappedByRole[player.role as keyof typeof uncappedByRole] ?? 0
+    // Floor guard: no uncapped cover in this role at all
+    if (roleUncapped === 0) {
+      score += 18
+    } else {
+      // Depth gap scaled by franchise youth appetite
+      const rt = persona.squadTierTargets[player.role as keyof typeof persona.squadTierTargets]
+      const depthTarget = rt?.depth ?? 2
+      const roleDepthGap = Math.max(0, depthTarget - roleUncapped)
+      score += roleDepthGap * persona.potentialWeight * 8
     }
   }
 
@@ -811,12 +921,15 @@ function computeMomentumAdjustment(persona: FranchisePersona, auctionLog: string
  */
 function computeEmotionScore(
   persona: FranchisePersona,
-  _teamState: TeamState,
+  teamState: TeamState,
   player: PlayerRecord,
   _llmResult: LLMPersonaResult | null,
   auctionLog: string[] = [],
 ): number {
   let score = 40 // neutral baseline
+
+  // Change 10C: plan disruption — team lost a Tier 1 target, making a statement
+  if ((teamState.planDisruptedCountdown ?? 0) > 0) score += 15
 
   // Former player loyalty triggers strong emotion
   if (player.previousTeam === persona.teamId) score += 25
@@ -878,11 +991,15 @@ function computeMaxBid(
   safeBidLimit: number,
   persona: FranchisePersona,
   llmResult: LLMPersonaResult | null,
+  startingPurse: number,
   marketValue?: number | null,
   currentPlayer?: PlayerRecord | null,
   bidState?: BidState | null,
   teamState?: TeamState | null,
   maxSquadSize?: number,
+  currentSetIndex?: number,
+  hasPendingTier1Target?: boolean,
+  isPlanDisrupted?: boolean,
 ): number {
   // Absolute hard ceiling — only Rishabh Pant (₹27 Cr) has ever come close
   const ABSOLUTE_CAP = 28
@@ -901,49 +1018,82 @@ function computeMaxBid(
       })()
     : 0
 
+  // ── Change 8B: Marquee cooling window — applied first, overrides headroom ────
+  // After a ₹12 Cr+ purchase, next 2 squad additions get a conservative cap.
+  // Minimum: 80% of historical boughtPrice (or ₹4 Cr) so cheap markets don't die.
+  const squadTail = teamState?.squad.slice(-2) ?? []
+  const recentMarqueeBuy = squadTail.some(p => p.soldPrice >= 12)
+  if (recentMarqueeBuy) {
+    const histFloor = currentPlayer?.boughtPrice && currentPlayer.boughtPrice > 0
+      ? currentPlayer.boughtPrice * 0.80
+      : 4.0
+    const cooledCap = Math.max(basePrice * 1.5, histFloor)
+    return Math.min(cooledCap, safeBidLimit, ABSOLUTE_CAP)
+  }
+
   if (marketValue && marketValue > basePrice * 1.2) {
     const desireFraction = blendedScore / 100
     let maxBid = marketValue * desireFraction * persona.maxBidMultiplier
     maxBid *= 0.90 + Math.random() * 0.20
 
     // Star floor: only apply when team genuinely needs this player (blendedScore ≥ 35)
-    // Saturated teams don't get an artificial floor — reduces mechanical price inflation
     if (currentPlayer?.cappedStatus === 'capped' && marketValue >= 5 && blendedScore >= 35) {
       const starFloor = marketValue * 0.40 * (0.7 + persona.maxBidMultiplier * 0.2)
       maxBid = Math.max(maxBid, Math.min(starFloor, safeBidLimit))
     }
 
     // Scarcity inflation: crowded rooms push franchise ceilings higher.
-    // Only truly marquee (MV ≥ ₹18 Cr) can reach full inflation — keeps ₹25+ Cr as a rare event.
+    // Scale inflation by boughtPrice/basePrice ratio — historically hot bidding wars get full inflation.
     const playerMV = currentPlayer?.marketValue ?? 0
     const isTrulyMarqueeTier = playerMV >= 18 || (currentPlayer?.basePrice ?? 0) >= 12
     const isMarqueeTier      = playerMV >= 14 || (currentPlayer?.basePrice ?? 0) >= 10
     const isPrimeTier        = playerMV >= 8
     let scarcityMult = 1.0
-    if (isTrulyMarqueeTier && activeBidderCount >= 5)  scarcityMult = 1.30
+    if (isTrulyMarqueeTier && activeBidderCount >= 5)      scarcityMult = 1.30
     else if (isTrulyMarqueeTier && activeBidderCount >= 3) scarcityMult = 1.15
-    else if (isMarqueeTier && activeBidderCount >= 5)  scarcityMult = 1.18
-    else if (isMarqueeTier && activeBidderCount >= 3)  scarcityMult = 1.10
-    else if (isPrimeTier && activeBidderCount >= 5)    scarcityMult = 1.10
-    else if (isPrimeTier && activeBidderCount >= 3)    scarcityMult = 1.05
-    // Taper: when blendedScore is already high, need score has priced in the urgency — don't double-count
+    else if (isMarqueeTier && activeBidderCount >= 5)      scarcityMult = 1.18
+    else if (isMarqueeTier && activeBidderCount >= 3)      scarcityMult = 1.10
+    else if (isPrimeTier && activeBidderCount >= 5)        scarcityMult = 1.10
+    else if (isPrimeTier && activeBidderCount >= 3)        scarcityMult = 1.05
+
+    // Scale scarcity by historical price ratio — high ratio = proven bidding war
+    if (scarcityMult > 1.0 && currentPlayer?.boughtPrice && currentPlayer.boughtPrice > 0) {
+      const histRatio = currentPlayer.boughtPrice / Math.max(basePrice, 0.2)
+      const scarcityScale = histRatio >= 10 ? 1.00 : histRatio >= 5 ? 0.85 : 0.60
+      scarcityMult = 1.0 + (scarcityMult - 1.0) * scarcityScale
+    }
+    // Taper: when blendedScore is already high, need score has priced in the urgency
     if (scarcityMult > 1.0 && blendedScore > 72) {
       const taper = 1 - Math.min((blendedScore - 72) / 28, 0.65)
       scarcityMult = 1.0 + (scarcityMult - 1.0) * taper
     }
     maxBid *= scarcityMult
 
+    // ── boughtPrice ceiling on marketValue path ───────────────────────────────
+    // Interested teams already get their bid anchored in the formula path;
+    // here just prevent the LLM/marketValue path from wildly exceeding history.
+    if (currentPlayer?.boughtPrice && currentPlayer.boughtPrice > 0) {
+      const ceilingMult = isPlanDisrupted ? 1.25 : 1.20
+      maxBid = Math.min(maxBid, currentPlayer.boughtPrice * ceilingMult)
+    }
+
+    // ── Change 10D: Target-saving — bid conservatively on non-targets when a Tier 1 target is coming ──
+    const isOwnTarget = currentPlayer?.interestedTeams?.includes(persona.teamId) ?? false
+    if (hasPendingTier1Target && !isOwnTarget && !isPlanDisrupted) {
+      maxBid *= 0.92
+    }
+
     return Math.min(maxBid, safeBidLimit, ABSOLUTE_CAP)
   }
 
-  // Pure formula fallback (no real price known) — raised ceilings for uncapped stars
+  // ── Pure formula fallback (no market value) ───────────────────────────────────
   let realisticCap = basePrice < 1  ? Math.min(basePrice * 8,  6)
                    : basePrice < 2  ? Math.min(basePrice * 6, 10)
                    : basePrice < 5  ? Math.min(basePrice * 4, 14)
                    : basePrice < 10 ? Math.min(basePrice * 2.5, 18)
                    :                  Math.min(basePrice * 1.8, 24)
 
-  // Uncapped potential: raised caps to reflect real auction results (Suryavanshi-tier)
+  // Uncapped potential: raised caps to reflect real auction results
   if (currentPlayer?.cappedStatus === 'uncapped' && currentPlayer.potential != null) {
     const potential = currentPlayer.potential
     const potentialCap = potential >= 9 ? 18
@@ -955,7 +1105,7 @@ function computeMaxBid(
     realisticCap = Math.max(realisticCap, potentialCap * persona.potentialWeight)
   }
 
-  // Interested teams stretch their ceiling for players that actually merit it
+  // Interested teams stretch their ceiling for players that merit it
   if (currentPlayer?.interestedTeams?.includes(persona.teamId)) {
     const pot = currentPlayer.potential ?? 0
     const interestMult = (currentPlayer.prospectTier === 'elite' || pot >= 8) ? 1.30
@@ -964,48 +1114,83 @@ function computeMaxBid(
     realisticCap *= interestMult
   }
 
-  // ── Per-tier bid multiplier from squad template ───────────────────────────────
+  // ── boughtPrice bid anchor for interested teams ───────────────────────────────
+  // Each interested team independently picks a walk-away price: boughtPrice ± 20%.
+  // This is their true valuation — they drop out when auction exceeds it.
+  // Non-interested teams get a snipe floor so cheap players don't go for pennies.
+  if (currentPlayer?.boughtPrice && currentPlayer.boughtPrice > 3) {
+    const isInterested = currentPlayer.interestedTeams?.includes(persona.teamId) ?? false
+    if (isInterested) {
+      // Walk-away price: 80%–120% of historical, each team independently sampled
+      const targetBid = currentPlayer.boughtPrice * (0.80 + Math.random() * 0.40)
+      realisticCap = targetBid   // this IS the bid anchor, not a multiplied cap
+    } else {
+      realisticCap = Math.max(realisticCap, currentPlayer.boughtPrice * 0.55)
+    }
+  }
+
+  // ── Per-tier bid multiplier from squad template ────────────────────────────────
   if (currentPlayer) {
     const t6 = getPlayerTier6(currentPlayer)
     const tierMult = persona.squadTemplate?.tierBidMultipliers?.[t6] ?? 1.0
     realisticCap *= tierMult
   }
 
-  // ── Purse budget guard: tighten ceiling when a tier group is over-budget ─────
+  // ── Change 7: Purse budget guard — dynamic startingPurse ─────────────────────
   if (currentPlayer && teamState && maxSquadSize) {
     const template = persona.squadTemplate
     if (template) {
-      const startingPurse = (dataset as AuctionDataset & { startingPurse?: Record<string, number> })
-        .startingPurse?.[persona.teamId] ?? 120
       const t6 = getPlayerTier6(currentPlayer)
-
       const starSpent = teamState.squad
         .filter(p => getPlayerTier6(p as PlayerRecord) <= 2)
         .reduce((sum, p) => sum + p.soldPrice, 0)
       const starBudget = startingPurse * template.tierPurseShare.xiStars
-
       const emergingSpent = teamState.squad
         .filter(p => { const t = getPlayerTier6(p as PlayerRecord); return t === 3 || t === 4 })
         .reduce((sum, p) => sum + p.soldPrice, 0)
       const emergingBudget = startingPurse * template.tierPurseShare.emergingSpec
-
       if (t6 <= 2 && starSpent > starBudget * 1.1) {
-        realisticCap *= 0.75  // Overspent on stars — tighten ceiling
+        realisticCap *= 0.75
       } else if ((t6 === 3 || t6 === 4) && emergingSpent > emergingBudget * 1.1) {
-        realisticCap *= 0.85  // Overspent on mid-tier — moderate tightening
+        realisticCap *= 0.85
       }
     }
   }
 
-  // ── Purse-per-slot modifier: teams with headroom can spend more; cash-strapped conserve ──
+  // ── Change 10D: Target-saving on formula path ─────────────────────────────────
+  const isOwnTargetFormula = currentPlayer?.interestedTeams?.includes(persona.teamId) ?? false
+  if (hasPendingTier1Target && !isOwnTargetFormula && !isPlanDisrupted) {
+    realisticCap *= 0.92
+  }
+
+  // ── Change 9: Stage-gated rich-team headroom ──────────────────────────────────
+  // Headroom bonus only unlocks after meaningful spend AND squad built.
+  // A team sitting on ₹90 Cr with 5 players (hasn't spent) gets zero bonus.
   if (teamState && maxSquadSize) {
-    const slotsLeft = Math.max(1, maxSquadSize - teamState.squad.length)
-    const pursePerSlot = teamState.currentPurse / slotsLeft
-    if (pursePerSlot > 4) {
-      realisticCap *= Math.min(1.15, 1 + (pursePerSlot - 4) * 0.02)
-    } else if (pursePerSlot < 1.5) {
-      realisticCap *= 0.80
+    const squadSize   = teamState.squad.length
+    const headroomRatio  = startingPurse > 0 ? teamState.currentPurse / startingPurse : 0
+    const squadFillRatio = squadSize / maxSquadSize
+    let headroomMult = 1.0
+    if (headroomRatio <= 0.70) {
+      if (headroomRatio > 0.50 && squadFillRatio > 0.40) {
+        headroomMult = 1.0 + (squadFillRatio - 0.40) * 0.10  // gentle, up to ~1.06
+      } else if (headroomRatio > 0.35 && squadFillRatio > 0.55) {
+        headroomMult = 1.0 + (squadFillRatio - 0.55) * 0.15  // moderate, up to ~1.07
+      }
     }
+    // Late-auction splash unlock: set 18+, >₹25 Cr left, squad < 20 players
+    if ((currentSetIndex ?? 0) >= 18 && teamState.currentPurse > 25 && squadSize < 20) {
+      headroomMult *= 1.10
+    }
+    realisticCap *= headroomMult
+  }
+
+  // For interested teams with a boughtPrice anchor, realisticCap already IS the
+  // target bid — skip the desireFraction/multiplier reductions so it stays anchored.
+  const isInterestedWithAnchor = (currentPlayer?.interestedTeams?.includes(persona.teamId) ?? false)
+    && (currentPlayer?.boughtPrice ?? 0) > 3
+  if (isInterestedWithAnchor) {
+    return Math.min(realisticCap, safeBidLimit, ABSOLUTE_CAP)
   }
 
   const desireFraction = blendedScore / 100

@@ -18,13 +18,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: true,
 
   signIn: async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return error ? error.message : null
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (!error) return null
+      return error.message || error.status?.toString() || 'Sign in failed. Check your credentials.'
+    } catch {
+      return 'Unable to connect. Check your internet connection.'
+    }
   },
 
   signUp: async (email, password) => {
-    const { error } = await supabase.auth.signUp({ email, password })
-    return error ? error.message : null
+    try {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (!error) return null
+      return error.message || error.status?.toString() || 'Sign up failed. Please try again.'
+    } catch {
+      return 'Unable to connect. Check your internet connection.'
+    }
   },
 
   signOut: async () => {

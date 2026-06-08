@@ -1,0 +1,3906 @@
+[
+  {
+    "playerName": "Jos Buttler",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 15.75
+  },
+  {
+    "playerName": "Shreyas Iyer",
+    "interestedTeams": [
+      "DC",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 26.75
+  },
+  {
+    "playerName": "Rishabh Pant",
+    "interestedTeams": [
+      "DC",
+      "SRH",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 27.0
+  },
+  {
+    "playerName": "Kagiso Rabada",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 10.75
+  },
+  {
+    "playerName": "Arshdeep Singh",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 18.0
+  },
+  {
+    "playerName": "Mitchell Starc",
+    "interestedTeams": [
+      "CSK",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 11.75
+  },
+  {
+    "playerName": "Yuzvendra Chahal",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 18.0
+  },
+  {
+    "playerName": "Liam Livingstone",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 8.75
+  },
+  {
+    "playerName": "David Miller",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 7.5
+  },
+  {
+    "playerName": "KL Rahul",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 14.0
+  },
+  {
+    "playerName": "Mohammad Shami",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 10.0
+  },
+  {
+    "playerName": "Mohammad Siraj",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 12.25
+  },
+  {
+    "playerName": "Devdutt Padikkal",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Rahul Tripathi",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 3.4
+  },
+  {
+    "playerName": "Mayank Agarawal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ajinkya Rahane",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Prithvi Shaw",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Manish Pandey",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Harry Brook",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 6.25
+  },
+  {
+    "playerName": "Devon Conway",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 6.25
+  },
+  {
+    "playerName": "Jake Fraser-Mcgurk",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 9.0
+  },
+  {
+    "playerName": "Aiden Markram",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "David Warner",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Faf Du Plessis",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Glenn Phillips",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Rovman Powell",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Kane Williamson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Finn Allen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dewald Brevis",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ben Duckett",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rilee Rossouw",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sherfane Rutherford",
+    "interestedTeams": [
+      "MI",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 2.6
+  },
+  {
+    "playerName": "Ashton Turner",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "James Vince",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sediqullah Atal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Matthew Breetzke",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Mark Chapman",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Brandon King",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Evin Lewis",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pathum Nissanka",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bhanuka Rajapaksa",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Steve Smith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Towhid Hridoy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mikyle Louis",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Harry Tector",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rassie Van Der Dussen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Will Young",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Najibullah Zadran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ibrahim Zadran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ravichandaran Ashwin",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 9.75
+  },
+  {
+    "playerName": "Venkatesh Iyer",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 23.75
+  },
+  {
+    "playerName": "Harshal Patel",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 8.0
+  },
+  {
+    "playerName": "Krunal Pandya",
+    "interestedTeams": [
+      "RR",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 5.75
+  },
+  {
+    "playerName": "Nitish Rana",
+    "interestedTeams": [
+      "CSK",
+      "RCB",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 4.2
+  },
+  {
+    "playerName": "Washington Sundar",
+    "interestedTeams": [
+      "LSG",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 3.2
+  },
+  {
+    "playerName": "Shardul Thakur",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shahbaz Ahamad",
+    "interestedTeams": [
+      "SRH",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 2.4
+  },
+  {
+    "playerName": "Deepak Hooda",
+    "interestedTeams": [
+      "SRH",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 1.7
+  },
+  {
+    "playerName": "R. Sai Kishore",
+    "interestedTeams": [
+      "SRH",
+      "PBKS",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Krishnappa Gowtham",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jayant Yadav",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Sarfaraz Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mitchell Marsh",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 3.4
+  },
+  {
+    "playerName": "Glenn Maxwell",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 4.2
+  },
+  {
+    "playerName": "Rachin Ravindra",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 4.0
+  },
+  {
+    "playerName": "Marcus Stoinis",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 11.0
+  },
+  {
+    "playerName": "Sam Curran",
+    "interestedTeams": [
+      "LSG",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 2.4
+  },
+  {
+    "playerName": "Marco Jansen",
+    "interestedTeams": [
+      "MI",
+      "GT",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 7.0
+  },
+  {
+    "playerName": "Daryl Mitchell",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Moeen Ali",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Tim David",
+    "interestedTeams": [
+      "SRH",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 3.0
+  },
+  {
+    "playerName": "Will Jacks",
+    "interestedTeams": [
+      "PBKS",
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 5.25
+  },
+  {
+    "playerName": "Azmatullah Omarzai",
+    "interestedTeams": [
+      "CSK",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 2.4
+  },
+  {
+    "playerName": "Romario Shepherd",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Gus Atkinson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tom Curran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mohammad Nabi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Gulbadin Naib",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sikandar Raza",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mitchell Santner",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Sean Abbott",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jacob Bethell",
+    "interestedTeams": [
+      "SRH",
+      "PBKS",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 2.6
+  },
+  {
+    "playerName": "Brydon Carse",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 1.0
+  },
+  {
+    "playerName": "Aaron Hardie",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 1.25
+  },
+  {
+    "playerName": "Kyle Mayers",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kamindu Mendis",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Matthew Short",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Qais Ahmad",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Charith Asalanka",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Michael Bracewell",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Gudakesh Motie",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Daniel Mousley",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jamie Overton",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Dunith Wellalage",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Cooper Connolly",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dushan Hemantha",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jason Holder",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Karim Janat",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Jimmy Neesham",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Daniel Sams",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "William Sutherland",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Zak Foulkes",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Chris Green",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shakib Al Hasan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mehidy Hasan Miraz",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Wiaan Mulder",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dwaine Pretorius",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dasun Shanaka",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ashton Agar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Roston Chase",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Junior Dala",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mahedi Hasan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nangeyalia Kharote",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dan Lawrence",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nathan Smith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Alick Athanaze",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Hilton Cartwright",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dominic Drakes",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Matthew Forde",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Patrick Kruger",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Michael Neser",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Keemo Paul",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Odean Smith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ishan Kishan",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 11.25
+  },
+  {
+    "playerName": "Jitesh Sharma",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 11.0
+  },
+  {
+    "playerName": "K.S Bharat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jonny Bairstow",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Quinton De Kock",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 3.6
+  },
+  {
+    "playerName": "Rahmanullah Gurbaz",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Phil Salt",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 11.5
+  },
+  {
+    "playerName": "Alex Carey",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Donovan Ferreira",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Shai Hope",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Josh Inglis",
+    "interestedTeams": [
+      "SRH",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 2.6
+  },
+  {
+    "playerName": "Ryan Rickelton",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 1.0
+  },
+  {
+    "playerName": "Tom Banton",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sam Billings",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jordan Cox",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ben McDermott",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kusal Mendis",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kusal Perera",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Josh Philippe",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tim Seifert",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Johnson Charles",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Litton Das",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Andre Fletcher",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tom Latham",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ollie Pope",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kyle Verreynne",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Syed Khaleel Ahmed",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 4.8
+  },
+  {
+    "playerName": "Avesh Khan",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 9.75
+  },
+  {
+    "playerName": "Prasidh Krishna",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 9.5
+  },
+  {
+    "playerName": "T. Natarajan",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 10.75
+  },
+  {
+    "playerName": "Deepak Chahar",
+    "interestedTeams": [
+      "PBKS",
+      "CSK",
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 9.25
+  },
+  {
+    "playerName": "Akash Deep",
+    "interestedTeams": [
+      "CSK",
+      "PBKS",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 8.0
+  },
+  {
+    "playerName": "Tushar Deshpande",
+    "interestedTeams": [
+      "CSK",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 6.5
+  },
+  {
+    "playerName": "Bhuvneshwar Kumar",
+    "interestedTeams": [
+      "MI",
+      "LSG",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 10.75
+  },
+  {
+    "playerName": "Mukesh Kumar",
+    "interestedTeams": [
+      "CSK",
+      "PBKS",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 8.0
+  },
+  {
+    "playerName": "Umran Malik",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Ishant Sharma",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Jaydev Unadkat",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 1.0
+  },
+  {
+    "playerName": "Umesh Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kuldeep Sen",
+    "interestedTeams": [
+      "CSK",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.8
+  },
+  {
+    "playerName": "Shivam Mavi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Navdeep Saini",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Chetan Sakariya",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sandeep Warrier",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Trent Boult",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 12.5
+  },
+  {
+    "playerName": "Josh Hazlewood",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 12.5
+  },
+  {
+    "playerName": "Anrich Nortje",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 6.5
+  },
+  {
+    "playerName": "Gerald Coetzee",
+    "interestedTeams": [
+      "PBKS",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 2.4
+  },
+  {
+    "playerName": "Lockie Ferguson",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Nandre Burger",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Spencer Johnson",
+    "interestedTeams": [
+      "PBKS",
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 2.8
+  },
+  {
+    "playerName": "Mustafizur Rahman",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nuwan Thushara",
+    "interestedTeams": [
+      "SRH",
+      "RR",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 1.6
+  },
+  {
+    "playerName": "Naveen Ul Haq",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Fazalhaq Farooqi",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Richard Gleeson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Matt Henry",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Alzarri Joseph",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kwena Maphaka",
+    "interestedTeams": [
+      "RCB",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Reece Topley",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Lizaad Williams",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Luke Wood",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jason Behrendorff",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dushmantha Chameera",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Nathan Ellis",
+    "interestedTeams": [
+      "PBKS",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 2.0
+  },
+  {
+    "playerName": "Shamar Joseph",
+    "interestedTeams": [
+      "MI",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Josh Little",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jhye Richardson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ottneil Baartman",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Xavier Bartlett",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.8
+  },
+  {
+    "playerName": "Dilshan Madushanka",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Adam Milne",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Lungisani Ngidi",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 1.0
+  },
+  {
+    "playerName": "William O'Rourke",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Taskin Ahmed",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ben Dwarshuis",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Obed McCoy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Riley Meredith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Lance Morris",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Olly Stone",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Daniel Worrall",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shoriful Islam",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Blessing Muzarabani",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Matthew Potts",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tanzim Hasan Sakib",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Benjamin Sears",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tim Southee",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "John Turner",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "James Anderson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kyle Jamieson",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Chris Jordan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Hasan Mahmud",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tymal Mills",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "David Payne",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nahid Rana",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Daryn Dupavillon",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Lahiru Kumara",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Richard Ngarava",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Wayne Parnell",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Andrew Tye",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jofra Archer",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 12.5
+  },
+  {
+    "playerName": "Rahul Chahar",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 3.2
+  },
+  {
+    "playerName": "Noor Ahmad",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 10.0
+  },
+  {
+    "playerName": "Wanindu Hasaranga",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 5.25
+  },
+  {
+    "playerName": "Waqar Salamkheil",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Maheesh Theekshana",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 4.4
+  },
+  {
+    "playerName": "Adam Zampa",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 2.4
+  },
+  {
+    "playerName": "Allah Ghazanfar",
+    "interestedTeams": [
+      "KKR",
+      "RCB",
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 4.8
+  },
+  {
+    "playerName": "Akeal Hosein",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Keshav Maharaj",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mujeeb Ur Rahman",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Adil Rashid",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vijayakanth Viyaskanth",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rishad Hossain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Zahir Khan Pakten",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nqabayomzi Peter",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tanveer Sangha",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tabraiz Shamsi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jeffery Vandersay",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yash Dhull",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhinav Manohar",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 3.2
+  },
+  {
+    "playerName": "Karun Nair",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.5
+  },
+  {
+    "playerName": "Angkrish Raghuvanshi",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 3.0
+  },
+  {
+    "playerName": "Anmolpreet Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Atharva Taide",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Nehal Wadhera",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 4.2
+  },
+  {
+    "playerName": "Harpreet Brar",
+    "interestedTeams": [
+      "LSG",
+      "MI",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Naman Dhir",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 5.25
+  },
+  {
+    "playerName": "Mahipal Lomror",
+    "interestedTeams": [
+      "RR",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 1.7
+  },
+  {
+    "playerName": "Sameer Rizvi",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.95
+  },
+  {
+    "playerName": "Abdul Samad",
+    "interestedTeams": [
+      "RCB",
+      "PBKS",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 4.2
+  },
+  {
+    "playerName": "Vijay Shankar",
+    "interestedTeams": [
+      "GT",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 1.2
+  },
+  {
+    "playerName": "Ashutosh Sharma",
+    "interestedTeams": [
+      "RCB",
+      "RR",
+      "PBKS",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 3.8
+  },
+  {
+    "playerName": "Nishant Sindhu",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Utkarsh Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Aryan Juyal",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kumar Kushagra",
+    "interestedTeams": [
+      "CSK",
+      "PBKS",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.65
+  },
+  {
+    "playerName": "Robin Minz",
+    "interestedTeams": [
+      "CSK",
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.65
+  },
+  {
+    "playerName": "Anuj Rawat",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Luvnith Sisodia",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Vishnu Vinod",
+    "interestedTeams": [
+      "KKR",
+      "MI",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.95
+  },
+  {
+    "playerName": "Upendra Singh Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vaibhav Arora",
+    "interestedTeams": [
+      "RR",
+      "DC",
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 1.8
+  },
+  {
+    "playerName": "Rasikh Dar",
+    "interestedTeams": [
+      "SRH",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 6.0
+  },
+  {
+    "playerName": "Akash Madhwal",
+    "interestedTeams": [
+      "PBKS",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 1.2
+  },
+  {
+    "playerName": "Mohit Sharma",
+    "interestedTeams": [
+      "GT",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 2.2
+  },
+  {
+    "playerName": "Simarjeet Singh",
+    "interestedTeams": [
+      "CSK",
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 1.5
+  },
+  {
+    "playerName": "Yash Thakur",
+    "interestedTeams": [
+      "GT",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 1.6
+  },
+  {
+    "playerName": "Kartik Tyagi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vyshak Vijaykumar",
+    "interestedTeams": [
+      "SRH",
+      "GT",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 1.8
+  },
+  {
+    "playerName": "Piyush Chawla",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shreyas Gopal",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Mayank Markande",
+    "interestedTeams": [
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Suyash Sharma",
+    "interestedTeams": [
+      "DC",
+      "MI",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 2.6
+  },
+  {
+    "playerName": "Karn Sharma",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.5
+  },
+  {
+    "playerName": "Kumar Kartikeya Singh",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Manav Suthar",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Ricky Bhui",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Swastik Chhikara",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Aarya Desai",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubham Dubey",
+    "interestedTeams": [
+      "RCB",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 0.8
+  },
+  {
+    "playerName": "Madhav Kaushik",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pukhraj Mann",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shaik Rasheed",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Himmat Singh",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Mayank Dagar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anshul Kamboj",
+    "interestedTeams": [
+      "DC",
+      "LSG",
+      "MI",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 3.4
+  },
+  {
+    "playerName": "Mohd. Arshad Khan",
+    "interestedTeams": [
+      "DC",
+      "PBKS",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 1.3
+  },
+  {
+    "playerName": "Darshan Nalkande",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Suyash Prabhudessai",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anukul Roy",
+    "interestedTeams": [
+      "DC",
+      "KKR"
+    ],
+    "finalBuyer": "KKR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Swapnil Singh",
+    "interestedTeams": [
+      "DC",
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 0.5
+  },
+  {
+    "playerName": "Sanvir Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Avanish Aravelly",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vansh Bedi",
+    "interestedTeams": [
+      "SRH",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.55
+  },
+  {
+    "playerName": "Saurav Chauhan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Harvik Desai",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tom Kohler-Cadmore",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kunal Rathore",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "B.R Sharath",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Gurnoor Singh Brar",
+    "interestedTeams": [
+      "CSK",
+      "PBKS",
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 1.3
+  },
+  {
+    "playerName": "Mukesh Choudhary",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Sakib Hussain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vidwath Kaverappa",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rajan Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sushant Mishra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Arjun Tendulkar",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Zeeshan Ansari",
+    "interestedTeams": [
+      "DC",
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 0.4
+  },
+  {
+    "playerName": "Prince Choudhary",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Himanshu Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "M. Siddharth",
+    "interestedTeams": [
+      "SRH",
+      "DC",
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.75
+  },
+  {
+    "playerName": "Digvesh Singh",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Prashant Solanki",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jhathavedh Subramanyan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sachin Baby",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Priyam Garg",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Harnoor Pannu",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Smaran Ravichandran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shashwat Rawat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Andre Siddarth",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Avneesh Sudha",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Apoorv Wankhade",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yudhvir Charak",
+    "interestedTeams": [
+      "MI",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 0.35
+  },
+  {
+    "playerName": "Rishi Dhawan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rajvardhan Hangargekar",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Tanush Kotian",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Arshin Kulkarni",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Shams Mulani",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shivam Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Lalit Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mohammed Azharuddeen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "L.R Chethan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Aryaman Singh Dhaliwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Urvil Patel",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sanskar Rawat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bipin Saurabh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tanay Thyagarajann",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Money Grewal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ashwani Kumar",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Ishan Porel",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhilash Shetty",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akash Singh",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Gurjapneet Singh",
+    "interestedTeams": [
+      "LSG",
+      "GT",
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 2.2
+  },
+  {
+    "playerName": "Basil Thampi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Murugan Ashwin",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shreyas Chavan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Chintal Gandhi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Raghav Goyal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jagadeesha Suchith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Roshan Waghsare",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bailapudi Yeswanth",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sachin Dhas",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Leus Du Plooy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ashwin Hebbar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rohan Kunnummal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ayush Pandey",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akshat Raghuwanshi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shoun Roger",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Virat Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Priyansh Arya",
+    "interestedTeams": [
+      "DC",
+      "MI",
+      "RCB",
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 3.8
+  },
+  {
+    "playerName": "Manoj Bhandage",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Pravin Dubey",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Ajay Mandal",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Prerak Mankad",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vipraj Nigam",
+    "interestedTeams": [
+      "MI",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.5
+  },
+  {
+    "playerName": "Vicky Ostwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shivalik Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Salil Arora",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dinesh Bana",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ajitesh Guruswamy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Narayan Jagadeesan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shrijith Krishnan",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Michael Pepper",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vishnu Solanki",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "K.M Asif",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akhil Chaudhary",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Himanshu Chauhan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Arpit Guleria",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nishanth Saranu",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kuldip Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prithviraj Yarra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubham Agrawal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jass Inder Baidwan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jasmer Dhankhar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pulkit Narang",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Saumy Pandey",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mohit Rathee",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Himanshu Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tanmay Agarwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Amandeep Khare",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ayush Mhatre",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Salman Nizar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Aniket Verma",
+    "interestedTeams": [
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Sumeet Verma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Manan Vohra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Samarth Vyas",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Raj Angad Bawa",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Emanjot Chahal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Musheer Khan",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Manvanth Kumar L",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Mayank Rawat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Suryansh Shedge",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Hritik Shokeen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sonu Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "S. Rithik Easwaran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anmol Malhotra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pradosh Paul",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Karteek Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akash Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tejasvi Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Siddharth Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Saurabh Dubey",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Aaqib Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kulwant Khejroliya",
+    "interestedTeams": [
+      "GT"
+    ],
+    "finalBuyer": "GT",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Ankit Singh Rajpoot",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Divesh Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Naman Tiwari",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prince Yadav",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Kunal Singh Chibb",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yuvraj Chudasama",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Deepak Devadiga",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ramesh Prasad",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shivam Shukla",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Himanshu Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tejpreet Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Musaif Ajaz",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Agni Chopra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhimanyu Easwaran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sudip Gharami",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubham Khajuria",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akhil Rawat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prateek Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abdul Bazith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "K.C Cariappa",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yuvraj Chaudhary",
+    "interestedTeams": [
+      "LSG"
+    ],
+    "finalBuyer": "LSG",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Aman Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sumit Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kamlesh Nagarkoti",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Hardik Raj",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Harsh Tyagi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "M. Ajnas",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Unmukt Chand",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tejasvi Dahiya",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sumit Ghadigaonkar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Baba Indrajith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Muhammed Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bhagmender Lather",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Baltej Dhanda",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ali Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ravi Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vineet Panwar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vidyadhar Patil",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Aradhya Shukla",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhinandan Singh",
+    "interestedTeams": [
+      "RCB"
+    ],
+    "finalBuyer": "RCB",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Pyla Avinash",
+    "interestedTeams": [
+      "PBKS"
+    ],
+    "finalBuyer": "PBKS",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Kiran Chormale",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ashish Dahariya",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tushar Raheja",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sarthak Ranjan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhijeet Tomar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Krish Bhagat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sohraab Dhaliwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Harsh Dubey",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ramakrishna Ghosh",
+    "interestedTeams": [
+      "CSK"
+    ],
+    "finalBuyer": "CSK",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Raj Limbani",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ninad Rathva",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vivrant Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shiva Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sayed Irfan Aftab",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anirudh Chowdhary",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anshuman Hooda",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Siddharth Kaul",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prashant Sai Painkra",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Venkata Satyanarayana Penmetsa",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Yeddala Reddy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Joshua Brown",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Oliver Davies",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bevan John Jacobs",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Atharva Kale",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhishek Nair",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vishwanath Pratap Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nasir Lone",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Brandon McMullen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "S. Midhun",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abid Mushtaq",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mahesh Pithiya",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Maramreddy Reddy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Atit Sheth",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jonty Sidhu",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mohit Avasthi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Faridoon Dawoodzai",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Praful Hinge",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pankaj Jaswal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vijay Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ashok Sharma",
+    "interestedTeams": [
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Mujtaba Yousuf",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prayas Ray Barman",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jafar Jamal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ayaz Khan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kaushik Maity",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rituraj Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vaibhav Suryavanshi",
+    "interestedTeams": [
+      "DC",
+      "RR"
+    ],
+    "finalBuyer": "RR",
+    "boughtPrice": 1.1
+  },
+  {
+    "playerName": "Kartik Chadha",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Writtick Chatterjee",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prerit Dutta",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rajneesh Gurbani",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubhang Hegde",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Saransh Jain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ripal Patel",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akash Vashisht",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Anirudh Kanwar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubham Kapse",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Atif Mushtaq",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dipesh Parwani",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Manish Reddy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Chetan Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Avinash Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ajay Ahlawat",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Corbin Bosch",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mayank Gusain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mukhtar Hussain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Girinath Reddy",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Jalaj Saxena",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yajas Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sanjay Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vishal Godara",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Eshan Malinga",
+    "interestedTeams": [
+      "RR",
+      "SRH"
+    ],
+    "finalBuyer": "SRH",
+    "boughtPrice": 1.2
+  },
+  {
+    "playerName": "Samarth Nagraj",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhishek Saini",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dumindu Sewmina",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pradyuman Kumar Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vasu Vats",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Umang Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Mohamed Ali",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Atharva Ankolekar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vaisakh Chandran",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Auqib Dar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rohit Rayudu",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Uday Saharan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ayush Vartak",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Baba Aparajith",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sumit Kumar Beniwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Nishunk Birla",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Digvijay Deshmukh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Lakshay Jain",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Duan Jansen",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Kritagya Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "P. Vignesh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sabhay Chadha",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Ben Howell",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Hemanth Kumar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Rohan Rana",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Bharat Sharma",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Pratham Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tripurana Vijay",
+    "interestedTeams": [
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Ravi Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Arjun Azad",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Abhay Choudhary",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Gaurav Gambhir",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Shubham Garhwal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Tejasvi Jaiswal",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Sairaj Patil",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Madhav Tiwari",
+    "interestedTeams": [
+      "MI",
+      "DC"
+    ],
+    "finalBuyer": "DC",
+    "boughtPrice": 0.4
+  },
+  {
+    "playerName": "Kamal Tripathi",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Prashant Chauhan",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Yash Dabas",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Dhruv Kaushik",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Khrievitso Kense",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Akash Parkar",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vignesh Puthur",
+    "interestedTeams": [
+      "MI"
+    ],
+    "finalBuyer": "MI",
+    "boughtPrice": 0.3
+  },
+  {
+    "playerName": "Tripuresh Singh",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  },
+  {
+    "playerName": "Vijay Yadav",
+    "interestedTeams": [],
+    "finalBuyer": null,
+    "boughtPrice": null
+  }
+]

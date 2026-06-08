@@ -45,6 +45,18 @@ export interface TeamState {
   rtmSlotsUsed: number
   rtmSlotsAvailable: number
   overseasCount: number
+  /**
+   * Running P&L from target reservations.
+   * Positive = surplus (targets won cheaply or lost, freeing purse).
+   * Negative = deficit (targets won above reserved cost — tightens future bids).
+   */
+  reservationBalance: number
+  /**
+   * Players remaining before plan-disruption mode expires.
+   * Set to 3 when a Tier-1 interestedTeams target is won by another team.
+   * Decremented once per player auctioned. 0 = not disrupted.
+   */
+  planDisruptedCountdown: number
 }
 
 /** Static persona config for each franchise — used by Bidding Engine */

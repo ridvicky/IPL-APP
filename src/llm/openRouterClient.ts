@@ -10,6 +10,7 @@ const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 // ─── Model tiers ──────────────────────────────────────────────────────────────
 
+const MODEL_PREMIUM   = 'anthropic/claude-sonnet-4-5'
 const MODEL_STRATEGIC = 'meta-llama/llama-3.3-70b-instruct'
 const MODEL_STANDARD  = 'google/gemini-2.0-flash-exp:free'
 const MODEL_FALLBACK  = 'google/gemma-2-9b-it:free'
@@ -197,6 +198,24 @@ export async function callLLMJsonStrategic<T>(
   console.warn('[LLM] Standard failed — trying fallback model')
   const raw3 = await callLLM(messages, { ...options, model: MODEL_FALLBACK })
   return raw3 ? parseJSON<T>(raw3) : null
+}
+
+/**
+ * Premium call — squad analysis and rich reports (Claude Sonnet).
+ * Falls back to Strategic → Standard → Fallback on failure.
+ */
+export async function callLLMJsonPremium<T>(
+  messages: ChatMessage[],
+  options: Omit<LLMCallOptions, 'model'> = {},
+): Promise<T | null> {
+  console.log('[LLM] PREMIUM call')
+  const raw = await callLLM(messages, { ...options, model: MODEL_PREMIUM, maxTokens: options.maxTokens ?? 1500 })
+  if (raw) {
+    const parsed = parseJSON<T>(raw)
+    if (parsed !== null) return parsed
+  }
+  console.warn('[LLM] Premium failed — falling back to strategic')
+  return callLLMJsonStrategic<T>(messages, options)
 }
 
 /** @deprecated Use callLLMJsonStrategic for high-stakes calls. */
